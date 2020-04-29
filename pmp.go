@@ -46,8 +46,6 @@ func (n *pmpClient) AddPortMapping(protocol string, externalPort, internalPort i
 }
 
 func (n *pmpClient) DeletePortMapping(protocol string, externalPort, internalPort int) (err error) {
-	// To destroy a mapping, send an add-port with
-	// an internalPort of the internal port to destroy, an external port of zero and a time of zero.
 	_, err = n.client.AddPortMapping(protocol, internalPort, 0, 0)
 	return
 }
