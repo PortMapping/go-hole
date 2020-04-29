@@ -73,8 +73,10 @@ func TestRecordGetExternalAddress(t *testing.T) {
 }
 
 func TestRecordAddPortMapping(t *testing.T) {
-	cr := &callRecorder{}
 	c := getClient()
-	result, err := c.AddPortMapping("tcp", 123, 0, 0)
-	t.Logf("%#v, %#v, %#v", result, err, cr.callRecord)
+	mapping, err := c.AddPortMapping("tcp", 10080, 18080, 3600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(mapping)
 }
