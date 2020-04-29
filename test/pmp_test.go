@@ -2,6 +2,7 @@ package test
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"github.com/jackpal/gateway"
 	natpmp "github.com/jackpal/go-nat-pmp"
@@ -58,7 +59,21 @@ func TestPMP(t *testing.T) {
 		t.Fatal(err)
 	}
 	fmt.Printf("External IP address: %v\n", response.ExternalIPAddress)
-
+	var localIP net.IP
+	// Port comes from the natpmp package
+	timeoutCtx, cancel := context.WithTimeout(context.TODO(), 30)
+	defer cancel()
+	conn, err := (&net.Dialer{}).DialContext(timeoutCtx, "udp", net.JoinHostPort(gatewayIP.String(), "5351"))
+	if err == nil {
+		conn.Close()
+		localIPAddress, _, err := net.SplitHostPort(conn.LocalAddr().String())
+		if err == nil {
+			localIP = net.ParseIP(localIPAddress)
+		} else {
+			t.Fatal("Failed to lookup local IP", err)
+		}
+	}
+	t.Log("local ip", localIP.To4())
 }
 
 type callRecorder struct {
