@@ -78,5 +78,5 @@ func TestRecordAddPortMapping(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(mapping)
+	t.Logf("%+v", mapping)
 }
