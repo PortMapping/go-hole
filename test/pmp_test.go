@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/jackpal/gateway"
 	natpmp "github.com/jackpal/go-nat-pmp"
+	"io/ioutil"
+	"net"
 	"testing"
 	"time"
 )
@@ -69,7 +71,7 @@ func (cr *callRecorder) observeCall(msg []byte, result []byte, err error) {
 func TestRecordGetExternalAddress(t *testing.T) {
 	c := getClient()
 	result, err := c.GetExternalAddress()
-	t.Logf("%#v, %#v", result, err)
+	t.Logf("%+v, %+v", result, err)
 }
 
 func TestRecordAddPortMapping(t *testing.T) {
@@ -79,4 +81,28 @@ func TestRecordAddPortMapping(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Logf("%+v", mapping)
+
+	ln, err := net.Listen("tcp", ":10080")
+	if err != nil {
+		// handle error
+	}
+	for {
+		conn, err := ln.Accept()
+		if err != nil {
+			// handle error
+		}
+		go handleConnection(conn)
+	}
+
+}
+
+func handleConnection(conn net.Conn) {
+	defer conn.Close()
+	all, err := ioutil.ReadAll(conn)
+	if err != nil {
+		fmt.Println("err", err)
+		return
+	}
+	fmt.Println("received:", string(all))
+	return
 }
