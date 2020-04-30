@@ -39,7 +39,7 @@ func main() {
 	anotherPeer := parseAddr(string(data[:n]))
 	fmt.Printf("local:%s server:%s another:%sn", srcAddr, remoteAddr, anotherPeer.String())
 	// 开始打洞
-	bidirectionHole(srcAddr, &anotherPeer)
+	bidirectionalHole(srcAddr, &anotherPeer)
 }
 
 func parseAddr(addr string) net.UDPAddr {
@@ -51,7 +51,7 @@ func parseAddr(addr string) net.UDPAddr {
 	}
 }
 
-func bidirectionHole(srcAddr *net.UDPAddr, anotherAddr *net.UDPAddr) {
+func bidirectionalHole(srcAddr *net.UDPAddr, anotherAddr *net.UDPAddr) {
 	conn, err := net.DialUDP("udp", srcAddr, anotherAddr)
 	if err != nil {
 		fmt.Println(err)
