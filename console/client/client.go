@@ -41,6 +41,7 @@ func main() {
 	// 开始打洞
 	bidirectionHole(srcAddr, &anotherPeer)
 }
+
 func parseAddr(addr string) net.UDPAddr {
 	t := strings.Split(addr, ":")
 	port, _ := strconv.Atoi(t[1])
@@ -49,6 +50,7 @@ func parseAddr(addr string) net.UDPAddr {
 		Port: port,
 	}
 }
+
 func bidirectionHole(srcAddr *net.UDPAddr, anotherAddr *net.UDPAddr) {
 	conn, err := net.DialUDP("udp", srcAddr, anotherAddr)
 	if err != nil {
