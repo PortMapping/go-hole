@@ -14,10 +14,10 @@ func main() {
 	nat, err := nat.DiscoverGateway()
 	if err != nil {
 		doSub = false
-		log.Fatalf("error: %s", err)
 	}
-	log.Printf("nat type: %s", nat.Type())
+
 	if doSub {
+		log.Printf("nat type: %s", nat.Type())
 		daddr, err := nat.GetDeviceAddress()
 		if err != nil {
 			log.Fatalf("error: %s", err)
@@ -66,7 +66,7 @@ func main() {
 			fmt.Fprintf(rw, "test-page: http://%s:%d/\n", eaddr, eport)
 		}))
 	} else {
-		http.ListenAndServe(":3080", http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		http.ListenAndServe(":8084", http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 			rw.Header().Set("Content-Type", "text/plain")
 			rw.WriteHeader(200)
 			fmt.Fprintf(rw, "Hello there!\n")
