@@ -54,15 +54,22 @@ func main() {
 			}
 		}()
 		defer nat.DeletePortMapping("tcp", 3080)
+
+		http.ListenAndServe(":3080", http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+			rw.Header().Set("Content-Type", "text/plain")
+			rw.WriteHeader(200)
+			fmt.Fprintf(rw, "Hello there!\n")
+			fmt.Fprintf(rw, "nat type: %s\n", nat.Type())
+			fmt.Fprintf(rw, "device address: %s\n", daddr)
+			fmt.Fprintf(rw, "internal address: %s\n", iaddr)
+			fmt.Fprintf(rw, "external address: %s\n", eaddr)
+			fmt.Fprintf(rw, "test-page: http://%s:%d/\n", eaddr, eport)
+		}))
+	} else {
+		http.ListenAndServe(":3080", http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+			rw.Header().Set("Content-Type", "text/plain")
+			rw.WriteHeader(200)
+			fmt.Fprintf(rw, "Hello there!\n")
+		}))
 	}
-	http.ListenAndServe(":3080", http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		rw.Header().Set("Content-Type", "text/plain")
-		rw.WriteHeader(200)
-		fmt.Fprintf(rw, "Hello there!\n")
-		fmt.Fprintf(rw, "nat type: %s\n", nat.Type())
-		fmt.Fprintf(rw, "device address: %s\n", daddr)
-		fmt.Fprintf(rw, "internal address: %s\n", iaddr)
-		fmt.Fprintf(rw, "external address: %s\n", eaddr)
-		fmt.Fprintf(rw, "test-page: http://%s:%d/\n", eaddr, eport)
-	}))
 }
