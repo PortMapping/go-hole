@@ -4,12 +4,19 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/libp2p/go-nat"
 )
 
 func main() {
+	port := ":5001"
+
+	if len(os.Args) > 1 {
+		port = os.Args[1]
+	}
+
 	doSub := true
 	nat, err := nat.DiscoverGateway()
 	if err != nil {
@@ -55,7 +62,7 @@ func main() {
 		}()
 		defer nat.DeletePortMapping("tcp", 3080)
 
-		http.ListenAndServe(":3080", http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		http.ListenAndServe(port, http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 			rw.Header().Set("Content-Type", "text/plain")
 			rw.WriteHeader(200)
 			fmt.Fprintf(rw, "Hello there!\n")
@@ -66,10 +73,13 @@ func main() {
 			fmt.Fprintf(rw, "test-page: http://%s:%d/\n", eaddr, eport)
 		}))
 	} else {
-		http.ListenAndServe(":8084", http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		log.Println("handling on port", port)
+		if err := http.ListenAndServe(port, http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 			rw.Header().Set("Content-Type", "text/plain")
 			rw.WriteHeader(200)
 			fmt.Fprintf(rw, "Hello there!\n")
-		}))
+		})); err != nil {
+			panic(err)
+		}
 	}
 }
