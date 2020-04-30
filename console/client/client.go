@@ -37,7 +37,7 @@ func main() {
 	}
 	conn.Close()
 	anotherPeer := parseAddr(string(data[:n]))
-	fmt.Printf("local:%s server:%s another:%sn", srcAddr, remoteAddr, anotherPeer.String())
+	fmt.Printf("local:%s server:%s another:%s\n", srcAddr, remoteAddr, anotherPeer.String())
 	// 开始打洞
 	bidirectionalHole(srcAddr, &anotherPeer)
 }
