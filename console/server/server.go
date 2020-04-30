@@ -12,7 +12,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	log.Printf("本地地址: <%s> n", listener.LocalAddr().String())
+	log.Printf("本地地址: <%s> \n", listener.LocalAddr().String())
 	peers := make([]net.UDPAddr, 0, 2)
 	data := make([]byte, 1024)
 	for {
