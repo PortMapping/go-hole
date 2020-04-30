@@ -22,7 +22,7 @@ func main() {
 	// 当前进程标记字符串,便于显示
 	tag = os.Args[1]
 	srcAddr := &net.UDPAddr{IP: net.IPv4zero, Port: 16005} // 注意端口必须固定
-	dstAddr := &net.UDPAddr{IP: net.ParseIP("183.193.57.158"), Port: 16004}
+	dstAddr := &net.UDPAddr{IP: net.ParseIP("47.101.169.94"), Port: 16004}
 	conn, err := net.DialUDP("udp", srcAddr, dstAddr)
 	if err != nil {
 		fmt.Println(err)
