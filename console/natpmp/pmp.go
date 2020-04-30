@@ -10,50 +10,51 @@ import (
 )
 
 func main() {
+	doSub := true
 	nat, err := nat.DiscoverGateway()
 	if err != nil {
+		doSub = false
 		log.Fatalf("error: %s", err)
 	}
 	log.Printf("nat type: %s", nat.Type())
-
-	daddr, err := nat.GetDeviceAddress()
-	if err != nil {
-		log.Fatalf("error: %s", err)
-	}
-	log.Printf("device address: %s", daddr)
-
-	iaddr, err := nat.GetInternalAddress()
-	if err != nil {
-		log.Fatalf("error: %s", err)
-	}
-	log.Printf("internal address: %s", iaddr)
-
-	eaddr, err := nat.GetExternalAddress()
-	if err != nil {
-		log.Fatalf("error: %s", err)
-	}
-	log.Printf("external address: %s", eaddr)
-
-	eport, err := nat.AddPortMapping("tcp", 3080, "http", 60)
-	if err != nil {
-		log.Fatalf("error: %s", err)
-	}
-
-	log.Printf("test-page: http://%s:%d/", eaddr, eport)
-
-	go func() {
-		for {
-			time.Sleep(30 * time.Second)
-
-			_, err = nat.AddPortMapping("tcp", 3080, "http", 60)
-			if err != nil {
-				log.Fatalf("error: %s", err)
-			}
+	if doSub {
+		daddr, err := nat.GetDeviceAddress()
+		if err != nil {
+			log.Fatalf("error: %s", err)
 		}
-	}()
+		log.Printf("device address: %s", daddr)
 
-	defer nat.DeletePortMapping("tcp", 3080)
+		iaddr, err := nat.GetInternalAddress()
+		if err != nil {
+			log.Fatalf("error: %s", err)
+		}
+		log.Printf("internal address: %s", iaddr)
 
+		eaddr, err := nat.GetExternalAddress()
+		if err != nil {
+			log.Fatalf("error: %s", err)
+		}
+		log.Printf("external address: %s", eaddr)
+
+		eport, err := nat.AddPortMapping("tcp", 3080, "http", 60)
+		if err != nil {
+			log.Fatalf("error: %s", err)
+		}
+
+		log.Printf("test-page: http://%s:%d/", eaddr, eport)
+
+		go func() {
+			for {
+				time.Sleep(30 * time.Second)
+
+				_, err = nat.AddPortMapping("tcp", 3080, "http", 60)
+				if err != nil {
+					log.Fatalf("error: %s", err)
+				}
+			}
+		}()
+		defer nat.DeletePortMapping("tcp", 3080)
+	}
 	http.ListenAndServe(":3080", http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		rw.Header().Set("Content-Type", "text/plain")
 		rw.WriteHeader(200)
