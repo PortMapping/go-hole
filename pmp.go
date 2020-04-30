@@ -1,7 +1,6 @@
 package natpmp
 
 import (
-	"fmt"
 	"github.com/jackpal/gateway"
 	natpmp "github.com/jackpal/go-nat-pmp"
 	"net"
