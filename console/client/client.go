@@ -80,5 +80,10 @@ func bidirectionalHole(srcAddr *net.UDPAddr, anotherAddr *net.UDPAddr) {
 	}
 }
 
-func bidirectionalHoleTCP(srcAddr *net.UDPAddr, anotherAddr *net.UDPAddr) {
+func bidirectionalHoleTCP(srcAddr *net.TCPAddr, anotherAddr *net.TCPAddr) {
+	conn, err := net.DialTCP("tcp", srcAddr, anotherAddr)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer conn.Close()
 }
