@@ -86,4 +86,25 @@ func bidirectionalHoleTCP(srcAddr *net.TCPAddr, anotherAddr *net.TCPAddr) {
 		fmt.Println(err)
 	}
 	defer conn.Close()
+	// 向另一个peer发送一条udp消息(对方peer的nat设备会丢弃该消息,非法来源),用意是在自身的nat设备打开一条可进入的通道,这样对方peer就可以发过来udp消息
+	if _, err = conn.Write([]byte(HandShakeMsg)); err != nil {
+		log.Println("send handshake:", err)
+	}
+	go func() {
+		for {
+			time.Sleep(10 * time.Second)
+			if _, err = conn.Write([]byte("from [" + tag + "]")); err != nil {
+				log.Println("send msg fail", err)
+			}
+		}
+	}()
+	for {
+		data := make([]byte, 1024)
+		n, err := conn.Read(data)
+		if err != nil {
+			log.Printf("error during read: %sn", err)
+		} else {
+			log.Printf("收到数据:%sn", data[:n])
+		}
+	}
 }
