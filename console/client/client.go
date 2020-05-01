@@ -79,3 +79,6 @@ func bidirectionalHole(srcAddr *net.UDPAddr, anotherAddr *net.UDPAddr) {
 		}
 	}
 }
+
+func bidirectionalHoleTCP(srcAddr *net.UDPAddr, anotherAddr *net.UDPAddr) {
+}
