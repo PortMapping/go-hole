@@ -19,6 +19,36 @@ func main() {
 		fmt.Println("请输入一个客户端标志")
 		os.Exit(0)
 	}
+
+}
+
+func handleTCP() {
+	// 当前进程标记字符串,便于显示
+	tag = os.Args[1]
+	srcAddr := &net.TCPAddr{IP: net.IPv4zero, Port: 16005} // 注意端口必须固定
+	dstAddr := &net.TCPAddr{IP: net.ParseIP("47.101.169.94"), Port: 16004}
+	conn, err := net.DialTCP("tcp", srcAddr, dstAddr)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if _, err = conn.Write([]byte("hello, I'm new peer:" + tag)); err != nil {
+		log.Panic(err)
+	}
+
+	//data := make([]byte, 1024)
+	//conn.ReadFrom()
+	//n, remoteAddr, err := conn.ReadFromUDP(data)
+	//if err != nil {
+	//	fmt.Printf("error during read: %s", err)
+	//}
+	//conn.Close()
+	//anotherPeer := parseAddr(string(data[:n]))
+	//fmt.Printf("local:%s server:%s another:%sn", srcAddr, remoteAddr, anotherPeer.String())
+	// 开始打洞
+	//bidirectionalHoleTCP(srcAddr, conn)
+}
+
+func handleUDP() {
 	// 当前进程标记字符串,便于显示
 	tag = os.Args[1]
 	srcAddr := &net.UDPAddr{IP: net.IPv4zero, Port: 16005} // 注意端口必须固定
@@ -39,7 +69,7 @@ func main() {
 	anotherPeer := parseAddr(string(data[:n]))
 	fmt.Printf("local:%s server:%s another:%sn", srcAddr, remoteAddr, anotherPeer.String())
 	// 开始打洞
-	bidirectionalHole(srcAddr, &anotherPeer)
+	bidirectionalHoleUDP(srcAddr, &anotherPeer)
 }
 
 func parseAddr(addr string) net.UDPAddr {
@@ -51,7 +81,7 @@ func parseAddr(addr string) net.UDPAddr {
 	}
 }
 
-func bidirectionalHole(srcAddr *net.UDPAddr, anotherAddr *net.UDPAddr) {
+func bidirectionalHoleUDP(srcAddr *net.UDPAddr, anotherAddr *net.UDPAddr) {
 	conn, err := net.DialUDP("udp", srcAddr, anotherAddr)
 	if err != nil {
 		fmt.Println(err)
