@@ -48,8 +48,14 @@ func handleUDP() {
 		peers = append(peers, *remoteAddr)
 		if len(peers) == 2 {
 			log.Printf("进行UDP打洞,建立 %s <--> %s 的连接n", peers[0].String(), peers[1].String())
-			listener.WriteToUDP([]byte(peers[1].String()), &peers[0])
-			listener.WriteToUDP([]byte(peers[0].String()), &peers[1])
+			_, err := listener.WriteToUDP([]byte(peers[1].String()), &peers[0])
+			if err != nil {
+				return
+			}
+			_, err = listener.WriteToUDP([]byte(peers[0].String()), &peers[1])
+			if err != nil {
+				return
+			}
 			time.Sleep(time.Second * 8)
 			log.Println("中转服务器退出,仍不影响peers间通信")
 			return
