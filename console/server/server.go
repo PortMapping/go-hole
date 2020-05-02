@@ -10,6 +10,26 @@ func main() {
 
 }
 
+func handleTCP() {
+	listener, err := net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4zero, Port: 16004})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	tcp, err := listener.AcceptTCP()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	data := make([]byte, 1024)
+	read, err := tcp.Read(data)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Print(string(read))
+}
+
 func handleUDP() {
 	listener, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.IPv4zero, Port: 16004})
 	if err != nil {
