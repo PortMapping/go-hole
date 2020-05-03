@@ -1,6 +1,7 @@
 package main //server.go
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"time"
@@ -16,18 +17,34 @@ func handleTCP() {
 		fmt.Println(err)
 		return
 	}
-	tcp, err := listener.AcceptTCP()
+
+	acceptTCP, err := listener.AcceptTCP()
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
-	data := make([]byte, 1024)
-	read, err := tcp.Read(data)
-	if err != nil {
-		fmt.Println(err)
-		return
+
+	//data := make([]byte, 1024)
+	peers := make([]net.TCPAddr, 0, 2)
+	for {
+		all, err := ioutil.ReadAll(acceptTCP)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		log.Printf("<%s> %sn", acceptTCP.RemoteAddr().String(), all[:])
+		addr, err := net.ResolveTCPAddr("tcp", acceptTCP.RemoteAddr().String())
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		peers = append(peers, *addr)
+		if len(peers) == 2 {
+			log.Printf("进行UDP打洞,建立 %s <--> %s 的连接n", peers[0].String(), peers[1].String())
+			time.Sleep(time.Second * 8)
+			log.Println("中转服务器退出,仍不影响peers间通信")
+			return
+		}
 	}
-	fmt.Print(string(read))
 }
 
 func handleUDP() {
