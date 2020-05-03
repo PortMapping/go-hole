@@ -6,6 +6,8 @@ import (
 )
 
 func Support() {
-	nat, host, err := stun.NewClient().Discover()
+	cli := stun.NewClient()
+	nat, host, err := cli.Discover()
 	fmt.Println(nat, host, err)
+
 }
