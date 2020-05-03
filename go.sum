@@ -1,3 +1,5 @@
+github.com/ccding/go-stun/stun v0.0.0-20200414024613-7ef3804a9059 h1:BJyVMwVwjDCWmAuUB4IkpjhoNR7a5aD/u+RpSaocEGY=
+github.com/ccding/go-stun/stun v0.0.0-20200414024613-7ef3804a9059/go.mod h1:re0hjRxhkwsdlR0CtX2C36o0viWPlEI+9u7Zjhaqw34=
 github.com/google/gopacket v1.1.17 h1:rMrlX2ZY2UbvT+sdz3+6J+pp2z+msCq9MxTU6ymxbBY=
 github.com/google/gopacket v1.1.17/go.mod h1:UdDNZ1OO62aGYVnPhxT1U6aI7ukYtA/kB8vaU0diBUM=
 github.com/huin/goupnp v1.0.0 h1:wg75sLpL6DZqwHQN6E1Cfk6mtfzS45z8OV+ic+DtHRo=
