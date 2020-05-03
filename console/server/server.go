@@ -52,7 +52,7 @@ func handleUDP() {
 		fmt.Println(err)
 		return
 	}
-	log.Printf("本地地址: <%s> \nn", listener.LocalAddr().String())
+	log.Printf("Local Addr: <%s> \nn", listener.LocalAddr().String())
 	log.Printf("Remote Addr:<%s> \n", listener.RemoteAddr().String())
 	peers := make([]net.UDPAddr, 0, 2)
 	data := make([]byte, 1024)
