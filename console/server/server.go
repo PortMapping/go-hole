@@ -22,7 +22,6 @@ func handleTCP() {
 	if err != nil {
 		return
 	}
-
 	//data := make([]byte, 1024)
 	peers := make([]net.TCPAddr, 0, 2)
 	for {
@@ -53,7 +52,8 @@ func handleUDP() {
 		fmt.Println(err)
 		return
 	}
-	log.Printf("本地地址: <%s> n", listener.LocalAddr().String())
+	log.Printf("本地地址: <%s> \nn", listener.LocalAddr().String())
+	log.Printf("Remote Addr:<%s> \n", listener.RemoteAddr().String())
 	peers := make([]net.UDPAddr, 0, 2)
 	data := make([]byte, 1024)
 	for {
