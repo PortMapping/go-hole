@@ -151,8 +151,25 @@ func reuseHandle() {
 	}
 	defer c.Close()
 	fmt.Println(l1, c)
-	if _, err = c.Write([]byte(HandShakeMsg)); err != nil {
-		log.Println("send handshake:", err)
+	go func() {
+		if _, err = c.Write([]byte(HandShakeMsg)); err != nil {
+			log.Println("send handshake:", err)
+		}
+	}()
+
+	accept, err := l1.Accept()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	for {
+		data := make([]byte, 1024)
+		n, err := accept.Read(data)
+		if err != nil {
+			log.Printf("error during read: %sn", err)
+		} else {
+			log.Printf("收到数据:%sn", data[:n])
+		}
 	}
 
 }
