@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	reuse "github.com/libp2p/go-reuseport"
 	"log"
 	"net"
 	"os"
@@ -137,4 +138,16 @@ func bidirectionalHoleTCP(srcAddr *net.TCPAddr, anotherAddr *net.TCPAddr) {
 			log.Printf("收到数据:%sn", data[:n])
 		}
 	}
+}
+
+func reuseHandle() {
+	l1, err := reuse.Listen("tcp", "127.0.0.1:16005")
+	if err != nil {
+		return
+	}
+	c, err := reuse.Dial("tcp", "127.0.0.1:16005", "127.0.0.1:16004")
+	if err != nil {
+		return
+	}
+	fmt.Println(l1, c)
 }
