@@ -4,11 +4,21 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
+	"os"
+	"strings"
 	"time"
 )
 
 func main() {
-
+	nw := "udp"
+	if len(os.Args) > 1 {
+		nw = os.Args[1]
+	}
+	if strings.Compare(nw, "tcp") == 0 {
+		handleTCP()
+		return
+	}
+	handleUDP()
 }
 
 func handleTCP() {
