@@ -149,5 +149,10 @@ func reuseHandle() {
 	if err != nil {
 		return
 	}
+	defer c.Close()
 	fmt.Println(l1, c)
+	if _, err = c.Write([]byte(HandShakeMsg)); err != nil {
+		log.Println("send handshake:", err)
+	}
+
 }
