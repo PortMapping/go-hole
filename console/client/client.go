@@ -159,10 +159,12 @@ func bidirectionalHoleTCP(srcAddr *net.TCPAddr, anotherAddr *net.TCPAddr) {
 func reuseHandle() {
 	l1, err := reuse.Listen("tcp", "127.0.0.1:16005")
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 	c, err := reuse.Dial("tcp", "127.0.0.1:16005", "47.96.140.215:16004")
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 	defer c.Close()
