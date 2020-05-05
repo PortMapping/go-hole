@@ -31,7 +31,7 @@ func main() {
 		handleUDP()
 		return
 	}
-	handleTCP()
+	reuseHandle()
 
 }
 
