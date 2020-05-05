@@ -161,7 +161,7 @@ func reuseHandle() {
 	if err != nil {
 		return
 	}
-	c, err := reuse.Dial("tcp", "127.0.0.1:16005", "127.0.0.1:16004")
+	c, err := reuse.Dial("tcp", "127.0.0.1:16005", "47.96.140.215:16004")
 	if err != nil {
 		return
 	}
