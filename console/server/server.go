@@ -28,13 +28,14 @@ func handleTCP() {
 		return
 	}
 
-	acceptTCP, err := listener.AcceptTCP()
-	if err != nil {
-		return
-	}
 	//data := make([]byte, 1024)
 	peers := make([]net.TCPAddr, 0, 2)
 	for {
+		acceptTCP, err := listener.AcceptTCP()
+		if err != nil {
+			return
+		}
+
 		all, err := ioutil.ReadAll(acceptTCP)
 		if err != nil {
 			fmt.Println(err)
@@ -50,7 +51,6 @@ func handleTCP() {
 		if len(peers) == 2 {
 			log.Printf("进行UDP打洞,建立 %s <--> %s 的连接n", peers[0].String(), peers[1].String())
 			time.Sleep(time.Second * 8)
-			log.Println("中转服务器退出,仍不影响peers间通信")
 			return
 		}
 	}
