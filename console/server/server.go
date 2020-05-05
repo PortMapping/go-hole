@@ -23,12 +23,16 @@ func main() {
 
 func handleTCP() {
 	fmt.Println("tcp server start")
-	listener, err := net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4zero, Port: 16004})
+	//listener, err := net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4zero, Port: 16004})
+	//if err != nil {
+	//	fmt.Println(err)
+	//	return
+	//}
+	listener, err := net.Listen("tcp", ":16400")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-
 	//data := make([]byte, 1024)
 	peers := make([]net.TCPAddr, 0, 2)
 	for {
