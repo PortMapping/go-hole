@@ -7,8 +7,6 @@ import (
 	"os"
 	"strings"
 	"time"
-
-	reuse "github.com/libp2p/go-reuseport"
 )
 
 func main() {
