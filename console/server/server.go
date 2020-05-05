@@ -37,24 +37,26 @@ func handleTCP() {
 			fmt.Println(err)
 			return
 		}
+		go func() {
+			all, err := ioutil.ReadAll(acceptTCP)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			log.Printf("<%s> %s\n", acceptTCP.RemoteAddr().String(), all[:])
+			addr, err := net.ResolveTCPAddr("tcp", acceptTCP.RemoteAddr().String())
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			peers = append(peers, *addr)
+			if len(peers) == 2 {
+				log.Printf("进行UDP打洞,建立 %s <--> %s 的连接\n", peers[0].String(), peers[1].String())
+				time.Sleep(time.Second * 8)
+				return
+			}
+		}()
 
-		all, err := ioutil.ReadAll(acceptTCP)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		log.Printf("<%s> %s\n", acceptTCP.RemoteAddr().String(), all[:])
-		addr, err := net.ResolveTCPAddr("tcp", acceptTCP.RemoteAddr().String())
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		peers = append(peers, *addr)
-		if len(peers) == 2 {
-			log.Printf("进行UDP打洞,建立 %s <--> %s 的连接\n", peers[0].String(), peers[1].String())
-			time.Sleep(time.Second * 8)
-			return
-		}
 	}
 }
 
