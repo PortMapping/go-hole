@@ -1,7 +1,6 @@
 package main //server.go
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -33,7 +32,7 @@ func handleTCP() {
 		fmt.Println(err)
 		return
 	}
-	//data := make([]byte, 1024)
+	data := make([]byte, 1024)
 	//peers := make([]net.TCPAddr, 0, 2)
 	for {
 		fmt.Println("accept listen")
@@ -42,13 +41,14 @@ func handleTCP() {
 			fmt.Println(err)
 			return
 		}
+
 		go func() {
-			all, err := ioutil.ReadAll(acceptTCP)
+			n, err := acceptTCP.Read(data)
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
-			log.Printf("<%s> %s\n", acceptTCP.RemoteAddr().String(), all[:])
+			log.Printf("<%s> %s\n", acceptTCP.RemoteAddr().String(), string(data[:n]))
 			//addr, err := net.ResolveTCPAddr("tcp", acceptTCP.RemoteAddr().String())
 			//if err != nil {
 			//	fmt.Println(err)
