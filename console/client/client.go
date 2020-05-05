@@ -16,10 +16,21 @@ var tag string
 const HandShakeMsg = "我是打洞消息"
 
 func main() {
-	if len(os.Args) < 2 {
+	h := "udp"
+	if len(os.Args) > 1 {
+		h = os.Args[1]
+	}
+
+	if len(os.Args) < 3 {
 		fmt.Println("请输入一个客户端标志")
 		os.Exit(0)
 	}
+
+	if strings.Compare("udp", h) == 0 {
+		handleUDP()
+		return
+	}
+	handleTCP()
 
 }
 
