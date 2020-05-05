@@ -39,8 +39,11 @@ func handleTCP() {
 	// 当前进程标记字符串,便于显示
 	tag = os.Args[1]
 	srcAddr := &net.TCPAddr{IP: net.IPv4zero, Port: 16005} // 注意端口必须固定
-	dstAddr := &net.TCPAddr{IP: net.ParseIP("47.101.169.94"), Port: 16004}
+	dstAddr := &net.TCPAddr{IP: net.ParseIP("47.96.140.215"), Port: 16004}
+
+	//conn, err := net.Dial("tcp","47.101.169.94:16004")
 	conn, err := net.DialTCP("tcp", srcAddr, dstAddr)
+
 	if err != nil {
 		fmt.Println(err)
 		return
