@@ -43,6 +43,7 @@ func handleTCP() {
 	conn, err := net.DialTCP("tcp", srcAddr, dstAddr)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 	if _, err = conn.Write([]byte("hello, I'm new peer:" + tag)); err != nil {
 		log.Panic(err)
