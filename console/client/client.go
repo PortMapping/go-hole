@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	reuse "github.com/libp2p/go-reuseport"
 	"log"
 	"net"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	reuse "github.com/libp2p/go-reuseport"
 )
 
 var tag string
