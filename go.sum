@@ -1,3 +1,4 @@
+github.com/ccding/go-stun v0.1.2/go.mod h1:3FK1bMar37f7jqVY7q/63k3OMX1c47pGCufzt3X0sYE=
 github.com/ccding/go-stun/stun v0.0.0-20200414024613-7ef3804a9059 h1:BJyVMwVwjDCWmAuUB4IkpjhoNR7a5aD/u+RpSaocEGY=
 github.com/ccding/go-stun/stun v0.0.0-20200414024613-7ef3804a9059/go.mod h1:re0hjRxhkwsdlR0CtX2C36o0viWPlEI+9u7Zjhaqw34=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
