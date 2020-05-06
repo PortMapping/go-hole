@@ -199,11 +199,12 @@ func reuseHandle() {
 		fmt.Println(err)
 		return
 	}
-	local.StopMapping()
 	mapping, err := local.Mapping()
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
+	defer local.StopMapping()
 	addr := fmt.Sprintf("0.0.0.0:%d", mapping)
 	l1, err := reuse.Listen("tcp", addr)
 	if err != nil {
