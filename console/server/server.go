@@ -54,13 +54,14 @@ func handleTCP() {
 			//	fmt.Println(err)
 			//	return
 			//}
-			dial, err := net.Dial("tcp", acceptTCP.RemoteAddr().String())
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			defer dial.Close()
-			dial.Write([]byte("test connect"))
+			//acceptTCP.Close()
+			//dial, err := net.Dial("tcp", acceptTCP.RemoteAddr().String())
+			//if err != nil {
+			//	fmt.Println(err)
+			//	return
+			//}
+			//defer dial.Close()
+			//dial.Write([]byte("test connect"))
 
 			//peers = append(peers, *addr)
 			//if len(peers) == 2 {
@@ -93,6 +94,8 @@ func handleUDP() {
 		peers = append(peers, *remoteAddr)
 		if len(peers) == 2 {
 			log.Printf("进行UDP打洞,建立 %s <--> %s 的连接\n", peers[0].String(), peers[1].String())
+			listener.Write([]byte(peers[1].String()))
+			listener.Write([]byte(peers[0].String()))
 			_, err := listener.WriteToUDP([]byte(peers[1].String()), &peers[0])
 			if err != nil {
 				return

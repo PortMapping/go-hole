@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/libp2p/go-nat"
 	reuse "github.com/libp2p/go-reuseport"
 )
 
@@ -31,44 +30,54 @@ func main() {
 	if strings.Compare("udp", h) == 0 {
 		handleUDP()
 		return
+	} else if strings.Compare("m", h) == 0 {
+		manualUDP(os.Args[2], "manual")
+		return
+	} else if strings.Compare("tcp", h) == 0 {
+		handleTCP(os.Args[2])
+		return
 	}
 	reuseHandle()
 
 }
 
-func handleTCP() {
+func handleTCP(ip string) {
 	// 当前进程标记字符串,便于显示
-	tag = os.Args[1]
-	//srcAddr := &net.TCPAddr{IP: net.IPv4zero, Port: 16005} // 注意端口必须固定
+	tag = os.Args[2]
+	srcAddr := &net.TCPAddr{IP: net.IPv4zero, Port: 16005} // 注意端口必须固定
 	//dstAddr := &net.TCPAddr{IP: net.ParseIP("47.96.140.215"), Port: 16004}
 
-	conn, err := net.Dial("tcp", "47.101.169.94:16004")
-	//conn, err := net.DialTCP("tcp", srcAddr, dstAddr)
+	//conn, err := net.Dial("tcp", "47.101.169.94:16004")
+	addr := parseTCPAddr(ip)
+	conn, err := net.DialTCP("tcp", srcAddr, &addr)
 	//conn.err:=net.Dial("tcp",)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	if _, err = conn.Write([]byte("hello, I'm new peer:" + tag)); err != nil {
-		log.Panic(err)
-	}
-	fmt.Println("local:", conn.LocalAddr().Network())
-	n, err := nat.DiscoverGateway()
-	if err != nil {
-		log.Panic(err)
-		return
-	}
-
-	go func() {
-		for {
-			time.Sleep(30 * time.Second)
-			_, err = n.AddPortMapping("tcp", 16005, "http", 60)
-			if err != nil {
-				log.Fatalf("error: %s", err)
-			}
+	for {
+		if _, err = conn.Write([]byte("hello, I'm new peer:" + tag)); err != nil {
+			log.Panic(err)
 		}
-	}()
-	defer n.DeletePortMapping("tcp", 16005)
+		time.Sleep(time.Second)
+	}
+	//fmt.Println("local:", conn.LocalAddr().Network())
+	//n, err := nat.DiscoverGateway()
+	//if err != nil {
+	//	log.Panic(err)
+	//	return
+	//}
+
+	//go func() {
+	//	for {
+	//		time.Sleep(30 * time.Second)
+	//		_, err = n.AddPortMapping("tcp", 16005, "http", 60)
+	//		if err != nil {
+	//			log.Fatalf("error: %s", err)
+	//		}
+	//	}
+	//}()
+	//defer n.DeletePortMapping("tcp", 16005)
 
 	//data := make([]byte, 1024)
 	//conn.ReadFrom()
@@ -77,7 +86,7 @@ func handleTCP() {
 	//	fmt.Printf("error during read: %s", err)
 	//}
 	//conn.Close()
-	//anotherPeer := parseAddr(string(data[:n]))
+	//anotherPeer := parseUDPAddr(string(data[:n]))
 	//fmt.Printf("local:%s server:%s another:%sn", srcAddr, remoteAddr, anotherPeer.String())
 	// 开始打洞
 	//bidirectionalHoleTCP(srcAddr, conn)
@@ -85,7 +94,7 @@ func handleTCP() {
 
 func handleUDP() {
 	// 当前进程标记字符串,便于显示
-	tag = os.Args[1]
+	tag = os.Args[2]
 	srcAddr := &net.UDPAddr{IP: net.IPv4zero, Port: 16005} // 注意端口必须固定
 	dstAddr := &net.UDPAddr{IP: net.ParseIP("47.96.140.215"), Port: 16004}
 	conn, err := net.DialUDP("udp", srcAddr, dstAddr)
@@ -101,13 +110,22 @@ func handleUDP() {
 		fmt.Printf("error during read: %s", err)
 	}
 	conn.Close()
-	anotherPeer := parseAddr(string(data[:n]))
+
+	anotherPeer := parseUDPAddr(string(data[:n]))
 	fmt.Printf("local:%s server:%s another:%s\n", srcAddr, remoteAddr, anotherPeer.String())
 	// 开始打洞
 	bidirectionalHoleUDP(srcAddr, &anotherPeer)
 }
 
-func parseAddr(addr string) net.UDPAddr {
+func parseTCPAddr(addr string) net.TCPAddr {
+	t := strings.Split(addr, ":")
+	port, _ := strconv.Atoi(t[1])
+	return net.TCPAddr{
+		IP:   net.ParseIP(t[0]),
+		Port: port,
+	}
+}
+func parseUDPAddr(addr string) net.UDPAddr {
 	t := strings.Split(addr, ":")
 	port, _ := strconv.Atoi(t[1])
 	return net.UDPAddr{
@@ -155,23 +173,23 @@ func bidirectionalHoleTCP(srcAddr *net.TCPAddr, anotherAddr *net.TCPAddr) {
 	if _, err = conn.Write([]byte(HandShakeMsg)); err != nil {
 		log.Println("send handshake:", err)
 	}
-	go func() {
-		for {
-			time.Sleep(10 * time.Second)
-			if _, err = conn.Write([]byte("from [" + tag + "]")); err != nil {
-				log.Println("send msg fail", err)
-			}
-		}
-	}()
+	//go func() {
 	for {
-		data := make([]byte, 1024)
-		n, err := conn.Read(data)
-		if err != nil {
-			log.Printf("error during read: %sn", err)
-		} else {
-			log.Printf("收到数据:%sn", data[:n])
+		time.Sleep(10 * time.Second)
+		if _, err = conn.Write([]byte("from [" + tag + "]")); err != nil {
+			log.Println("send msg fail", err)
 		}
 	}
+	//}()
+	//for {
+	//	data := make([]byte, 1024)
+	//	n, err := conn.Read(data)
+	//	if err != nil {
+	//		log.Printf("error during read: %sn", err)
+	//	} else {
+	//		log.Printf("收到数据:%sn", data[:n])
+	//	}
+	//}
 }
 
 func reuseHandle() {
@@ -185,30 +203,29 @@ func reuseHandle() {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("local:", c.LocalAddr().String())
-	n, err := nat.DiscoverGateway()
-	if err != nil {
-		log.Panic(err)
-		return
-	}
-
-	go func() {
-		for {
-			time.Sleep(30 * time.Second)
-			_, err = n.AddPortMapping("tcp", 16005, "http", 60)
-			if err != nil {
-				log.Fatalf("error: %s", err)
-			}
-		}
-	}()
-	defer n.DeletePortMapping("tcp", 16005)
-	fmt.Println(l1, c)
+	//fmt.Println("local:", c.LocalAddr().String())
+	//n, err := nat.DiscoverGateway()
+	//if err != nil {
+	//	log.Panic(err)
+	//	return
+	//}
+	//
+	//go func() {
+	//	for {
+	//		time.Sleep(30 * time.Second)
+	//		_, err = n.AddPortMapping("tcp", 16005, "http", 60)
+	//		if err != nil {
+	//			log.Fatalf("error: %s", err)
+	//		}
+	//	}
+	//}()
+	//defer n.DeletePortMapping("tcp", 16005)
+	//fmt.Println(l1, c)
 	//go func() {
 	if _, err = c.Write([]byte(HandShakeMsg)); err != nil {
 		log.Println("send handshake:", err)
 	}
 	//}()
-	c.Close()
 	fmt.Println("info sent")
 	accept, err := l1.Accept()
 	if err != nil {
@@ -224,4 +241,10 @@ func reuseHandle() {
 			log.Printf("收到数据:%sn", data[:n])
 		}
 	}
+}
+
+func manualUDP(ip string, tag string) {
+	srcAddr := &net.UDPAddr{IP: net.IPv4zero, Port: 16005} // 注意端口必须固定
+	addr := parseUDPAddr(ip)
+	bidirectionalHoleUDP(srcAddr, &addr)
 }
