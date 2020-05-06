@@ -55,13 +55,13 @@ func handleTCP() {
 			//	return
 			//}
 			//acceptTCP.Close()
-			//dial, err := net.Dial("tcp", acceptTCP.RemoteAddr().String())
-			//if err != nil {
-			//	fmt.Println(err)
-			//	return
-			//}
-			//defer dial.Close()
-			//dial.Write([]byte("test connect"))
+			dial, err := net.Dial("tcp", acceptTCP.RemoteAddr().String())
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			defer dial.Close()
+			dial.Write([]byte("test connect"))
 
 			//peers = append(peers, *addr)
 			//if len(peers) == 2 {

@@ -227,20 +227,26 @@ func reuseHandle() {
 	}
 	//}()
 	fmt.Println("info sent")
-	accept, err := l1.Accept()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+
 	for {
-		data := make([]byte, 1024)
-		n, err := accept.Read(data)
+		accept, err := l1.Accept()
 		if err != nil {
-			log.Printf("error during read: %sn", err)
-		} else {
-			log.Printf("收到数据:%sn", data[:n])
+			fmt.Println(err)
+			return
 		}
+		go func() {
+			for {
+				data := make([]byte, 1024)
+				n, err := accept.Read(data)
+				if err != nil {
+					log.Printf("error during read: %sn", err)
+				} else {
+					log.Printf("收到数据:%sn", data[:n])
+				}
+			}
+		}()
 	}
+
 }
 
 func manualUDP(ip string, tag string) {
