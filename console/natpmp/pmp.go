@@ -43,7 +43,7 @@ func main() {
 		}
 		log.Printf("external address: %s", eaddr)
 
-		eport, err := nat.AddPortMapping("tcp", 3080, "http", 60)
+		eport, err := nat.AddPortMapping("tcp", 16005, "http", 60)
 		if err != nil {
 			log.Fatalf("error: %s", err)
 		}
@@ -54,13 +54,13 @@ func main() {
 			for {
 				time.Sleep(30 * time.Second)
 
-				_, err = nat.AddPortMapping("tcp", 3080, "http", 60)
+				_, err = nat.AddPortMapping("tcp", 16005, "http", 60)
 				if err != nil {
 					log.Fatalf("error: %s", err)
 				}
 			}
 		}()
-		defer nat.DeletePortMapping("tcp", 3080)
+		defer nat.DeletePortMapping("tcp", 16005)
 
 		http.ListenAndServe(port, http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 			rw.Header().Set("Content-Type", "text/plain")

@@ -3,7 +3,10 @@ package natpmp
 import (
 	"github.com/jackpal/gateway"
 	natpmp "github.com/jackpal/go-nat-pmp"
+	"github.com/libp2p/go-nat"
+	"log"
 	"net"
+	"time"
 )
 
 var DefaultTimeOut = 30
@@ -22,6 +25,57 @@ func NewNatFromLocal() (NAT, error) {
 		client:  natpmp.NewClient(gatewayIP),
 		timeout: DefaultTimeOut,
 	}, nil
+}
+
+func (n *pmpClient) Mapping(port string) error {
+	nat, err := nat.DiscoverGateway()
+	if err != nil {
+		return err
+	}
+
+	log.Printf("nat type: %s", nat.Type())
+	daddr, err := nat.GetDeviceAddress()
+	if err != nil {
+		log.Fatalf("error: %s", err)
+	}
+	log.Printf("device address: %s", daddr)
+
+	iaddr, err := nat.GetInternalAddress()
+	if err != nil {
+		log.Fatalf("error: %s", err)
+	}
+	log.Printf("internal address: %s", iaddr)
+
+	eaddr, err := nat.GetExternalAddress()
+	if err != nil {
+		log.Fatalf("error: %s", err)
+	}
+	log.Printf("external address: %s", eaddr)
+
+	eport, err := nat.AddPortMapping("tcp", 16005, "http", 60)
+	if err != nil {
+		log.Fatalf("error: %s", err)
+	}
+
+	log.Printf("test-page: http://%s:%d/", eaddr, eport)
+
+	go func() {
+		for {
+			time.Sleep(30 * time.Second)
+
+			_, err = nat.AddPortMapping("tcp", 16005, "http", 60)
+			if err != nil {
+				log.Fatalf("error: %s", err)
+			}
+		}
+	}()
+	//defer nat.DeletePortMapping("tcp", 16005)
+
+	return nil
+}
+
+func (n *pmpClient) StopMapping() {
+
 }
 
 func (n *pmpClient) GetExternalAddress() (addr net.IP, err error) {
