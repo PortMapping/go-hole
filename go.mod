@@ -8,4 +8,5 @@ require (
 	github.com/jackpal/go-nat-pmp v1.0.2
 	github.com/libp2p/go-nat v0.0.5
 	github.com/libp2p/go-reuseport v0.0.1
+	go.uber.org/atomic v1.6.0
 )

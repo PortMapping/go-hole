@@ -203,6 +203,7 @@ func reuseHandle() {
 		fmt.Println(err)
 		return
 	}
+
 	//fmt.Println("local:", c.LocalAddr().String())
 	//n, err := nat.DiscoverGateway()
 	//if err != nil {
