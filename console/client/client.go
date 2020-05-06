@@ -230,6 +230,7 @@ func reuseHandle() {
 
 	for {
 		accept, err := l1.Accept()
+		fmt.Println("accept new addr")
 		if err != nil {
 			fmt.Println(err)
 			return

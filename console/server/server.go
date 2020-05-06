@@ -35,8 +35,8 @@ func handleTCP() {
 	data := make([]byte, 1024)
 	//peers := make([]net.TCPAddr, 0, 2)
 	for {
-		fmt.Println("accept listen")
 		acceptTCP, err := listener.Accept()
+		fmt.Println("accept listen")
 		if err != nil {
 			fmt.Println(err)
 			return
