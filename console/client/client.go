@@ -60,8 +60,8 @@ func handleTCP(ip string) {
 		return
 	}
 	for {
-		fmt.Println("from:", conn.RemoteAddr().String())
-		if _, err = conn.Write([]byte("hello, I'm new peer: " + tag)); err != nil {
+		//fmt.Println("from:", conn.RemoteAddr().String())
+		if _, err = conn.Write([]byte("hello, i'm " + tag)); err != nil {
 			log.Panic(err)
 		}
 		time.Sleep(time.Second)
@@ -264,6 +264,7 @@ func reuseHandle() {
 			fmt.Println(err)
 			return
 		}
+		addr := accept.RemoteAddr().String()
 		go func() {
 			for {
 				data := make([]byte, 1024)
@@ -272,7 +273,7 @@ func reuseHandle() {
 					log.Printf("error during read: %s\n", err)
 					return
 				} else {
-					log.Printf("收到数据:%s\n", data[:n])
+					log.Printf("from:%s recevied:%s\n", addr, data[:n])
 				}
 			}
 		}()
