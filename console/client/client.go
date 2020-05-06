@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/libp2p/go-nat"
 	reuse "github.com/libp2p/go-reuseport"
 )
 
@@ -38,12 +39,12 @@ func main() {
 func handleTCP() {
 	// 当前进程标记字符串,便于显示
 	tag = os.Args[1]
-	srcAddr := &net.TCPAddr{IP: net.IPv4zero, Port: 16005} // 注意端口必须固定
-	dstAddr := &net.TCPAddr{IP: net.ParseIP("47.96.140.215"), Port: 16004}
+	//srcAddr := &net.TCPAddr{IP: net.IPv4zero, Port: 16005} // 注意端口必须固定
+	//dstAddr := &net.TCPAddr{IP: net.ParseIP("47.96.140.215"), Port: 16004}
 
-	//conn, err := net.Dial("tcp","47.101.169.94:16004")
-	conn, err := net.DialTCP("tcp", srcAddr, dstAddr)
-
+	conn, err := net.Dial("tcp", "47.101.169.94:16004")
+	//conn, err := net.DialTCP("tcp", srcAddr, dstAddr)
+	//conn.err:=net.Dial("tcp",)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -51,6 +52,23 @@ func handleTCP() {
 	if _, err = conn.Write([]byte("hello, I'm new peer:" + tag)); err != nil {
 		log.Panic(err)
 	}
+	fmt.Println("local:", conn.LocalAddr().Network())
+	n, err := nat.DiscoverGateway()
+	if err != nil {
+		log.Panic(err)
+		return
+	}
+
+	go func() {
+		for {
+			time.Sleep(30 * time.Second)
+			_, err = n.AddPortMapping("tcp", 16005, "http", 60)
+			if err != nil {
+				log.Fatalf("error: %s", err)
+			}
+		}
+	}()
+	defer n.DeletePortMapping("tcp", 16005)
 
 	//data := make([]byte, 1024)
 	//conn.ReadFrom()
@@ -167,7 +185,23 @@ func reuseHandle() {
 		fmt.Println(err)
 		return
 	}
+	fmt.Println("local:", c.LocalAddr().String())
+	n, err := nat.DiscoverGateway()
+	if err != nil {
+		log.Panic(err)
+		return
+	}
 
+	go func() {
+		for {
+			time.Sleep(30 * time.Second)
+			_, err = n.AddPortMapping("tcp", 16005, "http", 60)
+			if err != nil {
+				log.Fatalf("error: %s", err)
+			}
+		}
+	}()
+	defer n.DeletePortMapping("tcp", 16005)
 	fmt.Println(l1, c)
 	//go func() {
 	if _, err = c.Write([]byte(HandShakeMsg)); err != nil {
