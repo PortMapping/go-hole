@@ -193,12 +193,12 @@ func bidirectionalHoleTCP(srcAddr *net.TCPAddr, anotherAddr *net.TCPAddr) {
 }
 
 func reuseHandle() {
-	l1, err := reuse.Listen("tcp", ":16005")
+	l1, err := reuse.Listen("tcp", "0.0.0.0:16005")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	c, err := reuse.Dial("tcp", ":16005", "47.96.140.215:16004")
+	c, err := reuse.Dial("tcp", "0.0.0.0:16005", "47.96.140.215:16004")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -226,8 +226,15 @@ func reuseHandle() {
 		log.Println("send handshake:", err)
 	}
 	//}()
+	//data := make([]byte, 1024)
+	//read, err := c.Read(data)
+	//if err != nil {
+	//	log.Println("read data:", err)
+	//	return
+	//}
+	//addr := parseTCPAddr(string(data[:read]))
 	fmt.Println("info sent")
-
+	//c.Close()
 	for {
 		accept, err := l1.Accept()
 		fmt.Println("accept new addr")
@@ -240,9 +247,10 @@ func reuseHandle() {
 				data := make([]byte, 1024)
 				n, err := accept.Read(data)
 				if err != nil {
-					log.Printf("error during read: %sn", err)
+					log.Printf("error during read: %s\n", err)
+					return
 				} else {
-					log.Printf("收到数据:%sn", data[:n])
+					log.Printf("收到数据:%s\n", data[:n])
 				}
 			}
 		}()

@@ -49,6 +49,7 @@ func handleTCP() {
 				return
 			}
 			log.Printf("<%s> %s\n", acceptTCP.RemoteAddr().String(), string(data[:n]))
+			//acceptTCP.Close()
 			//addr, err := net.ResolveTCPAddr("tcp", acceptTCP.RemoteAddr().String())
 			//if err != nil {
 			//	fmt.Println(err)
