@@ -44,7 +44,10 @@ func main() {
 
 func handleTCP(ip string) {
 	// 当前进程标记字符串,便于显示
-	tag = os.Args[2]
+	tag = "local name"
+	if len(os.Args) > 3 {
+		tag = os.Args[3]
+	}
 	srcAddr := &net.TCPAddr{IP: net.IPv4zero, Port: 16005} // 注意端口必须固定
 	//dstAddr := &net.TCPAddr{IP: net.ParseIP("47.96.140.215"), Port: 16004}
 
@@ -57,7 +60,8 @@ func handleTCP(ip string) {
 		return
 	}
 	for {
-		if _, err = conn.Write([]byte("hello, I'm new peer:" + tag)); err != nil {
+		fmt.Println("from:", conn.RemoteAddr().String())
+		if _, err = conn.Write([]byte("hello, I'm new peer: " + tag)); err != nil {
 			log.Panic(err)
 		}
 		time.Sleep(time.Second)

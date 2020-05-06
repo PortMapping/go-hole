@@ -60,16 +60,20 @@ func handleTCP() {
 			//	return
 			//}
 			//acceptTCP.Close()
-			dial, err := net.Dial("tcp", acceptTCP.RemoteAddr().String())
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			defer dial.Close()
-			for {
-				dial.Write([]byte("test connect"))
-			}
-
+			go func() {
+				dial, err := net.Dial("tcp", acceptTCP.RemoteAddr().String())
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				defer dial.Close()
+				for {
+					if _, err := dial.Write([]byte("test connect")); err != nil {
+						return
+					}
+					time.Sleep(3 * time.Second)
+				}
+			}()
 			//peers = append(peers, *addr)
 			//if len(peers) == 2 {
 			//	log.Printf("进行UDP打洞,建立 %s <--> %s 的连接\n", peers[0].String(), peers[1].String())
