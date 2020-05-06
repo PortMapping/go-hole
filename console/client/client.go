@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	natpmp "github.com/PortMapping/go-nat-pmp"
 	"log"
 	"net"
 	"os"
@@ -193,12 +194,23 @@ func bidirectionalHoleTCP(srcAddr *net.TCPAddr, anotherAddr *net.TCPAddr) {
 }
 
 func reuseHandle() {
-	l1, err := reuse.Listen("tcp", "0.0.0.0:16005")
+	local, err := natpmp.NewNatFromLocal(16005)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	c, err := reuse.Dial("tcp", "0.0.0.0:16005", "47.96.140.215:16004")
+	local.StopMapping()
+	mapping, err := local.Mapping()
+	if err != nil {
+		return
+	}
+	addr := fmt.Sprintf("0.0.0.0:%d", mapping)
+	l1, err := reuse.Listen("tcp", addr)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	c, err := reuse.Dial("tcp", addr, "47.96.140.215:16004")
 	if err != nil {
 		fmt.Println(err)
 		return

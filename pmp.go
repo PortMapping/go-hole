@@ -107,7 +107,7 @@ func (n *pmpClient) StopMapping() {
 //	return
 //}
 
-func (n *pmpClient) DeletePortMapping(protocol string, externalPort, internalPort int) (err error) {
-	_, err = n.client.AddPortMapping(protocol, internalPort, 0, 0)
-	return
-}
+//func (n *pmpClient) DeletePortMapping(protocol string, externalPort, internalPort int) (err error) {
+//	_, err = n.nat.AddPortMapping(protocol, internalPort, "", 0)
+//	return
+//}
