@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	natpmp "github.com/PortMapping/go-nat-pmp"
+	"github.com/PortMapping/go-hole"
 	"log"
 	"net"
 	"os"
@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	reuse "github.com/libp2p/go-reuseport"
+	"github.com/PortMapping/go-reuse"
 )
 
 var tag string
@@ -198,7 +198,7 @@ func bidirectionalHoleTCP(srcAddr *net.TCPAddr, anotherAddr *net.TCPAddr) {
 }
 
 func reuseHandle() {
-	local, err := natpmp.NewNatFromLocal(16005)
+	local, err := hole.NewNatFromLocal(16005)
 	if err != nil {
 		fmt.Println(err)
 		return

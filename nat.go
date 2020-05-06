@@ -1,4 +1,4 @@
-package natpmp
+package hole
 
 import "net"
 
