@@ -11,27 +11,36 @@ import (
 
 var DefaultTimeOut = 30
 
-type pmpClient struct {
+type natClient struct {
+	stop    *atomic.Bool
 	timeout int
 	nat     nat.NAT
 	port    int
-	stop    *atomic.Bool
 }
 
-func NewNatFromLocal(port int) (NAT, error) {
-	nat, err := nat.DiscoverGateway()
+func defaultNAT() nat.NAT {
+	n, err := nat.DiscoverGateway()
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
-	return &pmpClient{
+	return n
+}
+
+func NewNatFromLocal(port int) (nat NAT, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = e.(error)
+		}
+	}()
+	return &natClient{
 		stop:    atomic.NewBool(false),
-		nat:     nat,
+		nat:     defaultNAT(),
 		timeout: DefaultTimeOut,
 		port:    port,
 	}, nil
 }
 
-func (n *pmpClient) Mapping() (port int, err error) {
+func (n *natClient) Mapping() (port int, err error) {
 	eport, err := n.nat.AddPortMapping("tcp", n.port, "http", 60)
 	if err != nil {
 		return 0, err
@@ -60,13 +69,13 @@ func (n *pmpClient) Mapping() (port int, err error) {
 	return port, nil
 }
 
-func (n *pmpClient) Remapping() (port int, err error) {
+func (n *natClient) Remapping() (port int, err error) {
 	n.StopMapping()
 	n.stop.Store(false)
 	return n.Mapping()
 }
 
-func (n *pmpClient) StopMapping() (err error) {
+func (n *natClient) StopMapping() (err error) {
 	if n.nat != nil {
 		if err := n.nat.DeletePortMapping("tcp", n.port); err != nil {
 			return err
@@ -76,12 +85,16 @@ func (n *pmpClient) StopMapping() (err error) {
 	return nil
 }
 
-func (n *pmpClient) GetExternalAddress() (addr net.IP, err error) {
+func (n *natClient) GetExternalAddress() (addr net.IP, err error) {
 	return n.nat.GetExternalAddress()
 }
 
+func (n *natClient) GetDeviceAddress() (addr net.IP, err error) {
+	return n.nat.GetDeviceAddress()
+}
+
 //
-//func (n *pmpClient) AddPortMapping(protocol string, externalPort, internalPort int) (mappedExternalPort int, err error) {
+//func (n *natClient) AddPortMapping(protocol string, externalPort, internalPort int) (mappedExternalPort int, err error) {
 //	// Note order of port arguments is switched between our AddPortMapping and the client's AddPortMapping.
 //	response, err := n.client.AddPortMapping(protocol, internalPort, externalPort, n.timeout)
 //	if err != nil {
@@ -91,7 +104,7 @@ func (n *pmpClient) GetExternalAddress() (addr net.IP, err error) {
 //	return
 //}
 
-//func (n *pmpClient) DeletePortMapping(protocol string, externalPort, internalPort int) (err error) {
+//func (n *natClient) DeletePortMapping(protocol string, externalPort, internalPort int) (err error) {
 //	_, err = n.nat.AddPortMapping(protocol, internalPort, "", 0)
 //	return
 //}
