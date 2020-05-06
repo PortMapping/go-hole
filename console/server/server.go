@@ -66,7 +66,9 @@ func handleTCP() {
 				return
 			}
 			defer dial.Close()
-			dial.Write([]byte("test connect"))
+			for {
+				dial.Write([]byte("test connect"))
+			}
 
 			//peers = append(peers, *addr)
 			//if len(peers) == 2 {
