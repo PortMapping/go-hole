@@ -1,4 +1,4 @@
-module github.com/PortMapping/go-nat-pmp
+module github.com/PortMapping/go-hole
 
 go 1.14
 
