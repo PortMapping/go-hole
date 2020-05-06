@@ -221,11 +221,15 @@ func reuseHandle() {
 	//}()
 	//defer n.DeletePortMapping("tcp", 16005)
 	//fmt.Println(l1, c)
-	//go func() {
-	if _, err = c.Write([]byte(HandShakeMsg)); err != nil {
-		log.Println("send handshake:", err)
-	}
-	//}()
+	go func() {
+		for {
+			if _, err = c.Write([]byte(HandShakeMsg)); err != nil {
+				log.Println("send handshake:", err)
+				return
+			}
+			time.Sleep(3 * time.Second)
+		}
+	}()
 	//data := make([]byte, 1024)
 	//read, err := c.Read(data)
 	//if err != nil {

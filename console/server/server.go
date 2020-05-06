@@ -43,12 +43,16 @@ func handleTCP() {
 		}
 
 		go func() {
-			n, err := acceptTCP.Read(data)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			log.Printf("<%s> %s\n", acceptTCP.RemoteAddr().String(), string(data[:n]))
+			go func() {
+				for {
+					n, err := acceptTCP.Read(data)
+					if err != nil {
+						fmt.Println(err)
+						return
+					}
+					log.Printf("<%s> %s\n", acceptTCP.RemoteAddr().String(), string(data[:n]))
+				}
+			}()
 			//acceptTCP.Close()
 			//addr, err := net.ResolveTCPAddr("tcp", acceptTCP.RemoteAddr().String())
 			//if err != nil {
@@ -71,8 +75,8 @@ func handleTCP() {
 			//	return
 			//}
 		}()
-
 	}
+
 }
 
 func handleUDP() {
