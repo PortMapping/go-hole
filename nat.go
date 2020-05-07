@@ -2,6 +2,7 @@ package hole
 
 import "net"
 
+// NAT ...
 type NAT interface {
 	Mapping() (port int, err error)
 	StopMapping() (err error)

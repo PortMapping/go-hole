@@ -9,6 +9,7 @@ import (
 	"go.uber.org/atomic"
 )
 
+// DefaultTimeOut ...
 var DefaultTimeOut = 30
 
 type natClient struct {
@@ -26,6 +27,7 @@ func defaultNAT() nat.NAT {
 	return n
 }
 
+// NewNATFromLocal ...
 func NewNATFromLocal(port int) (nat NAT, err error) {
 	defer func() {
 		if e := recover(); e != nil {
@@ -40,6 +42,7 @@ func NewNATFromLocal(port int) (nat NAT, err error) {
 	}, nil
 }
 
+// NewNAT ...
 func NewNAT(n nat.NAT, port int) NAT {
 	return &natClient{
 		stop:    atomic.NewBool(false),
@@ -49,10 +52,12 @@ func NewNAT(n nat.NAT, port int) NAT {
 	}
 }
 
+// SetTimeOut ...
 func (n *natClient) SetTimeOut(t int) {
 	n.timeout = t
 }
 
+// Mapping ...
 func (n *natClient) Mapping() (port int, err error) {
 	eport, err := n.nat.AddPortMapping("tcp", n.port, "http", 60)
 	if err != nil {
@@ -82,12 +87,14 @@ func (n *natClient) Mapping() (port int, err error) {
 	return port, nil
 }
 
+// Remapping ...
 func (n *natClient) Remapping() (port int, err error) {
 	n.StopMapping()
 	n.stop.Store(false)
 	return n.Mapping()
 }
 
+// StopMapping ...
 func (n *natClient) StopMapping() (err error) {
 	if n.nat != nil {
 		if err := n.nat.DeletePortMapping("tcp", n.port); err != nil {
@@ -98,18 +105,22 @@ func (n *natClient) StopMapping() (err error) {
 	return nil
 }
 
+// GetExternalAddress ...
 func (n *natClient) GetExternalAddress() (addr net.IP, err error) {
 	return n.nat.GetExternalAddress()
 }
 
+// GetDeviceAddress ...
 func (n *natClient) GetDeviceAddress() (addr net.IP, err error) {
 	return n.nat.GetDeviceAddress()
 }
 
+// GetInternalAddress ...
 func (n *natClient) GetInternalAddress() (addr net.IP, err error) {
 	return n.nat.GetInternalAddress()
 }
 
+// GetNAT ...
 func (n *natClient) GetNAT() nat.NAT {
 	return n.nat
 }
