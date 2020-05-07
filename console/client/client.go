@@ -198,7 +198,7 @@ func bidirectionalHoleTCP(srcAddr *net.TCPAddr, anotherAddr *net.TCPAddr) {
 }
 
 func reuseHandle() {
-	local, err := hole.NewNatFromLocal(16005)
+	local, err := hole.NewNATFromLocal(16005)
 	if err != nil {
 		fmt.Println(err)
 		return

@@ -26,7 +26,7 @@ func defaultNAT() nat.NAT {
 	return n
 }
 
-func NewNatFromLocal(port int) (nat NAT, err error) {
+func NewNATFromLocal(port int) (nat NAT, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			err = e.(error)
@@ -38,6 +38,19 @@ func NewNatFromLocal(port int) (nat NAT, err error) {
 		timeout: DefaultTimeOut,
 		port:    port,
 	}, nil
+}
+
+func NewNAT(n nat.NAT, port int) NAT {
+	return &natClient{
+		stop:    atomic.NewBool(false),
+		nat:     n,
+		timeout: DefaultTimeOut,
+		port:    port,
+	}
+}
+
+func (n *natClient) SetTimeOut(t int) {
+	n.timeout = t
 }
 
 func (n *natClient) Mapping() (port int, err error) {
