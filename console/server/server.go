@@ -1,4 +1,4 @@
-package main //server.go
+package main //observer.go
 import (
 	"fmt"
 	"log"
@@ -21,7 +21,7 @@ func main() {
 }
 
 func handleTCP() {
-	fmt.Println("tcp server start")
+	fmt.Println("tcp observer start")
 	//listener, err := net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4zero, Port: 16004})
 	//if err != nil {
 	//	fmt.Println(err)
@@ -86,7 +86,7 @@ func handleTCP() {
 }
 
 func handleUDP() {
-	fmt.Println("udp server start")
+	fmt.Println("udp observer start")
 	listener, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.IPv4zero, Port: 16004})
 	if err != nil {
 		fmt.Println(err)

@@ -1,4 +1,4 @@
-package hole
+package nat
 
 import (
 	"fmt"
@@ -27,8 +27,8 @@ func defaultNAT() nat.NAT {
 	return n
 }
 
-// NewNATFromLocal ...
-func NewNATFromLocal(port int) (nat NAT, err error) {
+// FromLocal ...
+func FromLocal(port int) (nat NAT, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			err = e.(error)
@@ -42,8 +42,8 @@ func NewNATFromLocal(port int) (nat NAT, err error) {
 	}, nil
 }
 
-// NewNAT ...
-func NewNAT(n nat.NAT, port int) NAT {
+// New ...
+func New(n nat.NAT, port int) NAT {
 	return &natClient{
 		stop:    atomic.NewBool(false),
 		nat:     n,

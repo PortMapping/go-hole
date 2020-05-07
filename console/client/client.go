@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/PortMapping/go-hole"
+	"github.com/PortMapping/go-hole/nat"
 	"log"
 	"net"
 	"os"
@@ -10,11 +10,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/PortMapping/go-reuse"
+	"github.com/portmapping/go-reuse"
 )
 
 var tag string
 
+// HandShakeMsg ...
 const HandShakeMsg = "我是打洞消息"
 
 func main() {
@@ -92,7 +93,7 @@ func handleTCP(ip string) {
 	//}
 	//conn.Close()
 	//anotherPeer := parseUDPAddr(string(data[:n]))
-	//fmt.Printf("local:%s server:%s another:%sn", srcAddr, remoteAddr, anotherPeer.String())
+	//fmt.Printf("local:%s observer:%s another:%sn", srcAddr, remoteAddr, anotherPeer.String())
 	// 开始打洞
 	//bidirectionalHoleTCP(srcAddr, conn)
 }
@@ -117,7 +118,7 @@ func handleUDP() {
 	conn.Close()
 
 	anotherPeer := parseUDPAddr(string(data[:n]))
-	fmt.Printf("local:%s server:%s another:%s\n", srcAddr, remoteAddr, anotherPeer.String())
+	fmt.Printf("local:%s observer:%s another:%s\n", srcAddr, remoteAddr, anotherPeer.String())
 	// 开始打洞
 	bidirectionalHoleUDP(srcAddr, &anotherPeer)
 }
@@ -198,7 +199,7 @@ func bidirectionalHoleTCP(srcAddr *net.TCPAddr, anotherAddr *net.TCPAddr) {
 }
 
 func reuseHandle() {
-	local, err := hole.NewNATFromLocal(16005)
+	local, err := nat.NewNATFromLocal(16005)
 	if err != nil {
 		fmt.Println(err)
 		return
