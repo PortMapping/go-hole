@@ -10,11 +10,11 @@ import (
 )
 
 // DefaultTimeOut ...
-var DefaultTimeOut = 30
+var DefaultTimeOut time.Duration = 60
 
 type natClient struct {
 	stop    *atomic.Bool
-	timeout int
+	timeout time.Duration
 	nat     nat.NAT
 	port    int
 }
@@ -54,12 +54,12 @@ func NewNAT(n nat.NAT, port int) NAT {
 
 // SetTimeOut ...
 func (n *natClient) SetTimeOut(t int) {
-	n.timeout = t
+	n.timeout = time.Duration(t)
 }
 
 // Mapping ...
 func (n *natClient) Mapping() (port int, err error) {
-	eport, err := n.nat.AddPortMapping("tcp", n.port, "http", 60)
+	eport, err := n.nat.AddPortMapping("tcp", n.port, "mapping", n.timeout)
 	if err != nil {
 		return 0, err
 	}
@@ -68,13 +68,13 @@ func (n *natClient) Mapping() (port int, err error) {
 		defer func() {
 			if e := recover(); e != nil {
 				fmt.Println("panic error:", e)
-				//err = e.(error)
 			}
 		}()
 
 		for {
+			//check mapping every 30 second
 			time.Sleep(30 * time.Second)
-			_, err = n.nat.AddPortMapping("tcp", n.port, "http", 60)
+			_, err = n.nat.AddPortMapping("tcp", n.port, "http", n.timeout)
 			if err != nil {
 				panic(err)
 			}
@@ -89,7 +89,9 @@ func (n *natClient) Mapping() (port int, err error) {
 
 // Remapping ...
 func (n *natClient) Remapping() (port int, err error) {
-	n.StopMapping()
+	if err := n.StopMapping(); err != nil {
+		return 0, err
+	}
 	n.stop.Store(false)
 	return n.Mapping()
 }
@@ -124,19 +126,3 @@ func (n *natClient) GetInternalAddress() (addr net.IP, err error) {
 func (n *natClient) GetNAT() nat.NAT {
 	return n.nat
 }
-
-//
-//func (n *natClient) AddPortMapping(protocol string, externalPort, internalPort int) (mappedExternalPort int, err error) {
-//	// Note order of port arguments is switched between our AddPortMapping and the client's AddPortMapping.
-//	response, err := n.client.AddPortMapping(protocol, internalPort, externalPort, n.timeout)
-//	if err != nil {
-//		return
-//	}
-//	mappedExternalPort = int(response.MappedExternalPort)
-//	return
-//}
-
-//func (n *natClient) DeletePortMapping(protocol string, externalPort, internalPort int) (err error) {
-//	_, err = n.nat.AddPortMapping(protocol, internalPort, "", 0)
-//	return
-//}
