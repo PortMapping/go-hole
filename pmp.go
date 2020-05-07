@@ -93,6 +93,14 @@ func (n *natClient) GetDeviceAddress() (addr net.IP, err error) {
 	return n.nat.GetDeviceAddress()
 }
 
+func (n *natClient) GetInternalAddress() (addr net.IP, err error) {
+	return n.nat.GetInternalAddress()
+}
+
+func (n *natClient) GetNAT() nat.NAT {
+	return n.nat
+}
+
 //
 //func (n *natClient) AddPortMapping(protocol string, externalPort, internalPort int) (mappedExternalPort int, err error) {
 //	// Note order of port arguments is switched between our AddPortMapping and the client's AddPortMapping.
