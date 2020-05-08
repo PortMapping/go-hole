@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/libp2p/go-nat"
+	"github.com/portmapping/go-reuse"
 	"log"
 	"net"
 	"time"
@@ -66,7 +67,7 @@ func (o *lurker) Listener() (c <-chan Source, err error) {
 	gateway, err := nat.DiscoverGateway()
 	if err != nil {
 		if err == nat.ErrNoNATFound {
-			o.tcpListener, err = net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4zero, Port: o.tcpPort})
+			o.tcpListener, err = reuse.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4zero, Port: o.tcpPort})
 			if err != nil {
 				return nil, err
 			}
@@ -79,7 +80,7 @@ func (o *lurker) Listener() (c <-chan Source, err error) {
 			return nil, err
 		}
 		go keepMapping(o.ctx, gateway, o.tcpPort, o.timeout)
-		o.tcpListener, err = net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4zero, Port: extPort})
+		o.tcpListener, err = reuse.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4zero, Port: extPort})
 		if err != nil {
 			return nil, err
 		}
