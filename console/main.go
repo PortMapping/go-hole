@@ -36,6 +36,7 @@ func main() {
 	}()
 	if len(os.Args) > 2 {
 		addr, i := lurker.ParseAddr(address)
+		fmt.Println("remote addr:", addr.String(), i)
 		s := lurker.NewSource(network, addr, i)
 		if l.IsMapping() {
 			fmt.Println("set mapping port", l.MappingPort())
