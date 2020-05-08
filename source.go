@@ -3,6 +3,7 @@ package lurker
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/portmapping/go-reuse"
 	"net"
 )
 
@@ -51,7 +52,7 @@ func (c source) Decode(src interface{}) error {
 
 // Ping ...
 func (c source) Ping() bool {
-	dial, err := net.Dial(c.Network(), c.String())
+	dial, err := reuse.Dial(c.Network(), LocalAddr(c.Network()), c.String())
 	if err != nil {
 		return false
 	}
