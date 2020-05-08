@@ -65,7 +65,10 @@ func (c source) Decode(src interface{}) error {
 
 // Ping ...
 func (c source) Ping(msg string) bool {
-	dial, err := reuse.Dial(c.Network(), LocalAddr(LocalPort(c.Network(), c.mappingPort)), c.String())
+	local := LocalAddr(LocalPort(c.Network(), c.mappingPort))
+	remote := c.String()
+	fmt.Println("local", local, "remote", remote, "network", c.Network())
+	dial, err := reuse.Dial(c.Network(), local, remote)
 	if err != nil {
 		return false
 	}
@@ -78,7 +81,7 @@ func (c source) Ping(msg string) bool {
 	if err != nil {
 		return false
 	}
-	fmt.Println("read", string(data[:read]))
+	fmt.Println("received: ", string(data[:read]))
 	return true
 }
 
