@@ -10,6 +10,8 @@ import (
 // Source ...
 type Source interface {
 	net.Addr
+	MappingPort() int
+	SetMappingPort(int)
 	Ping(msg string) bool
 	Decode(src interface{}) error
 }
@@ -21,8 +23,9 @@ type Addr struct {
 }
 
 type source struct {
-	addr Addr
-	data []byte
+	addr        Addr
+	mappingPort int
+	data        []byte
 }
 
 // NewSource ...
@@ -43,6 +46,16 @@ func (c source) Network() string {
 // String ...
 func (c source) String() string {
 	return c.addr.Address
+}
+
+// MappingPort ...
+func (c source) MappingPort() int {
+	return c.mappingPort
+}
+
+// SetMappingPort ...
+func (c *source) SetMappingPort(i int) {
+	c.mappingPort = i
 }
 
 // Decode ...

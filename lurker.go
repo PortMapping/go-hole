@@ -16,6 +16,8 @@ const maxByteSize = 65520
 type Lurker interface {
 	Listener() (c <-chan Source, err error)
 	Stop() error
+	IsMapping() bool
+	MappingPort() int
 }
 
 type lurker struct {
@@ -25,6 +27,8 @@ type lurker struct {
 	tcpListener *net.TCPListener
 	udpPort     int
 	tcpPort     int
+	isMapping   bool
+	mappingPort int
 	client      chan Source
 	timeout     time.Duration
 }
@@ -75,6 +79,7 @@ func (o *lurker) Listener() (c <-chan Source, err error) {
 			return nil, err
 		}
 	} else {
+		o.isMapping = true
 		extPort, err := gateway.AddPortMapping("tcp", o.tcpPort, "http", o.timeout)
 		if err != nil {
 			return nil, err
@@ -84,6 +89,7 @@ func (o *lurker) Listener() (c <-chan Source, err error) {
 		if err != nil {
 			return nil, err
 		}
+		o.mappingPort = extPort
 	}
 	go listenTCP(o.ctx, o.tcpListener, o.client)
 
@@ -118,6 +124,16 @@ func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (e
 			}
 		}
 	}
+}
+
+// IsMapping ...
+func (o *lurker) IsMapping() bool {
+	return o.isMapping
+}
+
+// MappingPort ...
+func (o *lurker) MappingPort() int {
+	return o.mappingPort
 }
 
 func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Source) (err error) {
