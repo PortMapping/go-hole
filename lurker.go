@@ -210,11 +210,13 @@ func ParseAddr(addr string) (net.IP, int) {
 		}
 	}()
 	addrs := strings.Split(addr, ":")
-	fmt.Println(addrs)
-	ip := net.ParseIP(addr)
-	port, err := strconv.ParseInt(addrs[1], 32, 10)
-	if err != nil {
-		return ip, 0
+	ip := net.ParseIP(addrs[0])
+	if len(addrs) > 1 {
+		port, err := strconv.ParseInt(addrs[1], 10, 32)
+		if err != nil {
+			return ip, 0
+		}
+		return ip, int(port)
 	}
-	return ip, int(port)
+	return ip, 0
 }
