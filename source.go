@@ -6,6 +6,7 @@ import (
 	"github.com/portmapping/go-reuse"
 	"net"
 	"strconv"
+	"time"
 )
 
 // Source ...
@@ -80,6 +81,11 @@ func (c source) Ping(msg string) bool {
 		if IsUDP(c.Network()) {
 			udp, err := net.DialUDP(c.Network(), &net.UDPAddr{}, ParseUDPAddr(remote))
 			if err != nil {
+				return false
+			}
+			err = udp.SetDeadline(time.Now().Add(3 * time.Second))
+			if err != nil {
+				fmt.Println("debug|Ping|SetDeadline", err)
 				return false
 			}
 			_, err = udp.Write([]byte(msg))
