@@ -41,7 +41,7 @@ func main() {
 		}
 		go func() {
 			b := s.Ping(msg)
-			fmt.Println("reverse connected:", b)
+			fmt.Println("target connected:", b)
 		}()
 
 	}
