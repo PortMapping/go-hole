@@ -79,12 +79,14 @@ func (c source) Ping(msg string) bool {
 		return false
 	}
 	data := make([]byte, maxByteSize)
-	read, err := dial.Read(data)
-	if err != nil {
-		fmt.Println("debug|Ping|Read", err)
-		return false
+	for {
+		read, err := dial.Read(data)
+		if err != nil {
+			fmt.Println("debug|Ping|Read", err)
+			return false
+		}
+		fmt.Println("received: ", string(data[:read]))
 	}
-	fmt.Println("received: ", string(data[:read]))
 	return true
 }
 

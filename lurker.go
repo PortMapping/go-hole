@@ -181,11 +181,15 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) err
 		}
 		copy(c.data, data[:n])
 		cli <- &c
-		_, err = conn.Write(c.addr.JSON())
-		if err != nil {
-			fmt.Println("debug|getClientFromTCP|write", err)
-			return err
+		for {
+			_, err = conn.Write(c.addr.JSON())
+			if err != nil {
+				fmt.Println("debug|getClientFromTCP|write", err)
+				return err
+			}
+			time.Sleep(3 * time.Second)
 		}
+
 	}
 	return nil
 }
