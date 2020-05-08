@@ -132,7 +132,7 @@ func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (e
 			}
 			copy(c.data, data[:n])
 			cli <- &c
-			_, err = listener.Write(c.addr.JSON())
+			_, err = listener.WriteToUDP(c.addr.JSON(), remoteAddr)
 			if err != nil {
 				return err
 			}
@@ -189,16 +189,13 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) err
 		}
 		copy(c.data, data[:n])
 		cli <- &c
-		for {
-			_, err = conn.Write(c.addr.JSON())
-			if err != nil {
-				fmt.Println("debug|getClientFromTCP|write", err)
-				return err
-			}
-			time.Sleep(3 * time.Second)
+		_, err = conn.Write(c.addr.JSON())
+		if err != nil {
+			fmt.Println("debug|getClientFromTCP|write", err)
+			return err
 		}
-
 	}
+	return nil
 }
 
 // ParseAddr ...

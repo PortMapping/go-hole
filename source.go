@@ -72,7 +72,7 @@ func (c source) Ping(msg string) bool {
 	local := LocalAddr(LocalPort(c.Network(), c.mappingPort))
 	var dial net.Conn
 	var err error
-	if c.mappingPort != 0 {
+	if c.mappingPort == LocalPort(c.Network(), c.mappingPort) {
 		dial, err = reuse.Dial(c.Network(), local, remote)
 	} else {
 		dial, err = net.Dial(c.Network(), remote)
@@ -89,14 +89,13 @@ func (c source) Ping(msg string) bool {
 		return false
 	}
 	data := make([]byte, maxByteSize)
-	for {
-		read, err := dial.Read(data)
-		if err != nil {
-			fmt.Println("debug|Ping|Read", err)
-			return false
-		}
-		fmt.Println("received: ", string(data[:read]))
+	read, err := dial.Read(data)
+	if err != nil {
+		fmt.Println("debug|Ping|Read", err)
+		return false
 	}
+	fmt.Println("received: ", string(data[:read]))
+	return true
 }
 
 // JSON ...
