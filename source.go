@@ -65,7 +65,7 @@ func (c source) Ping() bool {
 	if err != nil {
 		return false
 	}
-	fmt.Println("read", string(read))
+	fmt.Println("read", string(data[:read]))
 	return true
 }
 
