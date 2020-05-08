@@ -31,6 +31,6 @@ func main() {
 	s := lurker.NewSource(network, address)
 	fmt.Println("target connected:", s.Ping())
 
-	time.Sleep(30 * time.Second)
+	time.Sleep(30 * time.Minute)
 
 }
