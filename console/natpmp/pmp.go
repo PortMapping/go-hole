@@ -20,6 +20,7 @@ func main() {
 	doSub := true
 	nat, err := nat.DiscoverGateway()
 	if err != nil {
+		fmt.Println(err)
 		doSub = false
 	}
 
@@ -42,11 +43,6 @@ func main() {
 			log.Fatalf("error: %s", err)
 		}
 		log.Printf("external address: %s", eaddr)
-
-		eport, err := nat.AddPortMapping("tcp", 16005, "http", 60)
-		if err != nil {
-			log.Fatalf("error: %s", err)
-		}
 
 		log.Printf("test-page: http://%s:%d/", eaddr, eport)
 

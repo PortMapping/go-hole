@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/PortMapping/go-hole"
+	"github.com/libp2p/go-nat"
 	"log"
 	"net"
 )
@@ -61,9 +62,25 @@ func (o *lurker) Listener() (c <-chan Source, err error) {
 
 	go listenUDP(o.ctx, o.udpListener, o.client)
 
-	o.tcpListener, err = net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4zero, Port: o.tcpPort})
+	gateway, err := nat.DiscoverGateway()
 	if err != nil {
-		return nil, err
+		if err == nat.ErrNoNATFound {
+			o.tcpListener, err = net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4zero, Port: o.tcpPort})
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, err
+		}
+	} else {
+		extPort, err := gateway.AddPortMapping("tcp", o.tcpPort, "http", 60)
+		if err != nil {
+			return nil, err
+		}
+		o.tcpListener, err = net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4zero, Port: extPort})
+		if err != nil {
+			return nil, err
+		}
 	}
 	go listenTCP(o.ctx, o.tcpListener, o.client)
 
