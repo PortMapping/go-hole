@@ -73,11 +73,12 @@ func (c source) Ping(msg string) bool {
 	local := LocalAddr(localPort)
 	var dial net.Conn
 	var err error
+	fmt.Println("ping", "local", local, "remote", remote, "network", c.Network(), "mapping", c.mappingPort)
 	if c.mappingPort == localPort {
 		dial, err = reuse.Dial(c.Network(), local, remote)
 	} else {
 		if IsUDP(c.Network()) {
-			udp, err := net.DialUDP(c.Network(), ParseUDPAddr(local), ParseUDPAddr(remote))
+			udp, err := net.DialUDP(c.Network(), &net.UDPAddr{}, ParseUDPAddr(remote))
 			if err != nil {
 				return false
 			}
@@ -98,7 +99,6 @@ func (c source) Ping(msg string) bool {
 		dial, err = net.Dial(c.Network(), remote)
 	}
 
-	fmt.Println("local", local, "remote", remote, "network", c.Network(), "mapping", c.mappingPort)
 	if err != nil {
 		fmt.Println("debug|Ping|Dial", err)
 		return false
