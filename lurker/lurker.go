@@ -35,38 +35,6 @@ func (o *lurker) Stop() error {
 	return nil
 }
 
-// Source ...
-type Source interface {
-	net.Addr
-	Decode(src interface{}) error
-}
-
-// Addr ...
-type Addr struct {
-	Network string
-	Address string
-}
-
-type source struct {
-	addr Addr
-	data []byte
-}
-
-// Network ...
-func (c source) Network() string {
-	return c.addr.Network
-}
-
-// String ...
-func (c source) String() string {
-	return c.addr.Address
-}
-
-// Decode ...
-func (c source) Decode(src interface{}) error {
-	return json.Unmarshal(c.data, src)
-}
-
 // New ...
 func New() Lurker {
 	o := &lurker{
