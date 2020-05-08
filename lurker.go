@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/portmapping/go-reuse"
@@ -196,24 +194,4 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) err
 		}
 	}
 	return nil
-}
-
-// ParseAddr ...
-func ParseAddr(addr string) (net.IP, int) {
-	defer func() {
-		if e := recover(); e != nil {
-			fmt.Println("panic", e)
-			return
-		}
-	}()
-	addrs := strings.Split(addr, ":")
-	ip := net.ParseIP(addrs[0])
-	if len(addrs) > 1 {
-		port, err := strconv.ParseInt(addrs[1], 10, 32)
-		if err != nil {
-			return ip, 0
-		}
-		return ip, int(port)
-	}
-	return ip, 0
 }

@@ -69,12 +69,32 @@ func (c source) Decode(src interface{}) error {
 // Ping ...
 func (c source) Ping(msg string) bool {
 	remote := c.String()
-	local := LocalAddr(LocalPort(c.Network(), c.mappingPort))
+	localPort := LocalPort(c.Network(), c.mappingPort)
+	local := LocalAddr(localPort)
 	var dial net.Conn
 	var err error
-	if c.mappingPort == LocalPort(c.Network(), c.mappingPort) {
+	if c.mappingPort == localPort {
 		dial, err = reuse.Dial(c.Network(), local, remote)
 	} else {
+		if IsUDP(c.Network()) {
+			udp, err := net.DialUDP(c.Network(), ParseUDPAddr(local), ParseUDPAddr(remote))
+			if err != nil {
+				return false
+			}
+			_, err = udp.Write([]byte(msg))
+			if err != nil {
+				fmt.Println("debug|Ping|Write", err)
+				return false
+			}
+			data := make([]byte, maxByteSize)
+			read, _, err := udp.ReadFromUDP(data)
+			if err != nil {
+				fmt.Println("debug|Ping|Read", err)
+				return false
+			}
+			fmt.Println("received: ", string(data[:read]))
+			return true
+		}
 		dial, err = net.Dial(c.Network(), remote)
 	}
 
