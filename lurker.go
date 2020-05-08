@@ -178,7 +178,7 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) err
 			return err
 		}
 		log.Printf("<%s> %s\n", conn.RemoteAddr().String(), string(data[:n]))
-		ip, port := parseAddr(conn.RemoteAddr().String())
+		ip, port := ParseAddr(conn.RemoteAddr().String())
 		c := source{
 			addr: Addr{
 				Network: conn.RemoteAddr().Network(),
@@ -210,10 +210,11 @@ func ParseAddr(addr string) (net.IP, int) {
 		}
 	}()
 	addrs := strings.Split(addr, ":")
-	ip := net.ParseIP(addrs[0])
+	fmt.Println(addrs)
+	ip := net.ParseIP(addr)
 	port, err := strconv.ParseInt(addrs[1], 32, 10)
 	if err != nil {
-		return nil, 0
+		return ip, 0
 	}
 	return ip, int(port)
 }

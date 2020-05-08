@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/portmapping/go-reuse"
 	"net"
+	"strconv"
 )
 
 // Source ...
@@ -47,7 +48,7 @@ func (c source) Network() string {
 
 // String ...
 func (c source) String() string {
-	return fmt.Sprintf("%s:%d", c.addr.IP, c.addr.Port)
+	return net.JoinHostPort(c.addr.IP.String(), strconv.Itoa(c.addr.Port))
 }
 
 // MappingPort ...
