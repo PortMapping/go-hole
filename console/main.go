@@ -8,6 +8,8 @@ import (
 )
 
 func main() {
+	lurker.DefaultTCP = 16004
+	lurker.DefaultUDP = 16005
 	network := "tcp"
 	address := ""
 	if len(os.Args) > 2 {
