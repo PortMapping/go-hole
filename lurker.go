@@ -68,7 +68,9 @@ func (o *lurker) Listener() (c <-chan Source, err error) {
 			fmt.Println("listener error found", e)
 		}
 	}()
-	o.udpListener, err = net.ListenUDP("udp", &net.UDPAddr{IP: net.IPv4zero, Port: o.udpPort})
+	udpAddr := &net.UDPAddr{IP: net.IPv4zero, Port: o.udpPort}
+	fmt.Println("listen udp:", udpAddr.String())
+	o.udpListener, err = net.ListenUDP("udp", udpAddr)
 	if err != nil {
 		return nil, err
 	}
@@ -153,6 +155,7 @@ func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Source) (e
 		default:
 			acceptTCP, err := listener.Accept()
 			if err != nil {
+				fmt.Println("debug|listenTCP|Accept", err)
 				continue
 			}
 			go getClientFromTCP(ctx, acceptTCP, cli)
