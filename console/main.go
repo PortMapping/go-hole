@@ -34,6 +34,7 @@ func main() {
 	if len(os.Args) > 2 {
 		s := lurker.NewSource(network, address)
 		if l.IsMapping() {
+			fmt.Println("set mapping port", l.MappingPort())
 			s.SetMappingPort(l.MappingPort())
 		}
 		fmt.Println("target connected:", s.Ping(msg))
