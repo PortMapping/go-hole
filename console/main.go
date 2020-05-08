@@ -27,8 +27,10 @@ func main() {
 	}
 	go func() {
 		for source := range listener {
-			b := source.Ping(msg)
-			fmt.Println("reverse connected:", b)
+			go func(s lurker.Source) {
+				b := s.Ping(msg)
+				fmt.Println("reverse connected:", b)
+			}(source)
 		}
 	}()
 	if len(os.Args) > 2 {
@@ -37,7 +39,11 @@ func main() {
 			fmt.Println("set mapping port", l.MappingPort())
 			s.SetMappingPort(l.MappingPort())
 		}
-		fmt.Println("target connected:", s.Ping(msg))
+		go func() {
+			b := s.Ping(msg)
+			fmt.Println("reverse connected:", b)
+		}()
+
 	}
 	fmt.Println("ready for waiting")
 	time.Sleep(30 * time.Minute)
