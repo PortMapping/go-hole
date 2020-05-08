@@ -10,7 +10,7 @@ import (
 // Source ...
 type Source interface {
 	net.Addr
-	Ping() bool
+	Ping(msg string) bool
 	Decode(src interface{}) error
 }
 
@@ -51,12 +51,12 @@ func (c source) Decode(src interface{}) error {
 }
 
 // Ping ...
-func (c source) Ping() bool {
+func (c source) Ping(msg string) bool {
 	dial, err := reuse.Dial(c.Network(), LocalAddr(c.Network()), c.String())
 	if err != nil {
 		return false
 	}
-	_, err = dial.Write([]byte("hello world"))
+	_, err = dial.Write([]byte(msg))
 	if err != nil {
 		return false
 	}
