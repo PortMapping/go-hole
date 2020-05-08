@@ -27,11 +27,12 @@ func LocalAddr(port int) string {
 
 // LocalPort ...
 func LocalPort(network string, mappingPort int) int {
-	if mappingPort == 0 {
-		if strings.Index(network, "tcp") >= 0 {
+	if strings.Index(network, "tcp") >= 0 {
+		if mappingPort == 0 {
 			return DefaultTCP
 		}
-		return DefaultUDP
+		return mappingPort
 	}
-	return mappingPort
+	return DefaultUDP
+
 }
