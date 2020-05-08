@@ -23,7 +23,7 @@ type observer struct {
 	tcpListener *net.TCPListener
 	udpPort     int
 	tcpPort     int
-	client      chan Client
+	client      chan Source
 }
 
 // Stop ...
@@ -35,37 +35,37 @@ func (o *observer) Stop() error {
 	return nil
 }
 
-// Client ...
-type Client interface {
+// Source ...
+type Source interface {
 	net.Addr
 	Decode(src interface{}) error
 }
 
-type client struct {
+type source struct {
 	network string
 	address string
 	data    []byte
 }
 
 // Network ...
-func (c client) Network() string {
+func (c source) Network() string {
 	return c.network
 }
 
 // String ...
-func (c client) String() string {
+func (c source) String() string {
 	return c.address
 }
 
 // Decode ...
-func (c client) Decode(src interface{}) error {
+func (c source) Decode(src interface{}) error {
 	return json.Unmarshal(c.data, src)
 }
 
 // New ...
 func New() Observer {
 	o := &observer{
-		client:  make(chan Client, 5),
+		client:  make(chan Source, 5),
 		udpPort: hole.DefaultUDP,
 		tcpPort: hole.DefaultTCP,
 	}
@@ -74,7 +74,7 @@ func New() Observer {
 }
 
 // Listener ...
-func (o *observer) Listener() (c <-chan Client, err error) {
+func (o *observer) Listener() (c <-chan Source, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			fmt.Println("listener error found", e)
@@ -96,7 +96,7 @@ func (o *observer) Listener() (c <-chan Client, err error) {
 	return o.client, nil
 }
 
-func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Client) (err error) {
+func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (err error) {
 	data := make([]byte, maxByteSize)
 	for {
 		select {
@@ -109,7 +109,7 @@ func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Client) (e
 				continue
 			}
 			log.Printf("<%s> %s\n", remoteAddr.String(), data[:n])
-			c := client{
+			c := source{
 				network: remoteAddr.Network(),
 				address: remoteAddr.String(),
 				data:    make([]byte, n),
@@ -119,7 +119,7 @@ func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Client) (e
 		}
 	}
 }
-func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Client) (err error) {
+func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Source) (err error) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -134,7 +134,7 @@ func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Client) (e
 	}
 }
 
-func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Client) error {
+func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) error {
 	select {
 	case <-ctx.Done():
 		return nil
@@ -145,7 +145,7 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Client) err
 			return err
 		}
 		log.Printf("<%s> %s\n", conn.RemoteAddr().String(), string(data[:n]))
-		c := client{
+		c := source{
 			network: conn.RemoteAddr().Network(),
 			address: conn.RemoteAddr().String(),
 			data:    make([]byte, n),
