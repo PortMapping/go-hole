@@ -96,7 +96,7 @@ func (o *lurker) Listener() (c <-chan Source, err error) {
 			return nil, err
 		}
 		fmt.Println("listen tcp:", LocalAddr(extPort))
-		o.tcpListener, err = reuse.Listen("tcp", LocalAddr(extPort))
+		o.tcpListener, err = reuse.Listen("tcp", LocalAddr(o.tcpPort))
 		if err != nil {
 			return nil, err
 		}
