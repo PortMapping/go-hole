@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/portmapping/go-reuse"
@@ -123,7 +125,8 @@ func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (e
 			c := source{
 				addr: Addr{
 					Network: remoteAddr.Network(),
-					Address: remoteAddr.String(),
+					Port:    remoteAddr.Port,
+					IP:      remoteAddr.IP,
 				},
 				data: make([]byte, n),
 			}
@@ -175,10 +178,12 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) err
 			return err
 		}
 		log.Printf("<%s> %s\n", conn.RemoteAddr().String(), string(data[:n]))
+		ip, port := parseAddr(conn.RemoteAddr().String())
 		c := source{
 			addr: Addr{
 				Network: conn.RemoteAddr().Network(),
-				Address: conn.RemoteAddr().String(),
+				IP:      ip,
+				Port:    port,
 			},
 			data: make([]byte, n),
 		}
@@ -194,5 +199,21 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) err
 		}
 
 	}
-	return nil
+}
+
+// ParseAddr ...
+func ParseAddr(addr string) (net.IP, int) {
+	defer func() {
+		if e := recover(); e != nil {
+			fmt.Println("panic", e)
+			return
+		}
+	}()
+	addrs := strings.Split(addr, ":")
+	ip := net.ParseIP(addrs[0])
+	port, err := strconv.ParseInt(addrs[1], 32, 10)
+	if err != nil {
+		return nil, 0
+	}
+	return ip, int(port)
 }

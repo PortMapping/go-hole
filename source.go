@@ -19,7 +19,8 @@ type Source interface {
 // Addr ...
 type Addr struct {
 	Network string
-	Address string
+	IP      net.IP
+	Port    int
 }
 
 type source struct {
@@ -29,11 +30,12 @@ type source struct {
 }
 
 // NewSource ...
-func NewSource(network, address string) Source {
+func NewSource(network string, ip net.IP, port int) Source {
 	return &source{
 		addr: Addr{
 			Network: network,
-			Address: address,
+			IP:      ip,
+			Port:    port,
 		},
 	}
 }
@@ -45,7 +47,7 @@ func (c source) Network() string {
 
 // String ...
 func (c source) String() string {
-	return c.addr.Address
+	return fmt.Sprintf("%s:%d", c.addr.IP, c.addr.Port)
 }
 
 // MappingPort ...
@@ -65,10 +67,17 @@ func (c source) Decode(src interface{}) error {
 
 // Ping ...
 func (c source) Ping(msg string) bool {
-	local := LocalAddr(LocalPort(c.Network(), c.mappingPort))
 	remote := c.String()
-	fmt.Println("local", local, "remote", remote, "network", c.Network())
-	dial, err := reuse.Dial(c.Network(), local, remote)
+	local := LocalAddr(LocalPort(c.Network(), c.mappingPort))
+	var dial net.Conn
+	var err error
+	if c.mappingPort != 0 {
+		dial, err = reuse.Dial(c.Network(), local, remote)
+	} else {
+		dial, err = net.Dial(c.Network(), remote)
+	}
+
+	fmt.Println("local", local, "remote", remote, "network", c.Network(), "mapping", c.mappingPort)
 	if err != nil {
 		fmt.Println("debug|Ping|Dial", err)
 		return false
@@ -87,7 +96,6 @@ func (c source) Ping(msg string) bool {
 		}
 		fmt.Println("received: ", string(data[:read]))
 	}
-	return true
 }
 
 // JSON ...
