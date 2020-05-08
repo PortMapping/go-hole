@@ -3,11 +3,14 @@ package lurker
 import (
 	"context"
 	"fmt"
-	"github.com/libp2p/go-nat"
-	"github.com/portmapping/go-reuse"
 	"log"
 	"net"
 	"time"
+
+	"github.com/portmapping/go-reuse"
+	"github.com/portmapping/lurker/nat"
+
+	p2pnat "github.com/libp2p/go-nat"
 )
 
 const maxByteSize = 65520
@@ -25,6 +28,7 @@ type lurker struct {
 	cancel      context.CancelFunc
 	udpListener *net.UDPConn
 	tcpListener net.Listener
+	nat         nat.NAT
 	udpPort     int
 	tcpPort     int
 	isMapping   bool
@@ -35,6 +39,9 @@ type lurker struct {
 
 // Stop ...
 func (o *lurker) Stop() error {
+	if err := o.nat.StopMapping(); err != nil {
+		return err
+	}
 	if o.cancel != nil {
 		o.cancel()
 		o.cancel = nil
@@ -68,9 +75,9 @@ func (o *lurker) Listener() (c <-chan Source, err error) {
 
 	go listenUDP(o.ctx, o.udpListener, o.client)
 
-	gateway, err := nat.DiscoverGateway()
+	o.nat, err = nat.FromLocal(o.tcpPort)
 	if err != nil {
-		if err == nat.ErrNoNATFound {
+		if err == p2pnat.ErrNoNATFound {
 			o.tcpListener, err = reuse.Listen("tcp", LocalAddr(o.tcpPort))
 			if err != nil {
 				return nil, err
@@ -80,11 +87,10 @@ func (o *lurker) Listener() (c <-chan Source, err error) {
 		}
 	} else {
 		o.isMapping = true
-		extPort, err := gateway.AddPortMapping("tcp", o.tcpPort, "http", o.timeout)
+		extPort, err := o.nat.Mapping()
 		if err != nil {
 			return nil, err
 		}
-		go keepMapping(o.ctx, gateway, o.tcpPort, o.timeout)
 		o.tcpListener, err = reuse.Listen("tcp", LocalAddr(extPort))
 		if err != nil {
 			return nil, err
@@ -177,21 +183,4 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) err
 		}
 	}
 	return nil
-}
-
-// KeepMapping ...
-func keepMapping(ctx context.Context, n nat.NAT, port int, timeout time.Duration) error {
-	for {
-		select {
-		case <-ctx.Done():
-			return nil
-		default:
-			time.Sleep(30 * time.Second)
-			_, err := n.AddPortMapping("tcp", port, "mapping", timeout)
-			if err != nil {
-				return err
-			}
-		}
-
-	}
 }
