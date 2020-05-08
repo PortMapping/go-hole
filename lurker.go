@@ -2,12 +2,11 @@ package lurker
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"github.com/PortMapping/go-hole"
 	"github.com/libp2p/go-nat"
 	"log"
 	"net"
+	"time"
 )
 
 const maxByteSize = 65520
@@ -26,6 +25,7 @@ type lurker struct {
 	udpPort     int
 	tcpPort     int
 	client      chan Source
+	timeout     time.Duration
 }
 
 // Stop ...
@@ -41,8 +41,9 @@ func (o *lurker) Stop() error {
 func New() Lurker {
 	o := &lurker{
 		client:  make(chan Source, 5),
-		udpPort: hole.DefaultUDP,
-		tcpPort: hole.DefaultTCP,
+		udpPort: DefaultUDP,
+		tcpPort: DefaultTCP,
+		timeout: DefaultTimeout,
 	}
 	o.ctx, o.cancel = context.WithCancel(context.TODO())
 	return o
@@ -73,10 +74,11 @@ func (o *lurker) Listener() (c <-chan Source, err error) {
 			return nil, err
 		}
 	} else {
-		extPort, err := gateway.AddPortMapping("tcp", o.tcpPort, "http", 60)
+		extPort, err := gateway.AddPortMapping("tcp", o.tcpPort, "http", o.timeout)
 		if err != nil {
 			return nil, err
 		}
+		go keepMapping(o.ctx, gateway, o.tcpPort, o.timeout)
 		o.tcpListener, err = net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4zero, Port: extPort})
 		if err != nil {
 			return nil, err
@@ -160,11 +162,19 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) err
 	return nil
 }
 
-// JSON ...
-func (addr *Addr) JSON() []byte {
-	marshal, err := json.Marshal(addr)
-	if err != nil {
-		return nil
+// KeepMapping ...
+func keepMapping(ctx context.Context, n nat.NAT, port int, timeout time.Duration) error {
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		default:
+			time.Sleep(30 * time.Second)
+			_, err := n.AddPortMapping("tcp", port, "mapping", timeout)
+			if err != nil {
+				return err
+			}
+		}
+
 	}
-	return marshal
 }

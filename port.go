@@ -1,4 +1,4 @@
-package hole
+package lurker
 
 // DefaultTCP ...
 const DefaultTCP = 46666

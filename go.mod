@@ -1,4 +1,4 @@
-module github.com/PortMapping/go-hole
+module github.com/portmapping/lurker
 
 go 1.14
 

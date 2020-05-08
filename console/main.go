@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/PortMapping/go-hole/lurker"
+	"github.com/portmapping/lurker"
 	"os"
 	"time"
 )

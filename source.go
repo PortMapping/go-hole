@@ -67,3 +67,12 @@ func (c source) Ping() bool {
 	fmt.Println("read", string(read))
 	return true
 }
+
+// JSON ...
+func (addr *Addr) JSON() []byte {
+	marshal, err := json.Marshal(addr)
+	if err != nil {
+		return nil
+	}
+	return marshal
+}
