@@ -41,20 +41,25 @@ type Source interface {
 	Decode(src interface{}) error
 }
 
+// Addr ...
+type Addr struct {
+	Network string
+	Address string
+}
+
 type source struct {
-	network string
-	address string
-	data    []byte
+	addr Addr
+	data []byte
 }
 
 // Network ...
 func (c source) Network() string {
-	return c.network
+	return c.addr.Network
 }
 
 // String ...
 func (c source) String() string {
-	return c.address
+	return c.addr.Address
 }
 
 // Decode ...
@@ -110,12 +115,18 @@ func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (e
 			}
 			log.Printf("<%s> %s\n", remoteAddr.String(), data[:n])
 			c := source{
-				network: remoteAddr.Network(),
-				address: remoteAddr.String(),
-				data:    make([]byte, n),
+				addr: Addr{
+					Network: remoteAddr.Network(),
+					Address: remoteAddr.String(),
+				},
+				data: make([]byte, n),
 			}
 			copy(c.data, data[:n])
 			cli <- c
+			_, err = listener.Write(c.addr.JSON())
+			if err != nil {
+				return err
+			}
 		}
 	}
 }
@@ -146,12 +157,27 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) err
 		}
 		log.Printf("<%s> %s\n", conn.RemoteAddr().String(), string(data[:n]))
 		c := source{
-			network: conn.RemoteAddr().Network(),
-			address: conn.RemoteAddr().String(),
-			data:    make([]byte, n),
+			addr: Addr{
+				Network: conn.RemoteAddr().Network(),
+				Address: conn.RemoteAddr().String(),
+			},
+			data: make([]byte, n),
 		}
 		copy(c.data, data[:n])
 		cli <- c
+		_, err = conn.Write(c.addr.JSON())
+		if err != nil {
+			return err
+		}
 	}
 	return nil
+}
+
+// JSON ...
+func (addr *Addr) JSON() []byte {
+	marshal, err := json.Marshal(addr)
+	if err != nil {
+		return nil
+	}
+	return marshal
 }
