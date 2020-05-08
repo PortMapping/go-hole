@@ -1,13 +1,23 @@
 package observer
 
-import "strings"
+import (
+	"crypto/sha256"
+	"fmt"
+)
 
 // Subject ...
 type Subject interface {
 }
 
 type subject struct {
-	sources map[string][]Source
+	sources map[string]map[string]Source
+}
+
+// NewSubject ...
+func NewSubject() Subject {
+	return subject{
+		sources: make(map[string]map[string]Source),
+	}
 }
 
 // Ping ...
@@ -17,18 +27,21 @@ func (s *subject) Ping() {
 
 // RegisterSource ...
 func (s *subject) RegisterSource(name string, source Source) {
-	if sources, b := s.sources[name]; b {
-		for _, s2 := range sources {
-			if strings.Compare(source.Network(), s2.Network()) == 0 &&
-				strings.Compare(source.String(), s2.String()) == 0 {
-				return
-			}
+	hash := hashString(source.Network(), source.String())
+	if _, b := s.sources[name]; b {
+		if _, b := s.sources[name][hash]; b {
+			return
 		}
-		s.sources[name] = append(s.sources[name], source)
+		s.sources[name][hash] = source
 		return
 	}
-	s.sources[name] = []Source{
-		source,
+	s.sources[name] = map[string]Source{
+		hash: source,
 	}
 	return
+}
+
+func hashString(network, address string) string {
+	s := sha256.Sum256([]byte(network + "_" + address))
+	return fmt.Sprintf("%x", s)
 }
