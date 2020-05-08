@@ -21,9 +21,17 @@ var DefaultLocalTCPAddr = fmt.Sprintf("0.0.0.0:%d", DefaultTCP)
 var DefaultLocalUDPAddr = fmt.Sprintf("0.0.0.0:%d", DefaultUDP)
 
 // LocalAddr ...
-func LocalAddr(network string) string {
-	if strings.Index(network, "tcp") >= 0 {
-		return DefaultLocalTCPAddr
+func LocalAddr(port int) string {
+	return fmt.Sprintf("0.0.0.0:%d", port)
+}
+
+// LocalPort ...
+func LocalPort(network string, mappingPort int) int {
+	if mappingPort == 0 {
+		if strings.Index(network, "tcp") >= 0 {
+			return DefaultTCP
+		}
+		return DefaultUDP
 	}
-	return DefaultLocalUDPAddr
+	return mappingPort
 }

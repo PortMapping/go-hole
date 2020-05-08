@@ -65,7 +65,7 @@ func (c source) Decode(src interface{}) error {
 
 // Ping ...
 func (c source) Ping(msg string) bool {
-	dial, err := reuse.Dial(c.Network(), LocalAddr(c.Network()), c.String())
+	dial, err := reuse.Dial(c.Network(), LocalAddr(LocalPort(c.Network(), c.mappingPort)), c.String())
 	if err != nil {
 		return false
 	}
