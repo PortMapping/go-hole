@@ -13,6 +13,7 @@ const maxByteSize = 65520
 
 // Lurker ...
 type Lurker interface {
+	Listener() (c <-chan Source, err error)
 	Stop() error
 }
 

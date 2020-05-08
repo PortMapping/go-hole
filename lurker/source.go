@@ -9,6 +9,7 @@ import (
 // Source ...
 type Source interface {
 	net.Addr
+	Ping() bool
 	Decode(src interface{}) error
 }
 
@@ -21,6 +22,16 @@ type Addr struct {
 type source struct {
 	addr Addr
 	data []byte
+}
+
+// NewSource ...
+func NewSource(network, address string) Source {
+	return &source{
+		addr: Addr{
+			Network: network,
+			Address: address,
+		},
+	}
 }
 
 // Network ...
