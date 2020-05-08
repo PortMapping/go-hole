@@ -77,7 +77,9 @@ func (o *lurker) Listener() (c <-chan Source, err error) {
 
 	o.nat, err = nat.FromLocal(o.tcpPort)
 	if err != nil {
+		fmt.Println("found err", err)
 		if err == p2pnat.ErrNoNATFound {
+			fmt.Println("listen tcp:", LocalAddr(o.tcpPort))
 			o.tcpListener, err = reuse.Listen("tcp", LocalAddr(o.tcpPort))
 			if err != nil {
 				return nil, err
@@ -91,6 +93,7 @@ func (o *lurker) Listener() (c <-chan Source, err error) {
 		if err != nil {
 			return nil, err
 		}
+		fmt.Println("listen tcp:", LocalAddr(extPort))
 		o.tcpListener, err = reuse.Listen("tcp", LocalAddr(extPort))
 		if err != nil {
 			return nil, err
@@ -165,6 +168,7 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) err
 		data := make([]byte, maxByteSize)
 		n, err := conn.Read(data)
 		if err != nil {
+			fmt.Println("debug|getClientFromTCP|read", err)
 			return err
 		}
 		log.Printf("<%s> %s\n", conn.RemoteAddr().String(), string(data[:n]))
@@ -179,6 +183,7 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) err
 		cli <- &c
 		_, err = conn.Write(c.addr.JSON())
 		if err != nil {
+			fmt.Println("debug|getClientFromTCP|write", err)
 			return err
 		}
 	}

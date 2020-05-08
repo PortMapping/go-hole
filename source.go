@@ -70,15 +70,18 @@ func (c source) Ping(msg string) bool {
 	fmt.Println("local", local, "remote", remote, "network", c.Network())
 	dial, err := reuse.Dial(c.Network(), local, remote)
 	if err != nil {
+		fmt.Println("debug|Ping|Dial", err)
 		return false
 	}
 	_, err = dial.Write([]byte(msg))
 	if err != nil {
+		fmt.Println("debug|Ping|Write", err)
 		return false
 	}
 	data := make([]byte, maxByteSize)
 	read, err := dial.Read(data)
 	if err != nil {
+		fmt.Println("debug|Ping|Read", err)
 		return false
 	}
 	fmt.Println("received: ", string(data[:read]))

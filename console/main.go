@@ -23,6 +23,7 @@ func main() {
 	l := lurker.New()
 	listener, err := l.Listener()
 	if err != nil {
+		panic(err)
 		return
 	}
 	go func() {
