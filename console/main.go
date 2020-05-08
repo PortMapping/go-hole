@@ -28,7 +28,7 @@ func main() {
 	go func() {
 		for source := range listener {
 			b := source.Ping(msg)
-			fmt.Println("source connected:", b)
+			fmt.Println("reverse connected:", b)
 		}
 	}()
 	if len(os.Args) > 2 {
@@ -38,5 +38,6 @@ func main() {
 		}
 		fmt.Println("target connected:", s.Ping(msg))
 	}
+	fmt.Println("ready for waiting")
 	time.Sleep(30 * time.Minute)
 }
