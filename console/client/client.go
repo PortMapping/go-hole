@@ -93,7 +93,7 @@ func handleTCP(ip string) {
 	//}
 	//conn.Close()
 	//anotherPeer := parseUDPAddr(string(data[:n]))
-	//fmt.Printf("local:%s observer:%s another:%sn", srcAddr, remoteAddr, anotherPeer.String())
+	//fmt.Printf("local:%s lurker:%s another:%sn", srcAddr, remoteAddr, anotherPeer.String())
 	// 开始打洞
 	//bidirectionalHoleTCP(srcAddr, conn)
 }
@@ -118,7 +118,7 @@ func handleUDP() {
 	conn.Close()
 
 	anotherPeer := parseUDPAddr(string(data[:n]))
-	fmt.Printf("local:%s observer:%s another:%s\n", srcAddr, remoteAddr, anotherPeer.String())
+	fmt.Printf("local:%s lurker:%s another:%s\n", srcAddr, remoteAddr, anotherPeer.String())
 	// 开始打洞
 	bidirectionalHoleUDP(srcAddr, &anotherPeer)
 }

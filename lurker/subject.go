@@ -1,4 +1,4 @@
-package observer
+package lurker
 
 import (
 	"crypto/sha256"

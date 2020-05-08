@@ -1,4 +1,4 @@
-package main //observer.go
+package main //lurker.go
 import (
 	"fmt"
 	"log"
@@ -21,7 +21,7 @@ func main() {
 }
 
 func handleTCP() {
-	fmt.Println("tcp observer start")
+	fmt.Println("tcp lurker start")
 	//listener, err := net.ListenTCP("tcp", &net.TCPAddr{IP: net.IPv4zero, Port: 16004})
 	//if err != nil {
 	//	fmt.Println(err)
@@ -86,7 +86,7 @@ func handleTCP() {
 }
 
 func handleUDP() {
-	fmt.Println("udp observer start")
+	fmt.Println("udp lurker start")
 	listener, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.IPv4zero, Port: 16004})
 	if err != nil {
 		fmt.Println(err)

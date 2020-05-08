@@ -1,4 +1,4 @@
-package observer
+package lurker
 
 import (
 	"context"
@@ -11,12 +11,12 @@ import (
 
 const maxByteSize = 65520
 
-// Observer ...
-type Observer interface {
+// Lurker ...
+type Lurker interface {
 	Stop() error
 }
 
-type observer struct {
+type lurker struct {
 	ctx         context.Context
 	cancel      context.CancelFunc
 	udpListener *net.UDPConn
@@ -27,7 +27,7 @@ type observer struct {
 }
 
 // Stop ...
-func (o *observer) Stop() error {
+func (o *lurker) Stop() error {
 	if o.cancel != nil {
 		o.cancel()
 		o.cancel = nil
@@ -68,8 +68,8 @@ func (c source) Decode(src interface{}) error {
 }
 
 // New ...
-func New() Observer {
-	o := &observer{
+func New() Lurker {
+	o := &lurker{
 		client:  make(chan Source, 5),
 		udpPort: hole.DefaultUDP,
 		tcpPort: hole.DefaultTCP,
@@ -79,7 +79,7 @@ func New() Observer {
 }
 
 // Listener ...
-func (o *observer) Listener() (c <-chan Source, err error) {
+func (o *lurker) Listener() (c <-chan Source, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			fmt.Println("listener error found", e)

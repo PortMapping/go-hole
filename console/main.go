@@ -208,16 +208,16 @@ func host2host(address1, address2 string) {
 }
 
 func start_server(address string) net.Listener {
-	log.Println("[+]", "try to start observer on:["+address+"]")
+	log.Println("[+]", "try to start lurker on:["+address+"]")
 	server, err := net.Listen("tcp", address)
 	if err != nil {
 		log.Fatalln("[x]", "listen address ["+address+"] faild.")
 	}
 	log.Println("[√]", "start listen at address:["+address+"]")
 	return server
-	/*defer observer.Close()
+	/*defer lurker.Close()
 	for {
-		conn, err := observer.Accept()
+		conn, err := lurker.Accept()
 		log.Println("accept a new client. remote address:[" + conn.RemoteAddr().String() +
 			"], local address:[" + conn.LocalAddr().String() + "]")
 		if err != nil {
