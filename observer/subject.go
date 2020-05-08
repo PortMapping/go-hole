@@ -20,11 +20,6 @@ func NewSubject() Subject {
 	}
 }
 
-// Ping ...
-func (s *subject) Ping() {
-
-}
-
 // RegisterSource ...
 func (s *subject) RegisterSource(name string, source Source) {
 	hash := hashString(source.Network(), source.String())
