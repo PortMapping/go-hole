@@ -14,7 +14,7 @@ type Source interface {
 	net.Addr
 	MappingPort() int
 	SetMappingPort(int)
-	Ping(msg string) bool
+	TryConnect() error
 	Decode(src interface{}) error
 }
 
@@ -67,8 +67,8 @@ func (c source) Decode(src interface{}) error {
 	return json.Unmarshal(c.data, src)
 }
 
-// Ping ...
-func (c source) Ping(msg string) bool {
+// TryConnect ...
+func (c source) TryConnect() error {
 	remote := c.String()
 	localPort := LocalPort(c.Network(), c.mappingPort)
 	local := LocalAddr(localPort)
@@ -81,47 +81,47 @@ func (c source) Ping(msg string) bool {
 		if IsUDP(c.Network()) {
 			udp, err := net.DialUDP(c.Network(), &net.UDPAddr{}, ParseUDPAddr(remote))
 			if err != nil {
-				return false
+				return err
 			}
 			err = udp.SetDeadline(time.Now().Add(3 * time.Second))
 			if err != nil {
 				fmt.Println("debug|Ping|SetDeadline", err)
-				return false
+				return err
 			}
-			_, err = udp.Write([]byte(msg))
+			_, err = udp.Write([]byte("hello world"))
 			if err != nil {
 				fmt.Println("debug|Ping|Write", err)
-				return false
+				return err
 			}
 			data := make([]byte, maxByteSize)
 			read, _, err := udp.ReadFromUDP(data)
 			if err != nil {
 				fmt.Println("debug|Ping|Read", err)
-				return false
+				return err
 			}
 			fmt.Println("received: ", string(data[:read]))
-			return true
+			return err
 		}
 		dial, err = net.Dial(c.Network(), remote)
 	}
 
 	if err != nil {
 		fmt.Println("debug|Ping|Dial", err)
-		return false
+		return err
 	}
-	_, err = dial.Write([]byte(msg))
+	_, err = dial.Write([]byte("hello world"))
 	if err != nil {
 		fmt.Println("debug|Ping|Write", err)
-		return false
+		return err
 	}
 	data := make([]byte, maxByteSize)
 	read, err := dial.Read(data)
 	if err != nil {
 		fmt.Println("debug|Ping|Read", err)
-		return false
+		return err
 	}
 	fmt.Println("received: ", string(data[:read]))
-	return true
+	return err
 }
 
 // JSON ...

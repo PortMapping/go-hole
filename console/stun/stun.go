@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/PortMapping/go-hole/stun"
+	"github.com/portmapping/lurker/stun"
 )
 
 func main() {

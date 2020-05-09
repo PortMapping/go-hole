@@ -7,4 +7,5 @@ require (
 	github.com/libp2p/go-nat v0.0.5
 	github.com/portmapping/go-reuse v0.0.2
 	go.uber.org/atomic v1.6.0
+	go.uber.org/zap v1.15.0
 )
