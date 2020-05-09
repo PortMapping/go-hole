@@ -29,8 +29,15 @@ type Addr struct {
 	Port    int
 }
 
+type Service struct {
+	ID  string
+	UDP int
+	TCP int
+}
+
 type source struct {
 	addr        Addr
+	service     Service
 	nat         int
 	mappingPort int
 	data        []byte
