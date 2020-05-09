@@ -3,15 +3,14 @@ package lurker
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/portmapping/go-reuse"
 	"net"
 	"strconv"
-	"time"
 )
 
 // Source ...
 type Source interface {
 	TryConnect() error
+	Support() Support
 }
 
 // Addr ...
@@ -34,7 +33,7 @@ type Service struct {
 type source struct {
 	addr    Addr
 	service Service
-	nat     int
+	support Support
 }
 
 // Network ...
@@ -84,43 +83,43 @@ func (c source) String() string {
 }
 
 // TryConnect ...
-func (c source) TryConnect() error {
-	remote := c.String()
+func (c *source) TryConnect() error {
+	//remote := c.String()
 	//localPort := LocalPort(c.Network(), c.mappingPort)
 	//local := LocalAddr(localPort)
 	var dial net.Conn
 	var err error
 	//fmt.Println("ping", "local", local, "remote", remote, "network", c.Network(), "mapping", c.mappingPort)
-	err = tryReverse(&c)
-	if c.mappingPort == localPort {
-		dial, err = reuse.Dial(c.Network(), local, remote)
-	} else {
-		if IsUDP(c.Network()) {
-			udp, err := net.DialUDP(c.Network(), &net.UDPAddr{}, ParseUDPAddr(remote))
-			if err != nil {
-				return err
-			}
-			err = udp.SetDeadline(time.Now().Add(3 * time.Second))
-			if err != nil {
-				fmt.Println("debug|Ping|SetDeadline", err)
-				return err
-			}
-			_, err = udp.Write([]byte("hello world"))
-			if err != nil {
-				fmt.Println("debug|Ping|Write", err)
-				return err
-			}
-			data := make([]byte, maxByteSize)
-			read, _, err := udp.ReadFromUDP(data)
-			if err != nil {
-				fmt.Println("debug|Ping|Read", err)
-				return err
-			}
-			fmt.Println("received: ", string(data[:read]))
-			return err
-		}
-		dial, err = net.Dial(c.Network(), remote)
-	}
+	//err = tryReverse(c)
+	//if c.mappingPort == localPort {
+	//	dial, err = reuse.Dial(c.Network(), local, remote)
+	//} else {
+	//	if IsUDP(c.Network()) {
+	//		udp, err := net.DialUDP(c.Network(), &net.UDPAddr{}, ParseUDPAddr(remote))
+	//		if err != nil {
+	//			return err
+	//		}
+	//		err = udp.SetDeadline(time.Now().Add(3 * time.Second))
+	//		if err != nil {
+	//			fmt.Println("debug|Ping|SetDeadline", err)
+	//			return err
+	//		}
+	//		_, err = udp.Write([]byte("hello world"))
+	//		if err != nil {
+	//			fmt.Println("debug|Ping|Write", err)
+	//			return err
+	//		}
+	//		data := make([]byte, maxByteSize)
+	//		read, _, err := udp.ReadFromUDP(data)
+	//		if err != nil {
+	//			fmt.Println("debug|Ping|Read", err)
+	//			return err
+	//		}
+	//		fmt.Println("received: ", string(data[:read]))
+	//		return err
+	//	}
+	//	//dial, err = net.Dial(c.Network(), remote)
+	//}
 
 	if err != nil {
 		fmt.Println("debug|Ping|Dial", err)
@@ -141,32 +140,29 @@ func (c source) TryConnect() error {
 	return err
 }
 
-func tryTCP(addr *Addr) error {
+func tryReverseTCP(s *source) error {
 	return nil
 }
 
-func tryReverse(s *source) error {
+func tryReverseUDP(s *source) error {
 	udp, err := net.DialUDP("udp", LocalUDPAddr(s.service.HolePort), s.addr.UDP())
 	if err != nil {
+		log.Debugw("debug|tryReverse|DialUDP", err)
 		return err
 	}
-	err = udp.SetDeadline(time.Now().Add(3 * time.Second))
+
+	_, err = udp.Write(s.service.JSON())
 	if err != nil {
-		fmt.Println("debug|Ping|SetDeadline", err)
-		return err
-	}
-	_, err = udp.Write([]byte("hello world"))
-	if err != nil {
-		fmt.Println("debug|Ping|Write", err)
+		log.Debugw("debug|tryReverse|Write", err)
 		return err
 	}
 	data := make([]byte, maxByteSize)
 	read, _, err := udp.ReadFromUDP(data)
 	if err != nil {
-		fmt.Println("debug|Ping|Read", err)
+		log.Debugw("debug|tryReverse|ReadFromUDP", err)
 		return err
 	}
-	fmt.Println("received: ", string(data[:read]))
+	log.Infow("received", "address", string(data[:read]))
 	return err
 }
 
@@ -176,14 +172,9 @@ func tryUDP(addr *Addr) error {
 
 // ParseSourceAddr ...
 func ParseSourceAddr(network string, ip net.IP, port int) *Addr {
-	net.TCPAddr{
-		IP:   nil,
-		Port: 0,
-		Zone: "",
-	}
 	return &Addr{
-		Network: network,
-		IP:      ip,
-		Port:    port,
+		Protocol: network,
+		IP:       ip,
+		Port:     port,
 	}
 }
