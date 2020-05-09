@@ -12,8 +12,6 @@ import (
 // Source ...
 type Source interface {
 	net.Addr
-	MappingPort() int
-	SetMappingPort(int)
 	TryConnect() error
 }
 
@@ -27,6 +25,7 @@ type Addr struct {
 // Service ...
 type Service struct {
 	ID      string
+	Addr    Addr
 	ISP     net.IP
 	UDP     int
 	TCP     int
@@ -34,20 +33,8 @@ type Service struct {
 }
 
 type source struct {
-	addr    Addr
 	service Service
 	nat     int
-}
-
-// NewSource ...
-func NewSource(network string, ip net.IP, port int) Source {
-	return &source{
-		addr: Addr{
-			Network: network,
-			IP:      ip,
-			Port:    port,
-		},
-	}
 }
 
 // Network ...
@@ -58,16 +45,6 @@ func (c source) Network() string {
 // String ...
 func (c source) String() string {
 	return net.JoinHostPort(c.addr.IP.String(), strconv.Itoa(c.addr.Port))
-}
-
-// MappingPort ...
-func (c source) MappingPort() int {
-	return c.mappingPort
-}
-
-// SetMappingPort ...
-func (c *source) SetMappingPort(i int) {
-	c.mappingPort = i
 }
 
 // TryConnect ...

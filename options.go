@@ -1,7 +1,6 @@
 package lurker
 
 import (
-	"fmt"
 	"net"
 	"strconv"
 	"strings"
@@ -30,18 +29,7 @@ var DefaultLocalUDPAddr = &net.UDPAddr{
 
 // LocalAddr ...
 func LocalAddr(port int) string {
-	return fmt.Sprintf("0.0.0.0:%d", port)
-}
-
-// LocalPort ...
-func LocalPort(network string, mappingPort int) int {
-	if strings.Index(network, "tcp") >= 0 {
-		if mappingPort == 0 {
-			return DefaultTCP
-		}
-		return mappingPort
-	}
-	return DefaultUDP
+	return net.JoinHostPort(net.IPv4zero.String(), strconv.Itoa(port))
 }
 
 // ParseTCPAddr ...
@@ -64,12 +52,6 @@ func ParseUDPAddr(addr string) *net.UDPAddr {
 
 // ParseAddr ...
 func ParseAddr(addr string) (net.IP, int) {
-	//defer func() {
-	//	if e := recover(); e != nil {
-	//		fmt.Println("panic", e)
-	//		return
-	//	}
-	//}()
 	addrs := strings.Split(addr, ":")
 	ip := net.ParseIP(addrs[0])
 	if len(addrs) > 1 {

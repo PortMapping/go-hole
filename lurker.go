@@ -14,9 +14,14 @@ import (
 
 const maxByteSize = 65520
 
+// Listener ...
+type Listener interface {
+	Listen() (c <-chan Source, err error)
+}
+
 // Lurker ...
 type Lurker interface {
-	Listener() (c <-chan Source, err error)
+	Listener
 	Stop() error
 	IsMapping() bool
 	MappingPort() int
@@ -60,8 +65,8 @@ func New() Lurker {
 	return o
 }
 
-// Listener ...
-func (o *lurker) Listener() (c <-chan Source, err error) {
+// Listen ...
+func (o *lurker) Listen() (c <-chan Source, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			fmt.Println("listener error found", e)
@@ -78,9 +83,9 @@ func (o *lurker) Listener() (c <-chan Source, err error) {
 
 	o.nat, err = nat.FromLocal(o.tcpPort)
 	if err != nil {
-		fmt.Println("found err", err)
+		log.Debugw("nat error", "error", err)
 		if err == p2pnat.ErrNoNATFound {
-			fmt.Println("listen tcp:", LocalAddr(o.tcpPort))
+			fmt.Println("listen tcp on address:", LocalAddr(o.tcpPort))
 			o.tcpListener, err = reuse.Listen("tcp", LocalAddr(o.tcpPort))
 			if err != nil {
 				return nil, err
