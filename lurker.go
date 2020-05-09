@@ -3,7 +3,6 @@ package lurker
 import (
 	"context"
 	"fmt"
-	"log"
 	"net"
 	"time"
 
@@ -119,7 +118,7 @@ func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (e
 				//waiting for next
 				continue
 			}
-			log.Printf("<%s> %s\n", remoteAddr.String(), data[:n])
+			log.Infof("<%s> %s\n", remoteAddr.String(), data[:n])
 			c := source{
 				addr: Addr{
 					Network: remoteAddr.Network(),
@@ -175,7 +174,7 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) err
 			fmt.Println("debug|getClientFromTCP|read", err)
 			return err
 		}
-		log.Printf("<%s> %s\n", conn.RemoteAddr().String(), string(data[:n]))
+		log.Infof("<%s> %s\n", conn.RemoteAddr().String(), string(data[:n]))
 		ip, port := ParseAddr(conn.RemoteAddr().String())
 		c := source{
 			addr: Addr{

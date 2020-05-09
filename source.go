@@ -9,6 +9,10 @@ import (
 	"time"
 )
 
+const SupportUDP = 0b00000001
+const SupportReverse = 0b00000010
+const SupportTCP = 0b00000100
+
 // Source ...
 type Source interface {
 	net.Addr
@@ -27,6 +31,7 @@ type Addr struct {
 
 type source struct {
 	addr        Addr
+	nat         int
 	mappingPort int
 	data        []byte
 }
@@ -131,4 +136,16 @@ func (addr *Addr) JSON() []byte {
 		return nil
 	}
 	return marshal
+}
+
+func tryTCP(addr *Addr) error {
+	return nil
+}
+
+func tryReverse(addr *Addr) error {
+	return nil
+}
+
+func tryUDP(addr *Addr) error {
+	return nil
 }
