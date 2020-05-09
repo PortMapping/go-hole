@@ -17,10 +17,16 @@ var DefaultTCP = 46666
 var DefaultUDP = 47777
 
 // DefaultLocalTCPAddr ...
-var DefaultLocalTCPAddr = fmt.Sprintf("0.0.0.0:%d", DefaultTCP)
+var DefaultLocalTCPAddr = &net.TCPAddr{
+	IP:   net.IPv4zero,
+	Port: DefaultTCP,
+}
 
 // DefaultLocalUDPAddr ...
-var DefaultLocalUDPAddr = fmt.Sprintf("0.0.0.0:%d", DefaultUDP)
+var DefaultLocalUDPAddr = &net.UDPAddr{
+	IP:   net.IPv4zero,
+	Port: DefaultUDP,
+}
 
 // LocalAddr ...
 func LocalAddr(port int) string {
@@ -58,12 +64,12 @@ func ParseUDPAddr(addr string) *net.UDPAddr {
 
 // ParseAddr ...
 func ParseAddr(addr string) (net.IP, int) {
-	defer func() {
-		if e := recover(); e != nil {
-			fmt.Println("panic", e)
-			return
-		}
-	}()
+	//defer func() {
+	//	if e := recover(); e != nil {
+	//		fmt.Println("panic", e)
+	//		return
+	//	}
+	//}()
 	addrs := strings.Split(addr, ":")
 	ip := net.ParseIP(addrs[0])
 	if len(addrs) > 1 {
