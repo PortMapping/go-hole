@@ -15,7 +15,6 @@ type Source interface {
 	MappingPort() int
 	SetMappingPort(int)
 	TryConnect() error
-	Decode(src interface{}) error
 }
 
 // Addr ...
@@ -27,17 +26,17 @@ type Addr struct {
 
 // Service ...
 type Service struct {
-	ID  string
-	UDP int
-	TCP int
+	ID      string
+	ISP     net.IP
+	UDP     int
+	TCP     int
+	ExtData []byte
 }
 
 type source struct {
-	addr        Addr
-	service     Service
-	nat         int
-	mappingPort int
-	data        []byte
+	addr    Addr
+	service Service
+	nat     int
 }
 
 // NewSource ...
@@ -69,11 +68,6 @@ func (c source) MappingPort() int {
 // SetMappingPort ...
 func (c *source) SetMappingPort(i int) {
 	c.mappingPort = i
-}
-
-// Decode ...
-func (c source) Decode(src interface{}) error {
-	return json.Unmarshal(c.data, src)
 }
 
 // TryConnect ...
