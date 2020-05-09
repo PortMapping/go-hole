@@ -2,7 +2,6 @@ package lurker
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/portmapping/go-reuse"
 	"net"
 	"strconv"
@@ -79,6 +78,12 @@ func ParseService(data []byte) (service Service, err error) {
 	return
 }
 
+func NewSource(service Service) Source {
+	return &source{
+		service: service,
+	}
+}
+
 // String ...
 func (s source) String() string {
 	return s.addr.String()
@@ -89,7 +94,7 @@ func (s *source) TryConnect() error {
 	//remote := s.String()
 	//localPort := LocalPort(s.Network(), s.mappingPort)
 	//local := LocalAddr(localPort)
-	var dial net.Conn
+	//var dial net.Conn
 	var err error
 	//fmt.Println("ping", "local", local, "remote", remote, "network", s.Network(), "mapping", s.mappingPort)
 	wg := sync.WaitGroup{}
@@ -140,22 +145,22 @@ func (s *source) TryConnect() error {
 	//	//dial, err = net.Dial(s.Network(), remote)
 	//}
 
-	if err != nil {
-		fmt.Println("debug|Ping|Dial", err)
-		return err
-	}
-	_, err = dial.Write([]byte("hello world"))
-	if err != nil {
-		fmt.Println("debug|Ping|Write", err)
-		return err
-	}
-	data := make([]byte, maxByteSize)
-	read, err := dial.Read(data)
-	if err != nil {
-		fmt.Println("debug|Ping|Read", err)
-		return err
-	}
-	fmt.Println("received: ", string(data[:read]))
+	//if err != nil {
+	//	fmt.Println("debug|Ping|Dial", err)
+	//	return err
+	//}
+	//_, err = dial.Write([]byte("hello world"))
+	//if err != nil {
+	//	fmt.Println("debug|Ping|Write", err)
+	//	return err
+	//}
+	//data := make([]byte, maxByteSize)
+	//read, err := dial.Read(data)
+	//if err != nil {
+	//	fmt.Println("debug|Ping|Read", err)
+	//	return err
+	//}
+	//fmt.Println("received: ", string(data[:read]))
 	return err
 }
 

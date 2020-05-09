@@ -23,8 +23,10 @@ type Listener interface {
 type Lurker interface {
 	Listener
 	Stop() error
-	IsMapping() bool
-	MappingPort() int
+	NAT() nat.NAT
+	PortUDP() int
+	PortHole() int
+	PortTCP() int
 }
 
 type lurker struct {
@@ -34,21 +36,38 @@ type lurker struct {
 	tcpListener net.Listener
 	nat         nat.NAT
 	udpPort     int
+	holePort    int
 	tcpPort     int
-	isMapping   bool
-	mappingPort int
-	client      chan Source
-	timeout     time.Duration
+	//isMapping   bool
+	//mappingPort int
+	client  chan Source
+	timeout time.Duration
+}
+
+func (l *lurker) PortUDP() int {
+	return l.udpPort
+}
+
+func (l *lurker) PortHole() int {
+	return l.holePort
+}
+
+func (l *lurker) PortTCP() int {
+	return l.tcpPort
+}
+
+func (l *lurker) NAT() nat.NAT {
+	return l.nat
 }
 
 // Stop ...
-func (o *lurker) Stop() error {
-	if err := o.nat.StopMapping(); err != nil {
+func (l *lurker) Stop() error {
+	if err := l.nat.StopMapping(); err != nil {
 		return err
 	}
-	if o.cancel != nil {
-		o.cancel()
-		o.cancel = nil
+	if l.cancel != nil {
+		l.cancel()
+		l.cancel = nil
 	}
 	return nil
 }
@@ -66,29 +85,29 @@ func New() Lurker {
 }
 
 // Listen ...
-func (o *lurker) Listen() (c <-chan Source, err error) {
+func (l *lurker) Listen() (c <-chan Source, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			log.Errorw("listener error found", "error", e)
 		}
 	}()
-	udpAddr := LocalUDPAddr(o.udpPort)
+	udpAddr := LocalUDPAddr(l.udpPort)
 	fmt.Println("listen udp on address:", udpAddr.String())
-	o.udpListener, err = net.ListenUDP("udp", udpAddr)
+	l.udpListener, err = net.ListenUDP("udp", udpAddr)
 	if err != nil {
 		return nil, err
 	}
 
-	go listenUDP(o.ctx, o.udpListener, o.client)
+	go listenUDP(l.ctx, l.udpListener, l.client)
 
-	o.nat, err = nat.FromLocal(o.tcpPort)
-	tcpAddr := LocalTCPAddr(o.tcpPort)
+	l.nat, err = nat.FromLocal(l.tcpPort)
+	tcpAddr := LocalTCPAddr(l.tcpPort)
 
 	if err != nil {
 		log.Debugw("nat error", "error", err)
 		if err == p2pnat.ErrNoNATFound {
 			fmt.Println("listen tcp on address:", tcpAddr.String())
-			o.tcpListener, err = reuse.ListenTCP("tcp", tcpAddr)
+			l.tcpListener, err = reuse.ListenTCP("tcp", tcpAddr)
 			if err != nil {
 				return nil, err
 			}
@@ -96,26 +115,26 @@ func (o *lurker) Listen() (c <-chan Source, err error) {
 			return nil, err
 		}
 	} else {
-		o.isMapping = true
-		extPort, err := o.nat.Mapping()
+		//l.isMapping = true
+		extPort, err := l.nat.Mapping()
 		if err != nil {
 			return nil, err
 		}
-		address, err := o.nat.GetInternalAddress()
+		address, err := l.nat.GetInternalAddress()
 		if err != nil {
 			return nil, err
 		}
 		addr := ParseSourceAddr("tcp", address, extPort)
 		fmt.Println("mapping on address:", addr.String())
-		o.tcpListener, err = reuse.ListenTCP("tcp", tcpAddr)
+		l.tcpListener, err = reuse.ListenTCP("tcp", tcpAddr)
 		if err != nil {
 			return nil, err
 		}
-		o.mappingPort = extPort
+		l.holePort = extPort
 	}
-	go listenTCP(o.ctx, o.tcpListener, o.client)
+	go listenTCP(l.ctx, l.tcpListener, l.client)
 
-	return o.client, nil
+	return l.client, nil
 }
 
 func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (err error) {
@@ -155,15 +174,15 @@ func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (e
 	}
 }
 
-// IsMapping ...
-func (o *lurker) IsMapping() bool {
-	return o.isMapping
-}
-
-// MappingPort ...
-func (o *lurker) MappingPort() int {
-	return o.mappingPort
-}
+//// IsMapping ...
+//func (l *lurker) IsMapping() bool {
+//	return l.isMapping
+//}
+//
+//// MappingPort ...
+//func (l *lurker) MappingPort() int {
+//	return l.mappingPort
+//}
 
 func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Source) (err error) {
 	for {
