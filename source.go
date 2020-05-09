@@ -9,10 +9,6 @@ import (
 	"time"
 )
 
-const SupportUDP = 0b00000001
-const SupportReverse = 0b00000010
-const SupportTCP = 0b00000100
-
 // Source ...
 type Source interface {
 	net.Addr
@@ -29,6 +25,7 @@ type Addr struct {
 	Port    int
 }
 
+// Service ...
 type Service struct {
 	ID  string
 	UDP int

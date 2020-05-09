@@ -7,6 +7,10 @@ import (
 	"strings"
 )
 
+const supportServiceUDP = 0b00000001
+const supportServiceReverse = 0b00000010
+const supportServiceTCP = 0b00000100
+
 // DefaultTimeout ...
 var DefaultTimeout = 60
 
