@@ -69,11 +69,11 @@ func New() Lurker {
 func (o *lurker) Listen() (c <-chan Source, err error) {
 	defer func() {
 		if e := recover(); e != nil {
-			fmt.Println("listener error found", e)
+			log.Errorw("listener error found", "error", e)
 		}
 	}()
-	udpAddr := &net.UDPAddr{IP: net.IPv4zero, Port: o.udpPort}
-	fmt.Println("listen udp:", udpAddr.String())
+	udpAddr := LocalUDPAddr(o.udpPort)
+	fmt.Println("listen udp on address:", udpAddr.String())
 	o.udpListener, err = net.ListenUDP("udp", udpAddr)
 	if err != nil {
 		return nil, err
@@ -82,11 +82,13 @@ func (o *lurker) Listen() (c <-chan Source, err error) {
 	go listenUDP(o.ctx, o.udpListener, o.client)
 
 	o.nat, err = nat.FromLocal(o.tcpPort)
+	tcpAddr := LocalTCPAddr(o.tcpPort)
+
 	if err != nil {
 		log.Debugw("nat error", "error", err)
 		if err == p2pnat.ErrNoNATFound {
-			fmt.Println("listen tcp on address:", LocalAddr(o.tcpPort))
-			o.tcpListener, err = reuse.Listen("tcp", LocalAddr(o.tcpPort))
+			fmt.Println("listen tcp on address:", tcpAddr.String())
+			o.tcpListener, err = reuse.ListenTCP("tcp", tcpAddr)
 			if err != nil {
 				return nil, err
 			}
@@ -99,8 +101,13 @@ func (o *lurker) Listen() (c <-chan Source, err error) {
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println("listen tcp:", LocalAddr(extPort))
-		o.tcpListener, err = reuse.Listen("tcp", LocalAddr(o.tcpPort))
+		address, err := o.nat.GetInternalAddress()
+		if err != nil {
+			return nil, err
+		}
+		addr := ParseSourceAddr("tcp", address, extPort)
+		fmt.Println("mapping on address:", addr.String())
+		o.tcpListener, err = reuse.ListenTCP("tcp", tcpAddr)
 		if err != nil {
 			return nil, err
 		}
@@ -121,20 +128,26 @@ func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (e
 			n, remoteAddr, err := listener.ReadFromUDP(data)
 			if err != nil {
 				//waiting for next
+				log.Debugw("debug|listenUDP|ReadFromUDP", "error", err)
 				continue
 			}
 			log.Infof("<%s> %s\n", remoteAddr.String(), data[:n])
+			service, err := ParseService(data[:n])
+			if err != nil {
+				//waiting for next
+				log.Debugw("debug|listenUDP|ParseService", "error", err)
+				continue
+			}
 			c := source{
 				addr: Addr{
-					Network: remoteAddr.Network(),
-					Port:    remoteAddr.Port,
-					IP:      remoteAddr.IP,
+					Protocol: remoteAddr.Network(),
+					Port:     remoteAddr.Port,
+					IP:       remoteAddr.IP,
 				},
-				data: make([]byte, n),
+				service: service,
 			}
-			copy(c.data, data[:n])
 			cli <- &c
-			_, err = listener.WriteToUDP(c.addr.JSON(), remoteAddr)
+			_, err = listener.WriteToUDP([]byte(c.addr.String()), remoteAddr)
 			if err != nil {
 				return err
 			}
@@ -160,7 +173,7 @@ func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Source) (e
 		default:
 			acceptTCP, err := listener.Accept()
 			if err != nil {
-				fmt.Println("debug|listenTCP|Accept", err)
+				log.Debugw("debug|getClientFromTCP|Accept", "error", err)
 				continue
 			}
 			go getClientFromTCP(ctx, acceptTCP, cli)
@@ -176,24 +189,28 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) err
 		data := make([]byte, maxByteSize)
 		n, err := conn.Read(data)
 		if err != nil {
-			fmt.Println("debug|getClientFromTCP|read", err)
+			log.Debugw("debug|getClientFromTCP|Read", "error", err)
 			return err
 		}
 		log.Infof("<%s> %s\n", conn.RemoteAddr().String(), string(data[:n]))
 		ip, port := ParseAddr(conn.RemoteAddr().String())
+		service, err := ParseService(data[:n])
+		if err != nil {
+			log.Debugw("debug|getClientFromTCP|ParseService", "error", err)
+			return err
+		}
 		c := source{
 			addr: Addr{
-				Network: conn.RemoteAddr().Network(),
-				IP:      ip,
-				Port:    port,
+				Protocol: conn.RemoteAddr().Network(),
+				IP:       ip,
+				Port:     port,
 			},
-			data: make([]byte, n),
+			service: service,
 		}
-		copy(c.data, data[:n])
 		cli <- &c
-		_, err = conn.Write(c.addr.JSON())
+		_, err = conn.Write([]byte(c.addr.String()))
 		if err != nil {
-			fmt.Println("debug|getClientFromTCP|write", err)
+			log.Debugw("debug|getClientFromTCP|write", "error", err)
 			return err
 		}
 	}

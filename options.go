@@ -15,6 +15,9 @@ var DefaultTCP = 46666
 // DefaultUDP ...
 var DefaultUDP = 47777
 
+// DefaultHolePort ...
+var DefaultHolePort = 0
+
 // DefaultLocalTCPAddr ...
 var DefaultLocalTCPAddr = &net.TCPAddr{
 	IP:   net.IPv4zero,
@@ -27,9 +30,25 @@ var DefaultLocalUDPAddr = &net.UDPAddr{
 	Port: DefaultUDP,
 }
 
+// LocalUDPAddr ...
+func LocalUDPAddr(port int) *net.UDPAddr {
+	return &net.UDPAddr{
+		IP:   net.IPv4zero,
+		Port: port,
+	}
+}
+
+// LocalTCPAddr ...
+func LocalTCPAddr(port int) *net.TCPAddr {
+	return &net.TCPAddr{
+		IP:   net.IPv4zero,
+		Port: port,
+	}
+}
+
 // LocalAddr ...
-func LocalAddr(port int) string {
-	return net.JoinHostPort(net.IPv4zero.String(), strconv.Itoa(port))
+func LocalAddr(ip net.IP, port int) string {
+	return net.JoinHostPort(ip.String(), strconv.Itoa(port))
 }
 
 // ParseTCPAddr ...
