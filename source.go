@@ -3,6 +3,7 @@ package lurker
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/portmapping/go-reuse"
 	"net"
 	"strconv"
 )
@@ -24,9 +25,9 @@ type Addr struct {
 type Service struct {
 	ID       string
 	ISP      net.IP
-	UDP      int
-	HolePort int
-	TCP      int
+	PortUDP  int
+	PortHole int
+	PortTCP  int
 	ExtData  []byte
 }
 
@@ -46,7 +47,7 @@ func (addr Addr) String() string {
 	return net.JoinHostPort(addr.IP.String(), strconv.Itoa(addr.Port))
 }
 
-// UDP ...
+// PortUDP ...
 func (addr Addr) UDP() *net.UDPAddr {
 	return &net.UDPAddr{
 		IP:   addr.IP,
@@ -54,7 +55,7 @@ func (addr Addr) UDP() *net.UDPAddr {
 	}
 }
 
-// TCP ...
+// PortTCP ...
 func (addr Addr) TCP() *net.TCPAddr {
 	return &net.TCPAddr{
 		IP:   addr.IP,
@@ -78,24 +79,25 @@ func ParseService(data []byte) (service Service, err error) {
 }
 
 // String ...
-func (c source) String() string {
-	return c.addr.String()
+func (s source) String() string {
+	return s.addr.String()
 }
 
 // TryConnect ...
-func (c *source) TryConnect() error {
-	//remote := c.String()
-	//localPort := LocalPort(c.Network(), c.mappingPort)
+func (s *source) TryConnect() error {
+	//remote := s.String()
+	//localPort := LocalPort(s.Network(), s.mappingPort)
 	//local := LocalAddr(localPort)
 	var dial net.Conn
 	var err error
-	//fmt.Println("ping", "local", local, "remote", remote, "network", c.Network(), "mapping", c.mappingPort)
-	//err = tryReverse(c)
-	//if c.mappingPort == localPort {
-	//	dial, err = reuse.Dial(c.Network(), local, remote)
+	//fmt.Println("ping", "local", local, "remote", remote, "network", s.Network(), "mapping", s.mappingPort)
+	go tryReverseUDP(s)
+	go tryReverseTCP(s)
+	//if s.mappingPort == localPort {
+	//	dial, err = reuse.Dial(s.Network(), local, remote)
 	//} else {
-	//	if IsUDP(c.Network()) {
-	//		udp, err := net.DialUDP(c.Network(), &net.UDPAddr{}, ParseUDPAddr(remote))
+	//	if IsUDP(s.Network()) {
+	//		udp, err := net.DialUDP(s.Network(), &net.UDPAddr{}, ParseUDPAddr(remote))
 	//		if err != nil {
 	//			return err
 	//		}
@@ -118,7 +120,7 @@ func (c *source) TryConnect() error {
 	//		fmt.Println("received: ", string(data[:read]))
 	//		return err
 	//	}
-	//	//dial, err = net.Dial(c.Network(), remote)
+	//	//dial, err = net.Dial(s.Network(), remote)
 	//}
 
 	if err != nil {
@@ -141,11 +143,28 @@ func (c *source) TryConnect() error {
 }
 
 func tryReverseTCP(s *source) error {
+	tcp, err := reuse.DialTCP("tcp", LocalTCPAddr(s.service.PortTCP), s.addr.TCP())
+	if err != nil {
+		log.Debugw("debug|tryReverse|DialTCP", err)
+		return err
+	}
+	_, err = tcp.Write(s.service.JSON())
+	if err != nil {
+		log.Debugw("debug|tryReverse|Write", err)
+		return err
+	}
+	data := make([]byte, maxByteSize)
+	n, err := tcp.Read(data)
+	if err != nil {
+		log.Debugw("debug|tryReverse|ReadFromUDP", err)
+		return err
+	}
+	log.Infow("received", "address", string(data[:n]))
 	return nil
 }
 
 func tryReverseUDP(s *source) error {
-	udp, err := net.DialUDP("udp", LocalUDPAddr(s.service.HolePort), s.addr.UDP())
+	udp, err := net.DialUDP("udp", LocalUDPAddr(s.service.PortHole), s.addr.UDP())
 	if err != nil {
 		log.Debugw("debug|tryReverse|DialUDP", err)
 		return err
@@ -157,12 +176,12 @@ func tryReverseUDP(s *source) error {
 		return err
 	}
 	data := make([]byte, maxByteSize)
-	read, _, err := udp.ReadFromUDP(data)
+	n, _, err := udp.ReadFromUDP(data)
 	if err != nil {
 		log.Debugw("debug|tryReverse|ReadFromUDP", err)
 		return err
 	}
-	log.Infow("received", "address", string(data[:read]))
+	log.Infow("received", "address", string(data[:n]))
 	return err
 }
 
