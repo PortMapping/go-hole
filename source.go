@@ -6,6 +6,7 @@ import (
 	"github.com/portmapping/go-reuse"
 	"net"
 	"strconv"
+	"sync"
 )
 
 // Source ...
@@ -91,8 +92,24 @@ func (s *source) TryConnect() error {
 	var dial net.Conn
 	var err error
 	//fmt.Println("ping", "local", local, "remote", remote, "network", s.Network(), "mapping", s.mappingPort)
-	go tryReverseUDP(s)
-	go tryReverseTCP(s)
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		if err := tryReverseUDP(s); err != nil {
+			log.Errorw("tryReverseUDP|error", "error", err)
+			return
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		if err := tryReverseTCP(s); err != nil {
+			log.Errorw("tryReverseTCP|error", "error", err)
+			return
+		}
+	}()
+	wg.Wait()
 	//if s.mappingPort == localPort {
 	//	dial, err = reuse.Dial(s.Network(), local, remote)
 	//} else {
