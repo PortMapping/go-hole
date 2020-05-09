@@ -10,7 +10,7 @@ import (
 // Source ...
 type Source interface {
 	TryConnect() error
-	Support() Support
+	//Support() Support
 }
 
 // Addr ...
