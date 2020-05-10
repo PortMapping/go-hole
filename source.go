@@ -128,52 +128,6 @@ func (s *source) TryConnect() error {
 		}
 	}()
 	wg.Wait()
-	//if s.mappingPort == localPort {
-	//	dial, err = reuse.Dial(s.Network(), local, remote)
-	//} else {
-	//	if IsUDP(s.Network()) {
-	//		udp, err := net.DialUDP(s.Network(), &net.UDPAddr{}, ParseUDPAddr(remote))
-	//		if err != nil {
-	//			return err
-	//		}
-	//		err = udp.SetDeadline(time.Now().Add(3 * time.Second))
-	//		if err != nil {
-	//			fmt.Println("debug|Ping|SetDeadline", err)
-	//			return err
-	//		}
-	//		_, err = udp.Write([]byte("hello world"))
-	//		if err != nil {
-	//			fmt.Println("debug|Ping|Write", err)
-	//			return err
-	//		}
-	//		data := make([]byte, maxByteSize)
-	//		read, _, err := udp.ReadFromUDP(data)
-	//		if err != nil {
-	//			fmt.Println("debug|Ping|Read", err)
-	//			return err
-	//		}
-	//		fmt.Println("received: ", string(data[:read]))
-	//		return err
-	//	}
-	//	//dial, err = net.Dial(s.Network(), remote)
-	//}
-
-	//if err != nil {
-	//	fmt.Println("debug|Ping|Dial", err)
-	//	return err
-	//}
-	//_, err = dial.Write([]byte("hello world"))
-	//if err != nil {
-	//	fmt.Println("debug|Ping|Write", err)
-	//	return err
-	//}
-	//data := make([]byte, maxByteSize)
-	//read, err := dial.Read(data)
-	//if err != nil {
-	//	fmt.Println("debug|Ping|Read", err)
-	//	return err
-	//}
-	//fmt.Println("received: ", string(data[:read]))
 	return err
 }
 
@@ -221,23 +175,23 @@ func tryReverseUDP(s *source) error {
 }
 
 func tryUDP(s *source) error {
-	tcp, err := reuse.DialTCP("tcp", LocalTCPAddr(s.service.PortTCP), s.addr.TCP())
+	udp, err := net.DialUDP("udp", LocalUDPAddr(s.service.PortTCP), s.addr.UDP())
 	if err != nil {
-		log.Debugw("debug|tryReverse|DialTCP", err)
+		log.Debugw("debug|tryReverse|DialUDP", err)
 		return err
 	}
-	_, err = tcp.Write(s.service.JSON())
+	_, err = udp.Write(s.service.JSON())
 	if err != nil {
 		log.Debugw("debug|tryReverse|Write", err)
 		return err
 	}
 	data := make([]byte, maxByteSize)
-	n, err := tcp.Read(data)
+	n, remote, err := udp.ReadFromUDP(data)
 	if err != nil {
 		log.Debugw("debug|tryReverse|ReadFromUDP", err)
 		return err
 	}
-	log.Infow("received", "address", string(data[:n]))
+	log.Infow("received", "remote info", remote.String(), "address", string(data[:n]))
 	return nil
 }
 
