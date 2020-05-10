@@ -22,7 +22,8 @@ func NewSubject() Subject {
 
 // RegisterSource ...
 func (s *subject) RegisterSource(name string, source Source) {
-	hash := hashString(source.Network(), source.String())
+	//todo hash
+	hash := hashString("", "")
 	if _, b := s.sources[name]; b {
 		if _, b := s.sources[name][hash]; b {
 			return
