@@ -81,6 +81,7 @@ func ParseService(data []byte) (service Service, err error) {
 func NewSource(service Service, addr Addr) Source {
 	return &source{
 		service: service,
+		addr:    addr,
 	}
 }
 
@@ -99,6 +100,7 @@ func (s *source) TryConnect() error {
 	//fmt.Println("ping", "local", local, "remote", remote, "network", s.Network(), "mapping", s.mappingPort)
 	wg := sync.WaitGroup{}
 	wg.Add(4)
+	log.Infow("connect to", "ip", s.addr.String())
 	go func() {
 		defer wg.Done()
 		if err := tryUDP(s); err != nil {
