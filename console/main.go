@@ -47,6 +47,10 @@ func main() {
 			PortHole: l.PortHole(),
 			PortTCP:  l.PortTCP(),
 			ExtData:  nil,
+		}, lurker.Addr{
+			Protocol: "tcp",
+			IP:       addr,
+			Port:     16004,
 		})
 		go func() {
 			b := s.TryConnect()

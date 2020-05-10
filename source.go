@@ -78,7 +78,7 @@ func ParseService(data []byte) (service Service, err error) {
 	return
 }
 
-func NewSource(service Service) Source {
+func NewSource(service Service, addr Addr) Source {
 	return &source{
 		service: service,
 	}
@@ -98,8 +98,21 @@ func (s *source) TryConnect() error {
 	var err error
 	//fmt.Println("ping", "local", local, "remote", remote, "network", s.Network(), "mapping", s.mappingPort)
 	wg := sync.WaitGroup{}
-	wg.Add(2)
-
+	wg.Add(4)
+	go func() {
+		defer wg.Done()
+		if err := tryUDP(s); err != nil {
+			log.Errorw("tryReverseUDP|error", "error", err)
+			return
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		if err := tryTCP(s); err != nil {
+			log.Errorw("tryReverseTCP|error", "error", err)
+			return
+		}
+	}()
 	go func() {
 		defer wg.Done()
 		if err := tryReverseUDP(s); err != nil {
@@ -207,7 +220,28 @@ func tryReverseUDP(s *source) error {
 	return err
 }
 
-func tryUDP(addr *Addr) error {
+func tryUDP(s *source) error {
+	tcp, err := reuse.DialTCP("tcp", LocalTCPAddr(s.service.PortTCP), s.addr.TCP())
+	if err != nil {
+		log.Debugw("debug|tryReverse|DialTCP", err)
+		return err
+	}
+	_, err = tcp.Write(s.service.JSON())
+	if err != nil {
+		log.Debugw("debug|tryReverse|Write", err)
+		return err
+	}
+	data := make([]byte, maxByteSize)
+	n, err := tcp.Read(data)
+	if err != nil {
+		log.Debugw("debug|tryReverse|ReadFromUDP", err)
+		return err
+	}
+	log.Infow("received", "address", string(data[:n]))
+	return nil
+}
+
+func tryTCP(s *source) error {
 	return nil
 }
 
