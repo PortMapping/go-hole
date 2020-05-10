@@ -102,14 +102,14 @@ func (s *source) TryConnect() error {
 	go func() {
 		defer wg.Done()
 		if err := tryUDP(s); err != nil {
-			log.Errorw("tryReverseUDP|error", "error", err)
+			log.Errorw("tryUDP|error", "error", err)
 			return
 		}
 	}()
 	go func() {
 		defer wg.Done()
 		if err := tryTCP(s); err != nil {
-			log.Errorw("tryReverseTCP|error", "error", err)
+			log.Errorw("tryTCP|error", "error", err)
 			return
 		}
 	}()

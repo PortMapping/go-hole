@@ -2,6 +2,7 @@ package lurker
 
 import (
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var log *zap.SugaredLogger
@@ -9,6 +10,7 @@ var log *zap.SugaredLogger
 func init() {
 	cfg := zap.NewProductionConfig()
 	//cfg.Level = logLvToAtomicLv(Level)
+	cfg.Level = zap.NewAtomicLevelAt(zapcore.DebugLevel)
 	cfg.OutputPaths = []string{"stdout"}
 	cfg.ErrorOutputPaths = []string{"stdout"}
 	logger, e := cfg.Build(
