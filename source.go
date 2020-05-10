@@ -134,18 +134,18 @@ func (s *source) TryConnect() error {
 func tryReverseTCP(s *source) error {
 	tcp, err := reuse.DialTCP("tcp", LocalTCPAddr(s.service.PortTCP), s.addr.TCP())
 	if err != nil {
-		log.Debugw("debug|tryReverse|DialTCP", err)
+		log.Debugw("debug|tryReverse|DialTCP", "error", err)
 		return err
 	}
 	_, err = tcp.Write(s.service.JSON())
 	if err != nil {
-		log.Debugw("debug|tryReverse|Write", err)
+		log.Debugw("debug|tryReverse|Write", "error", err)
 		return err
 	}
 	data := make([]byte, maxByteSize)
 	n, err := tcp.Read(data)
 	if err != nil {
-		log.Debugw("debug|tryReverse|ReadFromUDP", err)
+		log.Debugw("debug|tryReverse|ReadFromUDP", "error", err)
 		return err
 	}
 	log.Infow("received", "address", string(data[:n]))
@@ -155,19 +155,19 @@ func tryReverseTCP(s *source) error {
 func tryReverseUDP(s *source) error {
 	udp, err := net.DialUDP("udp", LocalUDPAddr(s.service.PortHole), s.addr.UDP())
 	if err != nil {
-		log.Debugw("debug|tryReverse|DialUDP", err)
+		log.Debugw("debug|tryReverse|DialUDP", "error", err)
 		return err
 	}
 
 	_, err = udp.Write(s.service.JSON())
 	if err != nil {
-		log.Debugw("debug|tryReverse|Write", err)
+		log.Debugw("debug|tryReverse|Write", "error", err)
 		return err
 	}
 	data := make([]byte, maxByteSize)
 	n, _, err := udp.ReadFromUDP(data)
 	if err != nil {
-		log.Debugw("debug|tryReverse|ReadFromUDP", err)
+		log.Debugw("debug|tryReverse|ReadFromUDP", "error", err)
 		return err
 	}
 	log.Infow("received", "address", string(data[:n]))
@@ -175,20 +175,20 @@ func tryReverseUDP(s *source) error {
 }
 
 func tryUDP(s *source) error {
-	udp, err := net.DialUDP("udp", LocalUDPAddr(s.service.PortTCP), s.addr.UDP())
+	udp, err := net.DialUDP("udp", LocalUDPAddr(s.service.PortHole), s.addr.UDP())
 	if err != nil {
-		log.Debugw("debug|tryReverse|DialUDP", err)
+		log.Debugw("debug|tryUDP|DialUDP", "error", err)
 		return err
 	}
 	_, err = udp.Write(s.service.JSON())
 	if err != nil {
-		log.Debugw("debug|tryReverse|Write", err)
+		log.Debugw("debug|tryUDP|Write", "error", err)
 		return err
 	}
 	data := make([]byte, maxByteSize)
 	n, remote, err := udp.ReadFromUDP(data)
 	if err != nil {
-		log.Debugw("debug|tryReverse|ReadFromUDP", err)
+		log.Debugw("debug|tryUDP|ReadFromUDP", "error", err)
 		return err
 	}
 	log.Infow("received", "remote info", remote.String(), "address", string(data[:n]))
@@ -196,6 +196,23 @@ func tryUDP(s *source) error {
 }
 
 func tryTCP(s *source) error {
+	tcp, err := reuse.DialTCP("tcp", LocalTCPAddr(s.service.PortTCP), s.addr.TCP())
+	if err != nil {
+		log.Debugw("debug|tryTCP|DialTCP", "error", err)
+		return err
+	}
+	_, err = tcp.Write(s.service.JSON())
+	if err != nil {
+		log.Debugw("debug|tryTCP|Write", "error", err)
+		return err
+	}
+	data := make([]byte, maxByteSize)
+	n, err := tcp.Read(data)
+	if err != nil {
+		log.Debugw("debug|tryTCP|ReadFromUDP", "error", err)
+		return err
+	}
+	log.Infow("received", "address", string(data[:n]))
 	return nil
 }
 
