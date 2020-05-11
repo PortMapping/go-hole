@@ -55,8 +55,9 @@ func main() {
 				err := s.TryConnect()
 				fmt.Println("reverse connected:", err)
 				if err != nil {
-					list.Store(id, s)
+					return
 				}
+				list.Store(id, s)
 			}(source.Service().ID, s)
 		}
 	}()
