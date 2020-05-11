@@ -46,7 +46,8 @@ func main() {
 	if len(os.Args) > 2 {
 		addr, i := lurker.ParseAddr(address)
 
-		internalAddress, err := l.NAT().GetInternalAddress()
+		extAddr, err := l.NAT().GetExternalAddress()
+		localAddr, err := l.NAT().GetInternalAddress()
 		if err != nil {
 			return
 		}
@@ -54,7 +55,8 @@ func main() {
 		fmt.Println("your connect id:", rnd)
 		s := lurker.NewSource(lurker.Service{
 			ID:       rnd,
-			ISP:      internalAddress,
+			ISP:      extAddr,
+			Local:    localAddr,
 			PortUDP:  l.PortUDP(),
 			PortHole: l.PortHole(),
 			PortTCP:  l.PortTCP(),
@@ -65,8 +67,15 @@ func main() {
 			Port:     16004,
 		})
 		go func() {
-			b := s.TryConnect()
-			fmt.Println("target connected:", b)
+			_, ok := list.Load(s.Service().ID)
+			if ok {
+				return
+			}
+			err := s.TryConnect()
+			fmt.Println("target connected:", err)
+			if err != nil {
+				list.Store(s.Service().ID, s)
+			}
 		}()
 
 	}

@@ -26,6 +26,7 @@ type Addr struct {
 type Service struct {
 	ID       string
 	ISP      net.IP
+	Local    net.IP
 	PortUDP  int
 	PortHole int
 	PortTCP  int
@@ -111,15 +112,15 @@ func (s *source) TryConnect() error {
 	var err error
 	//fmt.Println("ping", "local", local, "remote", remote, "network", s.Network(), "mapping", s.mappingPort)
 	wg := sync.WaitGroup{}
-	wg.Add(4)
+	wg.Add(2)
 	log.Infow("connect to", "ip", s.addr.String())
-	go func() {
-		defer wg.Done()
-		if err := tryUDP(s); err != nil {
-			log.Errorw("tryUDP|error", "error", err)
-			return
-		}
-	}()
+	//go func() {
+	//	defer wg.Done()
+	//	if err := tryUDP(s); err != nil {
+	//		log.Errorw("tryUDP|error", "error", err)
+	//		return
+	//	}
+	//}()
 	go func() {
 		defer wg.Done()
 		if err := tryTCP(s); err != nil {
@@ -127,13 +128,13 @@ func (s *source) TryConnect() error {
 			return
 		}
 	}()
-	go func() {
-		defer wg.Done()
-		if err := tryReverseUDP(s); err != nil {
-			log.Errorw("tryReverseUDP|error", "error", err)
-			return
-		}
-	}()
+	//go func() {
+	//	defer wg.Done()
+	//	if err := tryReverseUDP(s); err != nil {
+	//		log.Errorw("tryReverseUDP|error", "error", err)
+	//		return
+	//	}
+	//}()
 	go func() {
 		defer wg.Done()
 		if err := tryReverseTCP(s); err != nil {
@@ -210,7 +211,8 @@ func tryUDP(s *source) error {
 }
 
 func tryTCP(s *source) error {
-	tcp, err := reuse.DialTCP("tcp", LocalTCPAddr(s.service.PortTCP), s.addr.TCP())
+	tcpAddr := ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
+	tcp, err := reuse.DialTCP("tcp", LocalTCPAddr(DefaultTCP), tcpAddr.TCP())
 	if err != nil {
 		log.Debugw("debug|tryTCP|DialTCP", "error", err)
 		return err
