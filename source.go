@@ -55,7 +55,7 @@ func (addr Addr) UDP() *net.UDPAddr {
 	}
 }
 
-// PortTCP ...
+// TCP ...
 func (addr Addr) TCP() *net.TCPAddr {
 	return &net.TCPAddr{
 		IP:   addr.IP,
@@ -78,6 +78,7 @@ func ParseService(data []byte) (service Service, err error) {
 	return
 }
 
+// NewSource ...
 func NewSource(service Service, addr Addr) Source {
 	return &source{
 		service: service,

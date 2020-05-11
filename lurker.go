@@ -44,18 +44,22 @@ type lurker struct {
 	timeout time.Duration
 }
 
+// PortUDP ...
 func (l *lurker) PortUDP() int {
 	return l.udpPort
 }
 
+// PortHole ...
 func (l *lurker) PortHole() int {
 	return l.holePort
 }
 
+// PortTCP ...
 func (l *lurker) PortTCP() int {
 	return l.tcpPort
 }
 
+// NAT ...
 func (l *lurker) NAT() nat.NAT {
 	return l.nat
 }
