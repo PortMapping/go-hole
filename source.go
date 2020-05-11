@@ -38,6 +38,16 @@ type source struct {
 	support Support
 }
 
+// Service ...
+func (s source) Service() Service {
+	return s.service
+}
+
+// Addr ...
+func (s source) Addr() Addr {
+	return s.addr
+}
+
 // Network ...
 func (addr Addr) Network() string {
 	return addr.Protocol
