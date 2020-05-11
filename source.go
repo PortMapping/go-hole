@@ -212,7 +212,11 @@ func tryUDP(s *source) error {
 
 func tryTCP(s *source) error {
 	tcpAddr := ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
-	tcp, err := reuse.DialTCP("tcp", LocalTCPAddr(DefaultTCP), tcpAddr.TCP())
+	localPort := s.service.PortTCP
+	if s.service.PortHole != 0 {
+		localPort = s.service.PortHole
+	}
+	tcp, err := reuse.DialTCP("tcp", LocalTCPAddr(localPort), tcpAddr.TCP())
 	if err != nil {
 		log.Debugw("debug|tryTCP|DialTCP", "error", err)
 		return err
