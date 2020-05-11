@@ -26,6 +26,7 @@ type Addr struct {
 // Service ...
 type Service struct {
 	ID          string
+	Addr        Addr
 	ISP         net.IP
 	Local       net.IP
 	PortUDP     int
