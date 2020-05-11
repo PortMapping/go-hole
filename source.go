@@ -147,7 +147,11 @@ func (s *source) TryConnect() error {
 }
 
 func tryReverseTCP(s *source) error {
-	tcp, err := reuse.DialTCP("tcp", LocalTCPAddr(s.service.PortTCP), s.addr.TCP())
+	localPort := 0
+	if s.service.PortHole != 0 {
+		localPort = s.service.PortHole
+	}
+	tcp, err := reuse.DialTCP("tcp", LocalTCPAddr(localPort), s.addr.TCP())
 	if err != nil {
 		log.Debugw("debug|tryReverse|DialTCP", "error", err)
 		return err
