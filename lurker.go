@@ -205,6 +205,7 @@ func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Source) (e
 }
 
 func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) error {
+	defer conn.Close()
 	select {
 	case <-ctx.Done():
 		return nil
