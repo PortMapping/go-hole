@@ -205,7 +205,13 @@ func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Source) (e
 }
 
 func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) error {
-	defer conn.Close()
+	close := true
+	defer func() {
+		if close {
+			conn.Close()
+		}
+	}()
+
 	select {
 	case <-ctx.Done():
 		return nil
@@ -221,6 +227,9 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) err
 		if err != nil {
 			log.Debugw("debug|getClientFromTCP|ParseService", "error", err)
 			return err
+		}
+		if service.KeepConnect {
+			close = false
 		}
 		c := source{
 			addr: Addr{

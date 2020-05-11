@@ -33,6 +33,7 @@ func main() {
 			fmt.Println("connect from:", source.Addr().String(), string(source.Service().JSON()), string(source.Service().ExtData))
 			_, ok := list.Load(source.Service().ID)
 			if ok {
+				fmt.Println("exist:", source.Service().ID)
 				continue
 			}
 			localAddr := net.IPv4zero

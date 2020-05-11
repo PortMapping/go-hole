@@ -24,13 +24,14 @@ type Addr struct {
 
 // Service ...
 type Service struct {
-	ID       string
-	ISP      net.IP
-	Local    net.IP
-	PortUDP  int
-	PortHole int
-	PortTCP  int
-	ExtData  []byte
+	ID          string
+	ISP         net.IP
+	Local       net.IP
+	PortUDP     int
+	PortHole    int
+	PortTCP     int
+	KeepConnect bool
+	ExtData     []byte
 }
 
 type source struct {
@@ -156,9 +157,11 @@ func tryReverseTCP(s *source) error {
 		log.Debugw("debug|tryReverse|DialTCP", "error", err)
 		return err
 	}
-	defer tcp.Close()
+	//never close
+	//defer tcp.Close()
 	s.service.ExtData = []byte("tryReverseTCP")
 	s.service.ID = GlobalID
+	s.service.KeepConnect = true
 	_, err = tcp.Write(s.service.JSON())
 	if err != nil {
 		log.Debugw("debug|tryReverse|Write", "error", err)
