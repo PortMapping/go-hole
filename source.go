@@ -149,32 +149,32 @@ func (s *source) TryConnect() error {
 
 }
 
-func multiPortDialTCP(addr *net.TCPAddr, timeout time.Duration, lports ...int) (net.Conn, error) {
-	var lastErr error
-	for _, p := range lports {
-
-		tcp, err := reuse.DialTimeOut("tcp", LocalTCPAddr(p).String(), addr.String(), timeout)
+func multiPortDialTCP(addr *net.TCPAddr, timeout time.Duration, lport int) (net.Conn, bool, error) {
+	tcp, err := reuse.DialTimeOut("tcp", LocalTCPAddr(lport).String(), addr.String(), timeout)
+	if err != nil {
+		tcp, err = reuse.DialTimeOut("tcp", LocalTCPAddr(0).String(), addr.String(), timeout)
 		if err != nil {
-			lastErr = err
-			continue
+			return nil, false, err
 		}
-		return tcp, nil
+		return tcp, false, nil
 	}
-	return nil, lastErr
+	return tcp, true, nil
 }
 
 func tryReverseTCP(s *source) error {
-	tcp, err := multiPortDialTCP(s.addr.TCP(), 3*time.Second, s.service.PortHole, 0)
+	tcp, keep, err := multiPortDialTCP(s.addr.TCP(), 3*time.Second, s.service.PortHole)
 	if err != nil {
 		log.Debugw("debug|tryReverse|DialTCP", "error", err)
 		return err
 	}
 	//never close
-	//defer tcp.Close()
+	if !keep {
+		defer tcp.Close()
+	}
 	//tcp.SetDeadline(time.Now().Add(3 * time.Second))
 	s.service.ExtData = []byte("tryReverseTCP")
 	s.service.ID = GlobalID
-	s.service.KeepConnect = true
+	s.service.KeepConnect = keep
 	_, err = tcp.Write(s.service.JSON())
 	if err != nil {
 		log.Debugw("debug|tryReverse|Write", "error", err)
@@ -237,12 +237,14 @@ func tryUDP(s *source) error {
 func tryTCP(s *source) error {
 	addr := ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
 	//tcp, err := net.Dial("tcp", tcpAddr.String())
-	tcp, err := multiPortDialTCP(addr.TCP(), 3*time.Second, s.service.PortHole, 0)
+	tcp, keep, err := multiPortDialTCP(addr.TCP(), 3*time.Second, s.service.PortHole)
 	if err != nil {
 		log.Debugw("debug|tryTCP|DialTCP", "error", err)
 		return err
 	}
-	//defer tcp.Close()
+	if !keep {
+		defer tcp.Close()
+	}
 	s.service.ExtData = []byte("tryTCP")
 	s.service.ID = GlobalID
 	s.service.KeepConnect = true
