@@ -1,6 +1,7 @@
 package lurker
 
 import (
+	"github.com/goextension/tool"
 	"net"
 	"strconv"
 	"strings"
@@ -28,6 +29,13 @@ var DefaultLocalTCPAddr = &net.TCPAddr{
 var DefaultLocalUDPAddr = &net.UDPAddr{
 	IP:   net.IPv4zero,
 	Port: DefaultUDP,
+}
+
+// GlobalID ...
+var GlobalID string
+
+func init() {
+	GlobalID = tool.GenerateRandomString(16)
 }
 
 // LocalUDPAddr ...
