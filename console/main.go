@@ -2,16 +2,20 @@ package main
 
 import (
 	"fmt"
-	"github.com/portmapping/lurker"
 	"os"
+	"sync"
 	"time"
+
+	"github.com/goextension/tool"
+	"github.com/portmapping/lurker"
 )
 
 func main() {
 	lurker.DefaultTCP = 16004
 	lurker.DefaultUDP = 16005
-
+	rnd := tool.GenerateRandomString(16)
 	address := ""
+	list := sync.Map{}
 	if len(os.Args) > 2 {
 		address = os.Args[2]
 	}
@@ -26,8 +30,15 @@ func main() {
 	go func() {
 		for source := range listener {
 			go func(s lurker.Source) {
-				b := s.TryConnect()
-				fmt.Println("reverse connected:", b)
+				_, ok := list.Load(s.Service().ID)
+				if ok {
+					return
+				}
+				err := s.TryConnect()
+				fmt.Println("reverse connected:", err)
+				if err != nil {
+					list.Store(s.Service().ID, s)
+				}
 			}(source)
 		}
 	}()
@@ -40,8 +51,9 @@ func main() {
 			return
 		}
 		fmt.Println("remote addr:", addr.String(), i)
+		fmt.Println("your connect id:", rnd)
 		s := lurker.NewSource(lurker.Service{
-			ID:       "random_str",
+			ID:       rnd,
 			ISP:      internalAddress,
 			PortUDP:  l.PortUDP(),
 			PortHole: l.PortHole(),

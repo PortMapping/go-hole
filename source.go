@@ -11,7 +11,8 @@ import (
 // Source ...
 type Source interface {
 	TryConnect() error
-	//Support() Support
+	Service() Service
+	Addr() Addr
 }
 
 // Addr ...
