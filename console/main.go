@@ -31,6 +31,7 @@ func main() {
 		for source := range listener {
 			tmp := source
 			go func(s lurker.Source) {
+				fmt.Println("connect from:", s.Addr().String(), s.Service().JSON())
 				_, ok := list.Load(s.Service().ID)
 				if ok {
 					return
