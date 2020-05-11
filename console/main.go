@@ -30,34 +30,33 @@ func main() {
 	fmt.Println("your connect id:", lurker.GlobalID)
 	go func() {
 		for source := range listener {
-			tmp := source
-			go func(s lurker.Source) {
+			_, ok := list.Load(source.Service().ID)
+			if ok {
+				continue
+			}
+			localAddr := net.IPv4zero
+			ispAddr := net.IPv4zero
+			if l.NAT() != nil {
+				localAddr, _ = l.NAT().GetInternalAddress()
+				ispAddr, _ = l.NAT().GetExternalAddress()
+			}
+			s := lurker.NewSource(lurker.Service{
+				ID:       lurker.GlobalID,
+				ISP:      ispAddr,
+				Local:    localAddr,
+				PortUDP:  l.PortUDP(),
+				PortHole: l.PortHole(),
+				PortTCP:  l.PortTCP(),
+				ExtData:  nil,
+			}, source.Addr())
+			go func(id string, s lurker.Source) {
 				fmt.Println("connect from:", s.Addr().String(), string(s.Service().JSON()), string(s.Service().ExtData))
-				_, ok := list.Load(s.Service().ID)
-				if ok {
-					return
-				}
-				localAddr := net.IPv4zero
-				ispAddr := net.IPv4zero
-				if l.NAT() != nil {
-					localAddr, _ = l.NAT().GetInternalAddress()
-					ispAddr, _ = l.NAT().GetExternalAddress()
-				}
-				source := lurker.NewSource(lurker.Service{
-					ID:       lurker.GlobalID,
-					ISP:      ispAddr,
-					Local:    localAddr,
-					PortUDP:  l.PortUDP(),
-					PortHole: l.PortHole(),
-					PortTCP:  l.PortTCP(),
-					ExtData:  nil,
-				}, s.Addr())
-				err := source.TryConnect()
+				err := s.TryConnect()
 				fmt.Println("reverse connected:", err)
 				if err != nil {
-					list.Store(s.Service().ID, source)
+					list.Store(id, s)
 				}
-			}(tmp)
+			}(source.Service().ID, s)
 		}
 	}()
 
