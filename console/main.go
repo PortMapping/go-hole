@@ -30,6 +30,7 @@ func main() {
 	fmt.Println("your connect id:", lurker.GlobalID)
 	go func() {
 		for source := range listener {
+			fmt.Println("connect from:", source.Addr().String(), string(source.Service().JSON()), string(source.Service().ExtData))
 			_, ok := list.Load(source.Service().ID)
 			if ok {
 				continue
@@ -50,7 +51,7 @@ func main() {
 				ExtData:  nil,
 			}, source.Addr())
 			go func(id string, s lurker.Source) {
-				fmt.Println("connect from:", s.Addr().String(), string(s.Service().JSON()), string(s.Service().ExtData))
+
 				err := s.TryConnect()
 				fmt.Println("reverse connected:", err)
 				if err != nil {

@@ -156,7 +156,9 @@ func tryReverseTCP(s *source) error {
 		log.Debugw("debug|tryReverse|DialTCP", "error", err)
 		return err
 	}
+	defer tcp.Close()
 	s.service.ExtData = []byte("tryReverseTCP")
+	s.service.ID = GlobalID
 	_, err = tcp.Write(s.service.JSON())
 	if err != nil {
 		log.Debugw("debug|tryReverse|Write", "error", err)
@@ -222,11 +224,13 @@ func tryTCP(s *source) error {
 	if s.service.PortHole != 0 {
 		localPort = s.service.PortHole
 	}
+	//tcp, err := net.Dial("tcp", tcpAddr.String())
 	tcp, err := reuse.DialTCP("tcp", LocalTCPAddr(localPort), tcpAddr.TCP())
 	if err != nil {
 		log.Debugw("debug|tryTCP|DialTCP", "error", err)
 		return err
 	}
+	defer tcp.Close()
 	s.service.ExtData = []byte("tryTCP")
 	s.service.ID = GlobalID
 	_, err = tcp.Write(s.service.JSON())
@@ -241,6 +245,7 @@ func tryTCP(s *source) error {
 		return err
 	}
 	log.Infow("tryTCP received", "address", string(data[:n]))
+
 	return nil
 }
 
