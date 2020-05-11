@@ -215,7 +215,6 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) err
 			log.Debugw("debug|getClientFromTCP|Read", "error", err)
 			return err
 		}
-		log.Infof("<%s> %s\n", conn.RemoteAddr().String(), string(data[:n]))
 		ip, port := ParseAddr(conn.RemoteAddr().String())
 		service, err := ParseService(data[:n])
 		if err != nil {
