@@ -149,10 +149,11 @@ func (s *source) TryConnect() error {
 
 }
 
-func multiPortDialTCP(addr *net.TCPAddr, lports ...int) (net.Conn, error) {
+func multiPortDialTCP(addr *net.TCPAddr, timeout time.Duration, lports ...int) (net.Conn, error) {
 	var lastErr error
 	for _, p := range lports {
-		tcp, err := reuse.DialTCP("tcp", LocalTCPAddr(p), addr)
+
+		tcp, err := reuse.DialTimeOut("tcp", LocalTCPAddr(p).String(), addr.String(), timeout)
 		if err != nil {
 			lastErr = err
 			continue
@@ -163,14 +164,14 @@ func multiPortDialTCP(addr *net.TCPAddr, lports ...int) (net.Conn, error) {
 }
 
 func tryReverseTCP(s *source) error {
-	tcp, err := multiPortDialTCP(s.addr.TCP(), s.service.PortHole, 0)
+	tcp, err := multiPortDialTCP(s.addr.TCP(), 3*time.Second, s.service.PortHole, 0)
 	if err != nil {
 		log.Debugw("debug|tryReverse|DialTCP", "error", err)
 		return err
 	}
 	//never close
 	//defer tcp.Close()
-	tcp.SetDeadline(time.Now().Add(3 * time.Second))
+	//tcp.SetDeadline(time.Now().Add(3 * time.Second))
 	s.service.ExtData = []byte("tryReverseTCP")
 	s.service.ID = GlobalID
 	s.service.KeepConnect = true
@@ -236,15 +237,15 @@ func tryUDP(s *source) error {
 func tryTCP(s *source) error {
 	addr := ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
 	//tcp, err := net.Dial("tcp", tcpAddr.String())
-	tcp, err := multiPortDialTCP(addr.TCP(), s.service.PortHole, 0)
+	tcp, err := multiPortDialTCP(addr.TCP(), 3*time.Second, s.service.PortHole, 0)
 	if err != nil {
 		log.Debugw("debug|tryTCP|DialTCP", "error", err)
 		return err
 	}
-	tcp.SetDeadline(time.Now().Add(3 * time.Second))
-	defer tcp.Close()
+	//defer tcp.Close()
 	s.service.ExtData = []byte("tryTCP")
 	s.service.ID = GlobalID
+	s.service.KeepConnect = true
 	_, err = tcp.Write(s.service.JSON())
 	if err != nil {
 		log.Debugw("debug|tryTCP|Write", "error", err)
