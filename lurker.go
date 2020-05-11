@@ -154,7 +154,7 @@ func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (e
 				log.Debugw("debug|listenUDP|ReadFromUDP", "error", err)
 				continue
 			}
-			log.Infof("<%s> %s\n", remoteAddr.String(), data[:n])
+
 			service, err := ParseService(data[:n])
 			if err != nil {
 				//waiting for next

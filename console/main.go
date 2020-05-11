@@ -29,6 +29,7 @@ func main() {
 	}
 	go func() {
 		for source := range listener {
+			tmp := source
 			go func(s lurker.Source) {
 				_, ok := list.Load(s.Service().ID)
 				if ok {
@@ -39,7 +40,7 @@ func main() {
 				if err != nil {
 					list.Store(s.Service().ID, s)
 				}
-			}(source)
+			}(tmp)
 		}
 	}()
 
