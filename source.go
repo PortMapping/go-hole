@@ -47,7 +47,7 @@ func (addr Addr) String() string {
 	return net.JoinHostPort(addr.IP.String(), strconv.Itoa(addr.Port))
 }
 
-// PortUDP ...
+// UDP ...
 func (addr Addr) UDP() *net.UDPAddr {
 	return &net.UDPAddr{
 		IP:   addr.IP,
