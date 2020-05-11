@@ -12,6 +12,7 @@ import (
 func main() {
 	lurker.DefaultTCP = 16004
 	lurker.DefaultUDP = 16005
+	fmt.Println("your connect id:", lurker.GlobalID)
 	address := ""
 	list := sync.Map{}
 	if len(os.Args) > 2 {
@@ -52,7 +53,7 @@ func main() {
 			return
 		}
 		fmt.Println("remote addr:", addr.String(), i)
-		fmt.Println("your connect id:", lurker.GlobalID)
+
 		s := lurker.NewSource(lurker.Service{
 			ID:       lurker.GlobalID,
 			ISP:      extAddr,
