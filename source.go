@@ -156,6 +156,7 @@ func tryReverseTCP(s *source) error {
 		log.Debugw("debug|tryReverse|DialTCP", "error", err)
 		return err
 	}
+	s.service.ExtData = []byte("tryReverseTCP")
 	_, err = tcp.Write(s.service.JSON())
 	if err != nil {
 		log.Debugw("debug|tryReverse|Write", "error", err)
@@ -177,7 +178,7 @@ func tryReverseUDP(s *source) error {
 		log.Debugw("debug|tryReverse|DialUDP", "error", err)
 		return err
 	}
-
+	s.service.ExtData = []byte("tryReverseUDP")
 	_, err = udp.Write(s.service.JSON())
 	if err != nil {
 		log.Debugw("debug|tryReverse|Write", "error", err)
@@ -199,6 +200,7 @@ func tryUDP(s *source) error {
 		log.Debugw("debug|tryUDP|DialUDP", "error", err)
 		return err
 	}
+	s.service.ExtData = []byte("tryUDP")
 	_, err = udp.Write(s.service.JSON())
 	if err != nil {
 		log.Debugw("debug|tryUDP|Write", "error", err)
@@ -225,6 +227,7 @@ func tryTCP(s *source) error {
 		log.Debugw("debug|tryTCP|DialTCP", "error", err)
 		return err
 	}
+	s.service.ExtData = []byte("tryTCP")
 	_, err = tcp.Write(s.service.JSON())
 	if err != nil {
 		log.Debugw("debug|tryTCP|Write", "error", err)
