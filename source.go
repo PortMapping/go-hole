@@ -78,6 +78,11 @@ func (addr Addr) TCP() *net.TCPAddr {
 	}
 }
 
+// IsZero ...
+func (addr Addr) IsZero() bool {
+	return addr.Protocol == "" && addr.IP.Equal(net.IPv4zero) && addr.Port == 0
+}
+
 // JSON ...
 func (s Service) JSON() []byte {
 	marshal, err := json.Marshal(s)
@@ -108,31 +113,12 @@ func (s source) String() string {
 
 // TryConnect ...
 func (s *source) TryConnect() error {
-	//remote := s.String()
-	//localPort := LocalPort(s.Network(), s.mappingPort)
-	//local := LocalAddr(localPort)
-	//var dial net.Conn
-	//fmt.Println("ping", "local", local, "remote", remote, "network", s.Network(), "mapping", s.mappingPort)
 	log.Infow("connect to", "ip", s.addr.String())
-	//go func() {
-	//	defer wg.Done()
-	//	if err := tryUDP(s); err != nil {
-	//		log.Errorw("tryUDP|error", "error", err)
-	//		return
-	//	}
-	//}()
 	var err error
 	if err = tryTCP(s); err == nil {
 		return nil
 	}
 	log.Errorw("tryTCP|error", "error", err)
-	//go func() {
-	//	defer wg.Done()
-	//	if err := tryReverseUDP(s); err != nil {
-	//		log.Errorw("tryReverseUDP|error", "error", err)
-	//		return
-	//	}
-	//}()
 	if err = tryReverseTCP(s); err == nil {
 		return nil
 	}
@@ -145,7 +131,6 @@ func (s *source) TryConnect() error {
 		return nil
 	}
 	log.Errorw("tryReverseUDP|error", "error", err)
-
 	return fmt.Errorf("all try connect is failed")
 
 }
