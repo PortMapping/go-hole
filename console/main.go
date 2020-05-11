@@ -6,14 +6,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goextension/tool"
 	"github.com/portmapping/lurker"
 )
 
 func main() {
 	lurker.DefaultTCP = 16004
 	lurker.DefaultUDP = 16005
-	rnd := tool.GenerateRandomString(16)
 	address := ""
 	list := sync.Map{}
 	if len(os.Args) > 2 {
@@ -54,9 +52,9 @@ func main() {
 			return
 		}
 		fmt.Println("remote addr:", addr.String(), i)
-		fmt.Println("your connect id:", rnd)
+		fmt.Println("your connect id:", lurker.GlobalID)
 		s := lurker.NewSource(lurker.Service{
-			ID:       rnd,
+			ID:       lurker.GlobalID,
 			ISP:      extAddr,
 			Local:    localAddr,
 			PortUDP:  l.PortUDP(),
