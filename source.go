@@ -158,6 +158,9 @@ func multiPortDialTCP(addr *net.TCPAddr, timeout time.Duration, lport int) (net.
 		}
 		return tcp, false, nil
 	}
+	if lport == 0 {
+		return tcp, false, nil
+	}
 	return tcp, true, nil
 }
 
