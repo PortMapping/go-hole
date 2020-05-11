@@ -228,6 +228,7 @@ func tryTCP(s *source) error {
 		return err
 	}
 	s.service.ExtData = []byte("tryTCP")
+	s.service.ID = GlobalID
 	_, err = tcp.Write(s.service.JSON())
 	if err != nil {
 		log.Debugw("debug|tryTCP|Write", "error", err)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"sync"
 	"time"
@@ -12,7 +13,7 @@ import (
 func main() {
 	lurker.DefaultTCP = 16004
 	lurker.DefaultUDP = 16005
-	fmt.Println("your connect id:", lurker.GlobalID)
+
 	address := ""
 	list := sync.Map{}
 	if len(os.Args) > 2 {
@@ -26,6 +27,7 @@ func main() {
 		panic(err)
 		return
 	}
+	fmt.Println("your connect id:", lurker.GlobalID)
 	go func() {
 		for source := range listener {
 			tmp := source
@@ -35,10 +37,25 @@ func main() {
 				if ok {
 					return
 				}
-				err := s.TryConnect()
+				localAddr := net.IPv4zero
+				ispAddr := net.IPv4zero
+				if l.NAT() != nil {
+					localAddr, _ = l.NAT().GetInternalAddress()
+					ispAddr, _ = l.NAT().GetExternalAddress()
+				}
+				source := lurker.NewSource(lurker.Service{
+					ID:       lurker.GlobalID,
+					ISP:      ispAddr,
+					Local:    localAddr,
+					PortUDP:  l.PortUDP(),
+					PortHole: l.PortHole(),
+					PortTCP:  l.PortTCP(),
+					ExtData:  nil,
+				}, s.Addr())
+				err := source.TryConnect()
 				fmt.Println("reverse connected:", err)
 				if err != nil {
-					list.Store(s.Service().ID, s)
+					list.Store(s.Service().ID, source)
 				}
 			}(tmp)
 		}
@@ -46,7 +63,6 @@ func main() {
 
 	if len(os.Args) > 2 {
 		addr, i := lurker.ParseAddr(address)
-
 		extAddr, err := l.NAT().GetExternalAddress()
 		localAddr, err := l.NAT().GetInternalAddress()
 		if err != nil {
