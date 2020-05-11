@@ -2,10 +2,10 @@ package lurker
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/portmapping/go-reuse"
 	"net"
 	"strconv"
-	"sync"
 	"time"
 )
 
@@ -111,10 +111,7 @@ func (s *source) TryConnect() error {
 	//localPort := LocalPort(s.Network(), s.mappingPort)
 	//local := LocalAddr(localPort)
 	//var dial net.Conn
-	var err error
 	//fmt.Println("ping", "local", local, "remote", remote, "network", s.Network(), "mapping", s.mappingPort)
-	wg := sync.WaitGroup{}
-	wg.Add(2)
 	log.Infow("connect to", "ip", s.addr.String())
 	//go func() {
 	//	defer wg.Done()
@@ -123,13 +120,11 @@ func (s *source) TryConnect() error {
 	//		return
 	//	}
 	//}()
-	go func() {
-		defer wg.Done()
-		if err := tryTCP(s); err != nil {
-			log.Errorw("tryTCP|error", "error", err)
-			return
-		}
-	}()
+	var err error
+	if err = tryTCP(s); err == nil {
+		return nil
+	}
+	log.Errorw("tryTCP|error", "error", err)
 	//go func() {
 	//	defer wg.Done()
 	//	if err := tryReverseUDP(s); err != nil {
@@ -137,15 +132,21 @@ func (s *source) TryConnect() error {
 	//		return
 	//	}
 	//}()
-	go func() {
-		defer wg.Done()
-		if err := tryReverseTCP(s); err != nil {
-			log.Errorw("tryReverseTCP|error", "error", err)
-			return
-		}
-	}()
-	wg.Wait()
-	return err
+	if err = tryReverseTCP(s); err == nil {
+		return nil
+	}
+	log.Errorw("tryReverseTCP|error", "error", err)
+	if err := tryUDP(s); err == nil {
+		return nil
+	}
+	log.Errorw("tryUDP|error", "error", err)
+	if err := tryReverseUDP(s); err != nil {
+		return nil
+	}
+	log.Errorw("tryReverseUDP|error", "error", err)
+
+	return fmt.Errorf("all try connect is failed")
+
 }
 
 func multiPortDialTCP(addr *net.TCPAddr, lports ...int) (net.Conn, error) {
