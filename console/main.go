@@ -31,7 +31,7 @@ func main() {
 		for source := range listener {
 			tmp := source
 			go func(s lurker.Source) {
-				fmt.Println("connect from:", s.Addr().String(), s.Service().JSON())
+				fmt.Println("connect from:", s.Addr().String(), string(s.Service().JSON()))
 				_, ok := list.Load(s.Service().ID)
 				if ok {
 					return
@@ -66,7 +66,7 @@ func main() {
 		}, lurker.Addr{
 			Protocol: "tcp",
 			IP:       addr,
-			Port:     16004,
+			Port:     i,
 		})
 		go func() {
 			_, ok := list.Load(s.Service().ID)
