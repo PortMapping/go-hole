@@ -167,7 +167,7 @@ func tryReverseTCP(s *source) error {
 		log.Debugw("debug|tryReverse|ReadFromUDP", "error", err)
 		return err
 	}
-	log.Infow("received", "address", string(data[:n]))
+	log.Infow("tryReverseTCP received", "address", string(data[:n]))
 	return nil
 }
 
@@ -189,7 +189,7 @@ func tryReverseUDP(s *source) error {
 		log.Debugw("debug|tryReverse|ReadFromUDP", "error", err)
 		return err
 	}
-	log.Infow("received", "address", string(data[:n]))
+	log.Infow("tryReverseUDP received", "address", string(data[:n]))
 	return err
 }
 
@@ -210,7 +210,7 @@ func tryUDP(s *source) error {
 		log.Debugw("debug|tryUDP|ReadFromUDP", "error", err)
 		return err
 	}
-	log.Infow("received", "remote info", remote.String(), "address", string(data[:n]))
+	log.Infow("tryUDP received", "remote info", remote.String(), "address", string(data[:n]))
 	return nil
 }
 
@@ -236,7 +236,7 @@ func tryTCP(s *source) error {
 		log.Debugw("debug|tryTCP|ReadFromUDP", "error", err)
 		return err
 	}
-	log.Infow("received", "address", string(data[:n]))
+	log.Infow("tryTCP received", "address", string(data[:n]))
 	return nil
 }
 
