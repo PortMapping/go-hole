@@ -218,7 +218,7 @@ func tryUDP(s *source) error {
 
 func tryTCP(s *source) error {
 	tcpAddr := ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
-	localPort := s.service.PortTCP
+	localPort := 0
 	if s.service.PortHole != 0 {
 		localPort = s.service.PortHole
 	}
