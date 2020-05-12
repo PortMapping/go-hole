@@ -43,13 +43,14 @@ func main() {
 				ispAddr, _ = l.NAT().GetExternalAddress()
 			}
 			s := lurker.NewSource(lurker.Service{
-				ID:       lurker.GlobalID,
-				ISP:      ispAddr,
-				Local:    localAddr,
-				PortUDP:  l.PortUDP(),
-				PortHole: l.PortHole(),
-				PortTCP:  l.PortTCP(),
-				ExtData:  nil,
+				ID:          lurker.GlobalID,
+				ISP:         ispAddr,
+				Local:       localAddr,
+				PortUDP:     l.PortUDP(),
+				PortHole:    l.PortHole(),
+				PortTCP:     l.PortTCP(),
+				KeepConnect: false,
+				ExtData:     nil,
 			}, source.Addr())
 			go func(id string, s lurker.Source) {
 				err := s.TryConnect()
