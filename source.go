@@ -12,6 +12,7 @@ import (
 // Source ...
 type Source interface {
 	TryConnect() error
+	Reverse() error
 	Service() Service
 	Addr() Addr
 }
@@ -111,6 +112,20 @@ func (s source) String() string {
 	return s.addr.String()
 }
 
+// Reverse ...
+func (s *source) Reverse() error {
+	var err error
+	if err = tryReverseTCP(s); err == nil {
+		return nil
+	}
+	log.Debugw("tryReverseTCP|error", "error", err)
+	if err := tryReverseUDP(s); err != nil {
+		return nil
+	}
+	log.Debugw("tryReverseUDP|error", "error", err)
+	return err
+}
+
 // TryConnect ...
 func (s *source) TryConnect() error {
 	log.Infow("connect to", "ip", s.addr.String())
@@ -118,19 +133,19 @@ func (s *source) TryConnect() error {
 	if err = tryTCP(s); err == nil {
 		return nil
 	}
-	log.Errorw("tryTCP|error", "error", err)
+	log.Debugw("tryTCP|error", "error", err)
 	if err = tryReverseTCP(s); err == nil {
 		return nil
 	}
-	log.Errorw("tryReverseTCP|error", "error", err)
+	log.Debugw("tryReverseTCP|error", "error", err)
 	if err := tryUDP(s); err == nil {
 		return nil
 	}
-	log.Errorw("tryUDP|error", "error", err)
+	log.Debugw("tryUDP|error", "error", err)
 	if err := tryReverseUDP(s); err != nil {
 		return nil
 	}
-	log.Errorw("tryReverseUDP|error", "error", err)
+	log.Debugw("tryReverseUDP|error", "error", err)
 	return fmt.Errorf("all try connect is failed")
 
 }
