@@ -27,7 +27,7 @@ type Addr struct {
 // Service ...
 type Service struct {
 	ID          string
-	Addr        Addr
+	Addr        []Addr
 	ISP         net.IP
 	Local       net.IP
 	PortUDP     int
@@ -272,6 +272,16 @@ func tryTCP(s *source) error {
 func ParseSourceAddr(network string, ip net.IP, port int) *Addr {
 	return &Addr{
 		Protocol: network,
+		IP:       ip,
+		Port:     port,
+	}
+}
+
+// ParseNetAddr ...
+func ParseNetAddr(addr net.Addr) *Addr {
+	ip, port := ParseAddr(addr.String())
+	return &Addr{
+		Protocol: addr.Network(),
 		IP:       ip,
 		Port:     port,
 	}

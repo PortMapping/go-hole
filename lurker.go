@@ -2,6 +2,7 @@ package lurker
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net"
 	"time"
@@ -17,6 +18,13 @@ const maxByteSize = 65520
 // Listener ...
 type Listener interface {
 	Listen() (c <-chan Source, err error)
+}
+
+// ListenResponse ...
+type ListenResponse struct {
+	Status int
+	Addr   Addr
+	Error  error
 }
 
 // Lurker ...
@@ -240,11 +248,39 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) err
 			service: service,
 		}
 		cli <- &c
-		_, err = conn.Write([]byte(c.addr.String()))
+		netAddr := ParseNetAddr(conn.RemoteAddr())
+
+		err = tryReverseTCP(&source{addr: *netAddr,
+			service: Service{
+				ID:          GlobalID,
+				KeepConnect: false,
+				ExtData:     nil,
+			}})
+		status := 0
+		if err != nil {
+			status = -1
+			log.Debugw("debug|getClientFromTCP|tryReverseTCP", "error", err)
+		}
+
+		r := ListenResponse{
+			Status: status,
+			Addr:   *netAddr,
+			Error:  err,
+		}
+		_, err = conn.Write(r.JSON())
 		if err != nil {
 			log.Debugw("debug|getClientFromTCP|write", "error", err)
 			return err
 		}
 	}
 	return nil
+}
+
+// JSON ...
+func (r ListenResponse) JSON() []byte {
+	marshal, err := json.Marshal(r)
+	if err != nil {
+		return nil
+	}
+	return marshal
 }
