@@ -59,10 +59,26 @@ func LocalAddr(ip net.IP, port int) string {
 	return net.JoinHostPort(ip.String(), strconv.Itoa(port))
 }
 
+// TCPAddr ...
+func TCPAddr(ip net.IP, port int) *net.TCPAddr {
+	return &net.TCPAddr{
+		IP:   ip,
+		Port: port,
+	}
+}
+
 // ParseTCPAddr ...
 func ParseTCPAddr(addr string) *net.TCPAddr {
 	ip, port := ParseAddr(addr)
 	return &net.TCPAddr{
+		IP:   ip,
+		Port: port,
+	}
+}
+
+// UDPAddr ...
+func UDPAddr(ip net.IP, port int) *net.UDPAddr {
+	return &net.UDPAddr{
 		IP:   ip,
 		Port: port,
 	}

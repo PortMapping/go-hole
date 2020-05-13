@@ -286,10 +286,10 @@ func udpRW(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
 			return 0, err
 		}
 	}
-	n, remote, err := conn.ReadFromUDP(data)
-	if err != nil {
-		log.Debugw("debug|udpRW|ReadFromUDP", "error", err)
-		return 0, err
+	n, remote, errR := conn.ReadFromUDP(data)
+	if errR != nil {
+		log.Debugw("debug|udpRW|ReadFromUDP", "error", errR)
+		return 0, errR
 	}
 	log.Infow("udp received", "remote info", remote.String(), "data", string(data[:n]))
 	return n, nil
