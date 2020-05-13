@@ -175,7 +175,7 @@ func tryReverseTCP(s *source) error {
 	if !keep {
 		defer tcp.Close()
 	}
-	//tcp.SetDeadline(time.Now().Add(3 * time.Second))
+
 	s.service.ExtData = []byte("tryReverseTCP")
 	s.service.ID = GlobalID
 	s.service.KeepConnect = keep
