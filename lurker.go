@@ -90,7 +90,7 @@ func New() Lurker {
 		client:  make(chan Source, 5),
 		udpPort: DefaultUDP,
 		tcpPort: DefaultTCP,
-		timeout: time.Duration(DefaultTimeout),
+		timeout: DefaultTimeout,
 	}
 	o.ctx, o.cancel = context.WithCancel(context.TODO())
 	return o

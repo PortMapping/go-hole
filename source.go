@@ -104,7 +104,7 @@ func NewSource(service Service, addr Addr) Source {
 	return &source{
 		service: service,
 		addr:    addr,
-		timeout: time.Duration(DefaultTimeout),
+		timeout: DefaultConnectionTimeout,
 	}
 }
 

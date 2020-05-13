@@ -8,6 +8,9 @@ import (
 	"time"
 )
 
+// DefaultTimeout ...
+var DefaultTimeout = 60 * time.Second
+
 // DefaultConnectionTimeout ...
 var DefaultConnectionTimeout = 5 * time.Second
 
