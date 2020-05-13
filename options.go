@@ -8,7 +8,7 @@ import (
 )
 
 // DefaultTimeout ...
-var DefaultTimeout = 60
+var DefaultTimeout = 5
 
 // DefaultTCP ...
 var DefaultTCP = 46666
