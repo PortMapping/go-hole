@@ -42,6 +42,13 @@ type Service struct {
 	RequestType int    `json:"request_type"`
 }
 
+// HandshakeResponse ...
+type HandshakeResponse struct {
+	ProtocolVersion int    `json:"protocol_version"`
+	Status          int    `json:"status"`
+	Data            []byte `json:"data"`
+}
+
 type source struct {
 	addr    Addr
 	service Service
