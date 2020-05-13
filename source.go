@@ -19,22 +19,22 @@ type Source interface {
 
 // Addr ...
 type Addr struct {
-	Protocol string
-	IP       net.IP
-	Port     int
+	Protocol string `json:"protocol"`
+	IP       net.IP `json:"ip"`
+	Port     int    `json:"port"`
 }
 
 // Service ...
 type Service struct {
-	ID          string
-	Addr        []Addr
-	ISP         net.IP
-	Local       net.IP
-	PortUDP     int
-	PortHole    int
-	PortTCP     int
-	KeepConnect bool
-	ExtData     []byte
+	ID          string `json:"id"`
+	Addr        []Addr `json:"addr"`
+	ISP         net.IP `json:"isp"`
+	Local       net.IP `json:"local"`
+	PortUDP     int    `json:"port_udp"`
+	PortHole    int    `json:"port_hole"`
+	PortTCP     int    `json:"port_tcp"`
+	KeepConnect bool   `json:"keep_connect"`
+	ExtData     []byte `json:"ext_data"`
 }
 
 type source struct {
