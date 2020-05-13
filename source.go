@@ -199,7 +199,7 @@ func tryReverseTCP(s *source) error {
 func multiPortDialUDP(addr *net.UDPAddr, lport int) (*net.UDPConn, error) {
 	udp, err := net.DialUDP("udp", LocalUDPAddr(lport), addr)
 	if err != nil {
-		udp, err = net.DialUDP("tcp", LocalUDPAddr(0), addr)
+		udp, err = net.DialUDP("udp", LocalUDPAddr(0), addr)
 		if err != nil {
 			return nil, err
 		}
