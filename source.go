@@ -12,7 +12,6 @@ import (
 // Source ...
 type Source interface {
 	TryConnect() error
-	Reverse() error
 	Service() Service
 	Addr() Addr
 }
@@ -41,6 +40,7 @@ type source struct {
 	addr    Addr
 	service Service
 	support Support
+	timeout time.Duration
 }
 
 // Service ...
@@ -112,41 +112,32 @@ func (s source) String() string {
 	return s.addr.String()
 }
 
-// Reverse ...
-func (s *source) Reverse() error {
-	var err error
-	if err = tryReverseTCP(s); err == nil {
-		return nil
-	}
-	log.Debugw("tryReverseTCP|error", "error", err)
-	if err := tryReverseUDP(s); err != nil {
-		return nil
-	}
-	log.Debugw("tryReverseUDP|error", "error", err)
-	return err
-}
-
 // TryConnect ...
 func (s *source) TryConnect() error {
 	log.Infow("connect to", "ip", s.addr.String())
 	var err error
 	if err = tryConnect(s); err == nil {
+		log.Debugw("tryConnect|success")
 		return nil
 	}
 	log.Debugw("tryConnect|error", "error", err)
 	if err = tryTCP(s); err == nil {
+		log.Debugw("tryTCP|success")
 		return nil
 	}
 	log.Debugw("tryTCP|error", "error", err)
 	if err = tryReverseTCP(s); err == nil {
+		log.Debugw("tryReverseTCP|success")
 		return nil
 	}
 	log.Debugw("tryReverseTCP|error", "error", err)
 	if err := tryUDP(s); err == nil {
+		log.Debugw("tryUDP|success")
 		return nil
 	}
 	log.Debugw("tryUDP|error", "error", err)
 	if err := tryReverseUDP(s); err != nil {
+		log.Debugw("tryReverseUDP|success")
 		return nil
 	}
 	log.Debugw("tryReverseUDP|error", "error", err)
@@ -194,18 +185,13 @@ func tryReverseTCP(s *source) error {
 	s.service.ExtData = []byte("tryReverseTCP")
 	s.service.ID = GlobalID
 	s.service.KeepConnect = keep
-	_, err = tcp.Write(s.service.JSON())
-	if err != nil {
-		log.Debugw("debug|tryReverse|Write", "error", err)
-		return err
-	}
 	data := make([]byte, maxByteSize)
-	n, err := tcp.Read(data)
+	n, err := tcpRW(s, tcp, data)
 	if err != nil {
-		log.Debugw("debug|tryReverse|ReadFromUDP", "error", err)
 		return err
 	}
-	log.Infow("tryReverseTCP received", "address", string(data[:n]))
+	//ignore n
+	_ = n
 	return nil
 }
 
@@ -216,18 +202,13 @@ func tryReverseUDP(s *source) error {
 		return err
 	}
 	s.service.ExtData = []byte("tryReverseUDP")
-	_, err = udp.Write(s.service.JSON())
-	if err != nil {
-		log.Debugw("debug|tryReverse|Write", "error", err)
-		return err
-	}
 	data := make([]byte, maxByteSize)
-	n, _, err := udp.ReadFromUDP(data)
+	n, err := udpRW(s, udp, data)
 	if err != nil {
-		log.Debugw("debug|tryReverse|ReadFromUDP", "error", err)
 		return err
 	}
-	log.Infow("tryReverseUDP received", "address", string(data[:n]))
+	//ignore n
+	_ = n
 	return err
 }
 
@@ -238,19 +219,67 @@ func tryUDP(s *source) error {
 		return err
 	}
 	s.service.ExtData = []byte("tryUDP")
-	_, err = udp.Write(s.service.JSON())
-	if err != nil {
-		log.Debugw("debug|tryUDP|Write", "error", err)
-		return err
-	}
 	data := make([]byte, maxByteSize)
-	n, remote, err := udp.ReadFromUDP(data)
+	n, err := udpRW(s, udp, data)
 	if err != nil {
-		log.Debugw("debug|tryUDP|ReadFromUDP", "error", err)
 		return err
 	}
-	log.Infow("tryUDP received", "remote info", remote.String(), "address", string(data[:n]))
+	//ignore n
+	_ = n
 	return nil
+}
+func tcpRW(s *source, conn net.Conn, data []byte) (n int, err error) {
+	if s.timeout != 0 {
+		err = conn.SetWriteDeadline(time.Now().Add(s.timeout))
+		if err != nil {
+			return 0, err
+		}
+	}
+	_, err = conn.Write(s.service.JSON())
+	if err != nil {
+		log.Debugw("debug|tcpRW|Write", "error", err)
+		return 0, err
+	}
+	if s.timeout != 0 {
+		err = conn.SetReadDeadline(time.Now().Add(s.timeout))
+		if err != nil {
+			return 0, err
+		}
+	}
+	n, err = conn.Read(data)
+	if err != nil {
+		log.Debugw("debug|tcpRW|ReadFromUDP", "error", err)
+		return 0, err
+	}
+	log.Infow("udp received", "data", string(data[:n]))
+	return n, nil
+}
+func udpRW(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
+	if s.timeout != 0 {
+		err = conn.SetWriteDeadline(time.Now().Add(s.timeout))
+		if err != nil {
+			return 0, err
+		}
+	}
+	_, err = conn.Write(s.service.JSON())
+	if err != nil {
+		log.Debugw("debug|udpRW|Write", "error", err)
+		return 0, err
+	}
+	//data := make([]byte, maxByteSize)
+	if s.timeout != 0 {
+		err = conn.SetReadDeadline(time.Now().Add(s.timeout))
+		if err != nil {
+			return 0, err
+		}
+	}
+	n, remote, err := conn.ReadFromUDP(data)
+	if err != nil {
+		log.Debugw("debug|udpRW|ReadFromUDP", "error", err)
+		return 0, err
+	}
+	log.Infow("udp received", "remote info", remote.String(), "data", string(data[:n]))
+	return n, nil
 }
 
 func tryTCP(s *source) error {
@@ -267,19 +296,13 @@ func tryTCP(s *source) error {
 	s.service.ExtData = []byte("tryTCP")
 	s.service.ID = GlobalID
 	s.service.KeepConnect = true
-	_, err = tcp.Write(s.service.JSON())
-	if err != nil {
-		log.Debugw("debug|tryTCP|Write", "error", err)
-		return err
-	}
 	data := make([]byte, maxByteSize)
-	n, err := tcp.Read(data)
+	n, err := tcpRW(s, tcp, data)
 	if err != nil {
-		log.Debugw("debug|tryTCP|ReadFromUDP", "error", err)
 		return err
 	}
-	log.Infow("tryTCP received", "address", string(data[:n]))
-
+	//ignore n
+	_ = n
 	return nil
 }
 

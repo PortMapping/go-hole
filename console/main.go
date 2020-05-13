@@ -23,6 +23,12 @@ func main() {
 	if len(os.Args) > 3 {
 	}
 	l := lurker.New()
+	localAddr := net.IPv4zero
+	ispAddr := net.IPv4zero
+	if l.NAT() != nil {
+		localAddr, _ = l.NAT().GetInternalAddress()
+		ispAddr, _ = l.NAT().GetExternalAddress()
+	}
 	listener, err := l.Listen()
 	if err != nil {
 		panic(err)
@@ -36,12 +42,6 @@ func main() {
 			if ok {
 				fmt.Println("exist:", source.Service().ID)
 				continue
-			}
-			localAddr := net.IPv4zero
-			ispAddr := net.IPv4zero
-			if l.NAT() != nil {
-				localAddr, _ = l.NAT().GetInternalAddress()
-				ispAddr, _ = l.NAT().GetExternalAddress()
 			}
 			s := lurker.NewSource(lurker.Service{
 				ID:          lurker.GlobalID,
