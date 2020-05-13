@@ -12,7 +12,7 @@ import (
 var DefaultTimeout = 60 * time.Second
 
 // DefaultConnectionTimeout ...
-var DefaultConnectionTimeout = 5 * time.Second
+var DefaultConnectionTimeout = 15 * time.Second
 
 // DefaultTCP ...
 var DefaultTCP = 46666

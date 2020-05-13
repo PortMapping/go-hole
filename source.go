@@ -23,6 +23,12 @@ type Addr struct {
 	Port     int    `json:"port"`
 }
 
+// HandshakeRequest ...
+type HandshakeRequest struct {
+	ProtocolVersion int    `json:"protocol_version"`
+	Data            []byte `json:"data"`
+}
+
 // Service ...
 type Service struct {
 	ID          string `json:"id"`
@@ -33,7 +39,7 @@ type Service struct {
 	PortHole    int    `json:"port_hole"`
 	PortTCP     int    `json:"port_tcp"`
 	KeepConnect bool   `json:"keep_connect"`
-	ExtData     []byte `json:"ext_data"`
+	RequestType int    `json:"request_type"`
 }
 
 type source struct {
