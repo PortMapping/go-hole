@@ -196,10 +196,21 @@ func tryReverseTCP(s *source) error {
 	return nil
 }
 
-func tryReverseUDP(s *source) error {
-	udp, err := net.DialUDP("udp", LocalUDPAddr(s.service.PortHole), s.addr.UDP())
+func multiPortDialUDP(addr *net.UDPAddr, lport int) (*net.UDPConn, error) {
+	udp, err := net.DialUDP("udp", LocalUDPAddr(lport), addr)
 	if err != nil {
-		log.Debugw("debug|tryReverse|DialUDP", "error", err)
+		udp, err = net.DialUDP("tcp", LocalUDPAddr(0), addr)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return udp, nil
+}
+
+func tryReverseUDP(s *source) error {
+	udp, err := multiPortDialUDP(s.addr.UDP(), s.service.PortHole)
+	if err != nil {
+		log.Debugw("debug|tryReverseUDP|DialUDP", "error", err)
 		return err
 	}
 	s.service.ExtData = []byte("tryReverseUDP")
@@ -214,7 +225,8 @@ func tryReverseUDP(s *source) error {
 }
 
 func tryUDP(s *source) error {
-	udp, err := net.DialUDP("udp", LocalUDPAddr(s.service.PortHole), s.addr.UDP())
+	addr := ParseSourceAddr("udp", s.addr.IP, s.service.PortUDP)
+	udp, err := multiPortDialUDP(addr.UDP(), s.service.PortHole)
 	if err != nil {
 		log.Debugw("debug|tryUDP|DialUDP", "error", err)
 		return err
