@@ -5,10 +5,11 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 )
 
-// DefaultTimeout ...
-var DefaultTimeout = 5
+// DefaultConnectionTimeout ...
+var DefaultConnectionTimeout = 5 * time.Second
 
 // DefaultTCP ...
 var DefaultTCP = 46666

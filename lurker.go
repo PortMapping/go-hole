@@ -132,7 +132,7 @@ func (l *lurker) Listen() (c <-chan Source, err error) {
 		if err != nil {
 			return nil, err
 		}
-		address, err := l.nat.GetInternalAddress()
+		address, err := l.nat.GetExternalAddress()
 		if err != nil {
 			return nil, err
 		}
