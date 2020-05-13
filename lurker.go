@@ -171,7 +171,6 @@ func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (e
 			}
 
 			netAddr := ParseNetAddr(remoteAddr)
-
 			c := source{
 				addr:    *netAddr,
 				service: service,

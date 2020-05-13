@@ -221,7 +221,7 @@ func tryReverseUDP(s *source) error {
 	}
 	//ignore n
 	_ = n
-	return err
+	return nil
 }
 
 func tryUDP(s *source) error {
@@ -264,7 +264,7 @@ func tcpRW(s *source, conn net.Conn, data []byte) (n int, err error) {
 		log.Debugw("debug|tcpRW|ReadFromUDP", "error", err)
 		return 0, err
 	}
-	log.Infow("udp received", "data", string(data[:n]))
+	log.Infow("tcp received", "data", string(data[:n]))
 	return n, nil
 }
 func udpRW(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
