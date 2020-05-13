@@ -13,10 +13,11 @@ import (
 func main() {
 	lurker.DefaultTCP = 16004
 	lurker.DefaultUDP = 16005
-
+	network := "tcp"
 	address := ""
 	list := sync.Map{}
 	if len(os.Args) > 2 {
+		network = os.Args[1]
 		address = os.Args[2]
 	}
 	if len(os.Args) > 3 {
@@ -82,7 +83,7 @@ func main() {
 			PortTCP:  l.PortTCP(),
 			ExtData:  nil,
 		}, lurker.Addr{
-			Protocol: "tcp",
+			Protocol: network,
 			IP:       addr,
 			Port:     i,
 		})

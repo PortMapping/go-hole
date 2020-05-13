@@ -130,6 +130,10 @@ func (s *source) Reverse() error {
 func (s *source) TryConnect() error {
 	log.Infow("connect to", "ip", s.addr.String())
 	var err error
+	if err = tryConnect(s); err == nil {
+		return nil
+	}
+	log.Debugw("tryConnect|error", "error", err)
 	if err = tryTCP(s); err == nil {
 		return nil
 	}
@@ -148,6 +152,17 @@ func (s *source) TryConnect() error {
 	log.Debugw("tryReverseUDP|error", "error", err)
 	return fmt.Errorf("all try connect is failed")
 
+}
+
+func tryConnect(s *source) error {
+	switch s.addr.Network() {
+	case "tcp":
+		return tryTCP(s)
+	case "udp":
+		return tryUDP(s)
+	default:
+	}
+	return fmt.Errorf("network not supported")
 }
 
 func multiPortDialTCP(addr *net.TCPAddr, timeout time.Duration, lport int) (net.Conn, bool, error) {
