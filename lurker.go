@@ -104,7 +104,7 @@ func (l *lurker) Listen() (c <-chan Source, err error) {
 		}
 	}()
 
-	if l.cfg.UDP {
+	if l.cfg.UDP != 0 {
 		udpAddr := LocalUDPAddr(l.udpPort)
 		fmt.Println("listen udp on address:", udpAddr.String())
 		l.udpListener, err = net.ListenUDP("udp", udpAddr)
@@ -115,7 +115,7 @@ func (l *lurker) Listen() (c <-chan Source, err error) {
 		go listenUDP(l.ctx, l.udpListener, l.client)
 	}
 
-	if l.cfg.TCP {
+	if l.cfg.TCP != 0 {
 		tcpAddr := LocalTCPAddr(l.tcpPort)
 		if l.cfg.Secret != nil {
 			l.tcpListener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.Secret)
@@ -211,16 +211,6 @@ func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (e
 		}
 	}
 }
-
-//// IsMapping ...
-//func (l *lurker) IsMapping() bool {
-//	return l.isMapping
-//}
-//
-//// MappingPort ...
-//func (l *lurker) MappingPort() int {
-//	return l.mappingPort
-//}
 
 func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Source) (err error) {
 	for {

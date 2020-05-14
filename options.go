@@ -11,8 +11,8 @@ import (
 
 // Config ...
 type Config struct {
-	TCP    bool
-	UDP    bool
+	TCP    int
+	UDP    int
 	NAT    bool
 	Secret *tls.Config
 }
@@ -54,8 +54,8 @@ func init() {
 // DefaultConfig ...
 func DefaultConfig() *Config {
 	return &Config{
-		TCP:    true,
-		UDP:    true,
+		TCP:    DefaultTCP,
+		UDP:    DefaultUDP,
 		NAT:    true,
 		Secret: nil,
 	}
