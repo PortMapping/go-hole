@@ -118,7 +118,11 @@ func (l *lurker) Listen() (c <-chan Source, err error) {
 		log.Debugw("nat error", "error", err)
 		if err == p2pnat.ErrNoNATFound {
 			fmt.Println("listen tcp on address:", tcpAddr.String())
-			l.tcpListener, err = reuse.ListenTCP("tcp", tcpAddr)
+			if l.cfg.Secret != nil {
+				l.tcpListener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.Secret)
+			} else {
+				l.tcpListener, err = reuse.ListenTCP("tcp", tcpAddr)
+			}
 			if err != nil {
 				return nil, err
 			}
