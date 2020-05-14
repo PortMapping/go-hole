@@ -103,54 +103,59 @@ func (l *lurker) Listen() (c <-chan Source, err error) {
 			log.Errorw("listener error found", "error", e)
 		}
 	}()
-	udpAddr := LocalUDPAddr(l.udpPort)
-	fmt.Println("listen udp on address:", udpAddr.String())
-	l.udpListener, err = net.ListenUDP("udp", udpAddr)
-	if err != nil {
-		return nil, err
-	}
 
-	go listenUDP(l.ctx, l.udpListener, l.client)
-
-	tcpAddr := LocalTCPAddr(l.tcpPort)
-	if l.cfg.Secret != nil {
-		l.tcpListener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.Secret)
-	} else {
-		l.tcpListener, err = reuse.ListenTCP("tcp", tcpAddr)
-	}
-	if err != nil {
-		return nil, err
-	}
-	go listenTCP(l.ctx, l.tcpListener, l.client)
-
-	if !l.cfg.NAT {
-		return l.client, nil
-	}
-
-	l.nat, err = nat.FromLocal(l.tcpPort)
-	if err != nil {
-		log.Debugw("nat error", "error", err)
-		if err == p2pnat.ErrNoNATFound {
-			fmt.Println("listen tcp on address:", tcpAddr.String())
-		}
-		l.cfg.NAT = false
-	} else {
-		extPort, err := l.nat.Mapping()
+	if l.cfg.UDP {
+		udpAddr := LocalUDPAddr(l.udpPort)
+		fmt.Println("listen udp on address:", udpAddr.String())
+		l.udpListener, err = net.ListenUDP("udp", udpAddr)
 		if err != nil {
-			log.Debugw("nat mapping error", "error", err)
-			l.cfg.NAT = false
+			return nil, err
+		}
+
+		go listenUDP(l.ctx, l.udpListener, l.client)
+	}
+
+	if l.cfg.TCP {
+		tcpAddr := LocalTCPAddr(l.tcpPort)
+		if l.cfg.Secret != nil {
+			l.tcpListener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.Secret)
+		} else {
+			l.tcpListener, err = reuse.ListenTCP("tcp", tcpAddr)
+		}
+		if err != nil {
+			return nil, err
+		}
+		go listenTCP(l.ctx, l.tcpListener, l.client)
+
+		if !l.cfg.NAT {
 			return l.client, nil
 		}
-		l.holePort = extPort
 
-		address, err := l.nat.GetExternalAddress()
+		l.nat, err = nat.FromLocal(l.tcpPort)
 		if err != nil {
-			log.Debugw("get external address error", "error", err)
+			log.Debugw("nat error", "error", err)
+			if err == p2pnat.ErrNoNATFound {
+				fmt.Println("listen tcp on address:", tcpAddr.String())
+			}
 			l.cfg.NAT = false
-			return l.client, nil
+		} else {
+			extPort, err := l.nat.Mapping()
+			if err != nil {
+				log.Debugw("nat mapping error", "error", err)
+				l.cfg.NAT = false
+				return l.client, nil
+			}
+			l.holePort = extPort
+
+			address, err := l.nat.GetExternalAddress()
+			if err != nil {
+				log.Debugw("get external address error", "error", err)
+				l.cfg.NAT = false
+				return l.client, nil
+			}
+			addr := ParseSourceAddr("tcp", address, extPort)
+			fmt.Println("mapping on address:", addr.String())
 		}
-		addr := ParseSourceAddr("tcp", address, extPort)
-		fmt.Println("mapping on address:", addr.String())
 	}
 	return l.client, nil
 }

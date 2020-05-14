@@ -11,6 +11,8 @@ import (
 
 // Config ...
 type Config struct {
+	TCP    bool
+	UDP    bool
 	NAT    bool
 	Secret *tls.Config
 }
