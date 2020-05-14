@@ -64,8 +64,11 @@ func (n *natClient) Mapping() (port int, err error) {
 		return 0, err
 	}
 	port = eport
+
 	go func() {
+		t := time.NewTicker(30 * time.Second)
 		defer func() {
+			t.Stop()
 			if e := recover(); e != nil {
 				fmt.Println("panic error:", e)
 			}
@@ -73,7 +76,7 @@ func (n *natClient) Mapping() (port int, err error) {
 
 		for {
 			//check mapping every 30 second
-			time.Sleep(30 * time.Second)
+			<-t.C
 			_, err = n.nat.AddPortMapping("tcp", n.port, "http", n.timeout)
 			if err != nil {
 				panic(err)
