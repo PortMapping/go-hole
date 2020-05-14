@@ -86,6 +86,7 @@ func (l *lurker) Stop() error {
 // New ...
 func New(cfg *Config) Lurker {
 	o := &lurker{
+		cfg:     cfg,
 		client:  make(chan Source, 5),
 		udpPort: DefaultUDP,
 		tcpPort: DefaultTCP,
@@ -111,48 +112,45 @@ func (l *lurker) Listen() (c <-chan Source, err error) {
 
 	go listenUDP(l.ctx, l.udpListener, l.client)
 
-	l.nat, err = nat.FromLocal(l.tcpPort)
 	tcpAddr := LocalTCPAddr(l.tcpPort)
+	if l.cfg.Secret != nil {
+		l.tcpListener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.Secret)
+	} else {
+		l.tcpListener, err = reuse.ListenTCP("tcp", tcpAddr)
+	}
+	if err != nil {
+		return nil, err
+	}
+	go listenTCP(l.ctx, l.tcpListener, l.client)
 
+	if !l.cfg.NAT {
+		return l.client, nil
+	}
+	l.nat, err = nat.FromLocal(l.tcpPort)
 	if err != nil {
 		log.Debugw("nat error", "error", err)
 		if err == p2pnat.ErrNoNATFound {
 			fmt.Println("listen tcp on address:", tcpAddr.String())
-			if l.cfg.Secret != nil {
-				l.tcpListener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.Secret)
-			} else {
-				l.tcpListener, err = reuse.ListenTCP("tcp", tcpAddr)
-			}
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			return nil, err
 		}
+		l.cfg.NAT = false
 	} else {
-		//l.isMapping = true
 		extPort, err := l.nat.Mapping()
 		if err != nil {
-			return nil, err
+			log.Debugw("nat mapping error", "error", err)
+			l.cfg.NAT = false
+			return l.client, nil
 		}
+		l.holePort = extPort
+
 		address, err := l.nat.GetExternalAddress()
 		if err != nil {
-			return nil, err
+			log.Debugw("get external address error", "error", err)
+			l.cfg.NAT = false
+			return l.client, nil
 		}
 		addr := ParseSourceAddr("tcp", address, extPort)
 		fmt.Println("mapping on address:", addr.String())
-		if l.cfg.Secret != nil {
-			l.tcpListener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.Secret)
-		} else {
-			l.tcpListener, err = reuse.ListenTCP("tcp", tcpAddr)
-		}
-		if err != nil {
-			return nil, err
-		}
-		l.holePort = extPort
 	}
-	go listenTCP(l.ctx, l.tcpListener, l.client)
-
 	return l.client, nil
 }
 
