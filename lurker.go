@@ -46,10 +46,8 @@ type lurker struct {
 	udpPort     int
 	holePort    int
 	tcpPort     int
-	//isMapping   bool
-	//mappingPort int
-	client  chan Source
-	timeout time.Duration
+	client      chan Source
+	timeout     time.Duration
 }
 
 // PortUDP ...
@@ -85,7 +83,7 @@ func (l *lurker) Stop() error {
 }
 
 // New ...
-func New() Lurker {
+func New(cfg *Config) Lurker {
 	o := &lurker{
 		client:  make(chan Source, 5),
 		udpPort: DefaultUDP,

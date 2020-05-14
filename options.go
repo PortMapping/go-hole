@@ -1,12 +1,18 @@
 package lurker
 
 import (
+	"crypto/tls"
 	"github.com/goextension/tool"
 	"net"
 	"strconv"
 	"strings"
 	"time"
 )
+
+// Config ...
+type Config struct {
+	Secret *tls.Config
+}
 
 // DefaultTimeout ...
 var DefaultTimeout = 60 * time.Second
