@@ -42,6 +42,7 @@ type lurker struct {
 	cancel      context.CancelFunc
 	udpListener *net.UDPConn
 	tcpListener net.Listener
+	cfg         *Config
 	nat         nat.NAT
 	udpPort     int
 	holePort    int
@@ -136,7 +137,11 @@ func (l *lurker) Listen() (c <-chan Source, err error) {
 		}
 		addr := ParseSourceAddr("tcp", address, extPort)
 		fmt.Println("mapping on address:", addr.String())
-		l.tcpListener, err = reuse.ListenTCP("tcp", tcpAddr)
+		if l.cfg.Secret != nil {
+			l.tcpListener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.Secret)
+		} else {
+			l.tcpListener, err = reuse.ListenTCP("tcp", tcpAddr)
+		}
 		if err != nil {
 			return nil, err
 		}
