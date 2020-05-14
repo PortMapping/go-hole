@@ -51,6 +51,16 @@ func init() {
 	GlobalID = tool.GenerateRandomString(16)
 }
 
+// DefaultConfig ...
+func DefaultConfig() *Config {
+	return &Config{
+		TCP:    true,
+		UDP:    true,
+		NAT:    true,
+		Secret: nil,
+	}
+}
+
 // LocalUDPAddr ...
 func LocalUDPAddr(port int) *net.UDPAddr {
 	return &net.UDPAddr{
