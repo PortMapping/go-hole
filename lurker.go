@@ -181,7 +181,6 @@ func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (e
 				service: Service{
 					ID:          GlobalID,
 					KeepConnect: false,
-					ExtData:     nil,
 				}})
 			status := 0
 			if err != nil {
@@ -270,7 +269,6 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) err
 			service: Service{
 				ID:          GlobalID,
 				KeepConnect: false,
-				ExtData:     nil,
 			}})
 		status := 0
 		if err != nil {
