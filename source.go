@@ -244,7 +244,6 @@ func tryUDP(s *source) error {
 		log.Debugw("debug|tryUDP|DialUDP", "error", err)
 		return err
 	}
-	s.service.ExtData = []byte("tryUDP")
 	data := make([]byte, maxByteSize)
 	n, err := udpRW(s, udp, data)
 	if err != nil {
@@ -319,7 +318,6 @@ func tryTCP(s *source) error {
 	if !keep {
 		defer tcp.Close()
 	}
-	s.service.ExtData = []byte("tryTCP")
 	s.service.ID = GlobalID
 	s.service.KeepConnect = true
 	data := make([]byte, maxByteSize)
