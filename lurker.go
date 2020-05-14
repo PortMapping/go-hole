@@ -32,9 +32,8 @@ type Lurker interface {
 	Listener
 	Stop() error
 	NAT() nat.NAT
-	PortUDP() int
+	Config() Config
 	PortHole() int
-	PortTCP() int
 }
 
 type lurker struct {
@@ -44,26 +43,19 @@ type lurker struct {
 	tcpListener net.Listener
 	cfg         *Config
 	nat         nat.NAT
-	udpPort     int
 	holePort    int
-	tcpPort     int
 	client      chan Source
 	timeout     time.Duration
 }
 
 // PortUDP ...
-func (l *lurker) PortUDP() int {
-	return l.udpPort
+func (l *lurker) Config() Config {
+	return *l.cfg
 }
 
 // PortHole ...
 func (l *lurker) PortHole() int {
 	return l.holePort
-}
-
-// PortTCP ...
-func (l *lurker) PortTCP() int {
-	return l.tcpPort
 }
 
 // NAT ...
@@ -88,8 +80,6 @@ func New(cfg *Config) Lurker {
 	o := &lurker{
 		cfg:     cfg,
 		client:  make(chan Source, 5),
-		udpPort: DefaultUDP,
-		tcpPort: DefaultTCP,
 		timeout: DefaultTimeout,
 	}
 	o.ctx, o.cancel = context.WithCancel(context.TODO())
@@ -105,7 +95,7 @@ func (l *lurker) Listen() (c <-chan Source, err error) {
 	}()
 
 	if l.cfg.UDP != 0 {
-		udpAddr := LocalUDPAddr(l.udpPort)
+		udpAddr := LocalUDPAddr(l.cfg.UDP)
 		fmt.Println("listen udp on address:", udpAddr.String())
 		l.udpListener, err = net.ListenUDP("udp", udpAddr)
 		if err != nil {
@@ -116,7 +106,7 @@ func (l *lurker) Listen() (c <-chan Source, err error) {
 	}
 
 	if l.cfg.TCP != 0 {
-		tcpAddr := LocalTCPAddr(l.tcpPort)
+		tcpAddr := LocalTCPAddr(l.cfg.TCP)
 		if l.cfg.Secret != nil {
 			l.tcpListener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.Secret)
 		} else {
@@ -131,7 +121,7 @@ func (l *lurker) Listen() (c <-chan Source, err error) {
 			return l.client, nil
 		}
 
-		l.nat, err = nat.FromLocal(l.tcpPort)
+		l.nat, err = nat.FromLocal(l.cfg.TCP)
 		if err != nil {
 			log.Debugw("nat error", "error", err)
 			if err == p2pnat.ErrNoNATFound {
