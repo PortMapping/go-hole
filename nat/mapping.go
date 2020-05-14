@@ -59,6 +59,7 @@ func (n *natClient) SetTimeOut(t int) {
 
 // Mapping ...
 func (n *natClient) Mapping() (port int, err error) {
+	n.stop.Store(false)
 	eport, err := n.nat.AddPortMapping("tcp", n.port, "mapping", n.timeout)
 	if err != nil {
 		return 0, err
@@ -78,7 +79,6 @@ func (n *natClient) Mapping() (port int, err error) {
 			//check mapping every 30 second
 			<-t.C
 			if n.stop.Load() {
-				n.stop.Store(false)
 				return
 			}
 			_, err = n.nat.AddPortMapping("tcp", n.port, "http", n.timeout)
@@ -97,7 +97,6 @@ func (n *natClient) Remapping() (port int, err error) {
 	if err := n.StopMapping(); err != nil {
 		return 0, err
 	}
-	n.stop.Store(false)
 	return n.Mapping()
 }
 
