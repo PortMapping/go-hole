@@ -126,6 +126,7 @@ func (l *lurker) Listen() (c <-chan Source, err error) {
 	if !l.cfg.NAT {
 		return l.client, nil
 	}
+
 	l.nat, err = nat.FromLocal(l.tcpPort)
 	if err != nil {
 		log.Debugw("nat error", "error", err)
