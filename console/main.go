@@ -40,7 +40,7 @@ func main() {
 	fmt.Println("your connect id:", lurker.GlobalID)
 	go func() {
 		for source := range listener {
-			fmt.Println("connect from:", source.Addr().String(), string(source.Service().JSON()), string(source.Service().ExtData))
+			fmt.Println("connect from:", source.Addr().String(), string(source.Service().JSON()))
 			_, ok := list.Load(source.Service().ID)
 			if ok {
 				fmt.Println("exist:", source.Service().ID)
@@ -54,7 +54,6 @@ func main() {
 				PortHole:    l.PortHole(),
 				PortTCP:     l.PortTCP(),
 				KeepConnect: false,
-				ExtData:     nil,
 			}, source.Addr())
 			go func(id string, s lurker.Source) {
 				err := s.TryConnect()
@@ -84,7 +83,6 @@ func main() {
 			PortUDP:  l.PortUDP(),
 			PortHole: l.PortHole(),
 			PortTCP:  l.PortTCP(),
-			ExtData:  nil,
 		}, lurker.Addr{
 			Protocol: network,
 			IP:       addr,
