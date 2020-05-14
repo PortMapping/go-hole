@@ -77,13 +77,15 @@ func (n *natClient) Mapping() (port int, err error) {
 		for {
 			//check mapping every 30 second
 			<-t.C
+			if n.stop.Load() {
+				n.stop.Store(false)
+				return
+			}
 			_, err = n.nat.AddPortMapping("tcp", n.port, "http", n.timeout)
 			if err != nil {
 				panic(err)
 			}
-			if n.stop.Load() {
-				return
-			}
+
 		}
 	}()
 
