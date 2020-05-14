@@ -18,6 +18,7 @@ const maxByteSize = 65520
 // Listener ...
 type Listener interface {
 	Listen() (c <-chan Source, err error)
+	Stop() error
 }
 
 // ListenResponse ...
@@ -30,7 +31,6 @@ type ListenResponse struct {
 // Lurker ...
 type Lurker interface {
 	Listener
-	Stop() error
 	NAT() nat.NAT
 	Config() Config
 	PortHole() int
