@@ -22,7 +22,10 @@ func main() {
 	}
 	if len(os.Args) > 3 {
 	}
-	l := lurker.New()
+
+	cfg := lurker.DefaultConfig()
+
+	l := lurker.New(cfg)
 	localAddr := net.IPv4zero
 	ispAddr := net.IPv4zero
 	if l.NAT() != nil {
