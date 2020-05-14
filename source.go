@@ -44,7 +44,7 @@ type Service struct {
 
 // HandshakeResponse ...
 type HandshakeResponse struct {
-	ProtocolVersion int    `json:"protocol_version"`
+	ProtocolVersion string `json:"protocol_version"`
 	Status          int    `json:"status"`
 	Data            []byte `json:"data"`
 }
@@ -196,7 +196,7 @@ func tryReverseTCP(s *source) error {
 		defer tcp.Close()
 	}
 
-	s.service.ExtData = []byte("tryReverseTCP")
+	//s.service.ExtData = []byte("tryReverseTCP")
 	s.service.ID = GlobalID
 	s.service.KeepConnect = keep
 	data := make([]byte, maxByteSize)
@@ -226,7 +226,7 @@ func tryReverseUDP(s *source) error {
 		log.Debugw("debug|tryReverseUDP|DialUDP", "error", err)
 		return err
 	}
-	s.service.ExtData = []byte("tryReverseUDP")
+	//s.service.ExtData = []byte("tryReverseUDP")
 	data := make([]byte, maxByteSize)
 	n, err := udpRW(s, udp, data)
 	if err != nil {
