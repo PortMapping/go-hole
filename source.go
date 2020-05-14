@@ -3,10 +3,11 @@ package lurker
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/portmapping/go-reuse"
 	"net"
 	"strconv"
 	"time"
+
+	"github.com/portmapping/go-reuse"
 )
 
 // Source ...
