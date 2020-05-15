@@ -2,11 +2,12 @@ package lurker
 
 import (
 	"crypto/tls"
-	"github.com/goextension/tool"
 	"net"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // Config ...
@@ -45,7 +46,7 @@ var DefaultLocalUDPAddr = &net.UDPAddr{
 var GlobalID string
 
 func init() {
-	GlobalID = tool.GenerateRandomString(16)
+	GlobalID = uuid.Must(uuid.NewUUID()).String()
 }
 
 // DefaultConfig ...
