@@ -25,9 +25,8 @@ const RequestTypeAdapter RequestType = 0x03
 
 // HandshakeRequest ...
 type HandshakeRequest struct {
-	ProtocolVersion Version     `json:"protocol_version"`
-	RequestType     RequestType `json:"request_type"`
-	Data            []byte      `json:"data"`
+	ProtocolVersion Version `json:"protocol_version"`
+	Data            []byte  `json:"data"`
 }
 
 // HandshakeResponse ...
