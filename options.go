@@ -16,6 +16,8 @@ type Config struct {
 	UDP    int
 	NAT    bool
 	Secret *tls.Config
+	HTTP   int
+	HTTPS  int
 }
 
 // DefaultTimeout ...
