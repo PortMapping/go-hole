@@ -52,6 +52,16 @@ type Service struct {
 	KeepConnect bool   `json:"keep_connect"`
 }
 
+// ParsingHandshake ...
+func ParsingHandshake(data []byte) (Handshake, error) {
+	var h Handshake
+	err := json.Unmarshal(data, &h)
+	if err != nil {
+		return Handshake{}, err
+	}
+	return h, nil
+}
+
 // DecodeHandshakeRequest ...
 func DecodeHandshakeRequest(data []byte) (Service, error) {
 	var r HandshakeRequest
