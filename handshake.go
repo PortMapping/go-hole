@@ -50,7 +50,6 @@ type Service struct {
 	PortHole    int    `json:"port_hole"`
 	PortTCP     int    `json:"port_tcp"`
 	KeepConnect bool   `json:"keep_connect"`
-	RequestType int    `json:"request_type"`
 }
 
 // DecodeHandshakeRequest ...
