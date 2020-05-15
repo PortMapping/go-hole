@@ -37,9 +37,8 @@ type Lurker interface {
 }
 
 type lurker struct {
-	ctx         context.Context
-	cancel      context.CancelFunc
-	udpListener *net.UDPConn
+	listeners map[string]Listener
+
 	tcpListener net.Listener
 	cfg         *Config
 	nat         nat.NAT
@@ -68,10 +67,7 @@ func (l *lurker) Stop() error {
 	if err := l.nat.StopMapping(); err != nil {
 		return err
 	}
-	if l.cancel != nil {
-		l.cancel()
-		l.cancel = nil
-	}
+	fmt.Println("stopped")
 	return nil
 }
 
@@ -82,8 +78,15 @@ func New(cfg *Config) Lurker {
 		client:  make(chan Source, 5),
 		timeout: DefaultTimeout,
 	}
-	o.ctx, o.cancel = context.WithCancel(context.TODO())
 	return o
+}
+
+// RegisterListener ...
+func (l *lurker) RegisterListener(name string, listener Listener) {
+	if name == "" {
+		name = UUID()
+	}
+	l.listeners[name] = listener
 }
 
 // Listen ...
@@ -93,17 +96,6 @@ func (l *lurker) Listen() (c <-chan Source, err error) {
 			log.Errorw("listener error found", "error", e)
 		}
 	}()
-
-	if l.cfg.UDP != 0 {
-		udpAddr := LocalUDPAddr(l.cfg.UDP)
-		fmt.Println("listen udp on address:", udpAddr.String())
-		l.udpListener, err = net.ListenUDP("udp", udpAddr)
-		if err != nil {
-			return nil, err
-		}
-
-		go listenUDP(l.ctx, l.udpListener, l.client)
-	}
 
 	if l.cfg.TCP != 0 {
 		tcpAddr := LocalTCPAddr(l.cfg.TCP)
@@ -148,62 +140,6 @@ func (l *lurker) Listen() (c <-chan Source, err error) {
 		}
 	}
 	return l.client, nil
-}
-
-func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (err error) {
-	data := make([]byte, maxByteSize)
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			n, remoteAddr, err := listener.ReadFromUDP(data)
-			if err != nil {
-				//waiting for next
-				log.Debugw("debug|listenUDP|ReadFromUDP", "error", err)
-				continue
-			}
-			//handshake, err := ParseHandshake(data)
-			//if err != nil {
-			//	return err
-			//}
-
-			service, err := DecodeHandshakeRequest(data[:n])
-			if err != nil {
-				//waiting for next
-				log.Debugw("debug|listenUDP|ParseService", "error", err)
-				continue
-			}
-
-			netAddr := ParseNetAddr(remoteAddr)
-			c := source{
-				addr:    *netAddr,
-				service: service,
-			}
-			cli <- &c
-			err = tryReverseUDP(&source{
-				addr: *netAddr,
-				service: Service{
-					ID:          GlobalID,
-					KeepConnect: false,
-				}})
-			status := 0
-			if err != nil {
-				status = -1
-				log.Debugw("debug|listenUDP|tryReverseUDP", "error", err)
-			}
-
-			r := &ListenResponse{
-				Status: status,
-				Addr:   *netAddr,
-				Error:  err,
-			}
-			_, err = listener.WriteToUDP(r.JSON(), remoteAddr)
-			if err != nil {
-				return err
-			}
-		}
-	}
 }
 
 func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Source) (err error) {

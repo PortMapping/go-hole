@@ -46,7 +46,12 @@ var DefaultLocalUDPAddr = &net.UDPAddr{
 var GlobalID string
 
 func init() {
-	GlobalID = uuid.Must(uuid.NewUUID()).String()
+	GlobalID = UUID()
+}
+
+// UUID ...
+func UUID() string {
+	return uuid.Must(uuid.NewUUID()).String()
 }
 
 // DefaultConfig ...
