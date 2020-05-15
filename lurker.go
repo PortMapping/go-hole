@@ -163,6 +163,10 @@ func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (e
 				log.Debugw("debug|listenUDP|ReadFromUDP", "error", err)
 				continue
 			}
+			//handshake, err := ParseHandshake(data)
+			//if err != nil {
+			//	return err
+			//}
 
 			service, err := DecodeHandshakeRequest(data[:n])
 			if err != nil {

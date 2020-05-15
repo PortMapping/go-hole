@@ -52,8 +52,8 @@ type Service struct {
 	KeepConnect bool   `json:"keep_connect"`
 }
 
-// ParsingHandshake ...
-func ParsingHandshake(data []byte) (Handshake, error) {
+// ParseHandshake ...
+func ParseHandshake(data []byte) (Handshake, error) {
 	var h Handshake
 	err := json.Unmarshal(data, &h)
 	if err != nil {
@@ -100,4 +100,13 @@ func EncodeHandshakeResponse(ver Version) ([]byte, error) {
 
 func encodeHandshakeResponseV1(r *HandshakeResponse) ([]byte, error) {
 	return json.Marshal(r)
+}
+
+// JSON ...
+func (h Handshake) JSON() []byte {
+	marshal, err := json.Marshal(h)
+	if err != nil {
+		return nil
+	}
+	return marshal
 }
