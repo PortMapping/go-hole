@@ -20,6 +20,9 @@ const RequestTypePing RequestType = 0x01
 // RequestTypeConnect ...
 const RequestTypeConnect RequestType = 0x02
 
+// RequestTypeAdapter ...
+const RequestTypeAdapter RequestType = 0x03
+
 // HandshakeRequest ...
 type HandshakeRequest struct {
 	ProtocolVersion Version     `json:"protocol_version"`
