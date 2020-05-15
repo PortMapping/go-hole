@@ -29,9 +29,6 @@ var DefaultTCP = 46666
 // DefaultUDP ...
 var DefaultUDP = 47777
 
-// DefaultHolePort ...
-var DefaultHolePort = 0
-
 // DefaultLocalTCPAddr ...
 var DefaultLocalTCPAddr = &net.TCPAddr{
 	IP:   net.IPv4zero,

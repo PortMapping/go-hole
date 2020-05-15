@@ -47,12 +47,12 @@ func main() {
 				continue
 			}
 			s := lurker.NewSource(lurker.Service{
-				ID:          lurker.GlobalID,
-				ISP:         ispAddr,
-				Local:       localAddr,
-				PortUDP:     l.PortUDP(),
-				PortHole:    l.PortHole(),
-				PortTCP:     l.PortTCP(),
+				ID:    lurker.GlobalID,
+				ISP:   ispAddr,
+				Local: localAddr,
+				//PortUDP:     l.PortUDP(),
+				PortHole: l.PortHole(),
+				//PortTCP:     l.PortTCP(),
 				KeepConnect: false,
 			}, source.Addr())
 			go func(id string, s lurker.Source) {
@@ -63,6 +63,7 @@ func main() {
 				}
 				list.Store(id, s)
 			}(source.Service().ID, s)
+
 		}
 	}()
 
@@ -80,9 +81,7 @@ func main() {
 			ID:       lurker.GlobalID,
 			ISP:      ispAddr,
 			Local:    localAddr,
-			PortUDP:  l.PortUDP(),
 			PortHole: l.PortHole(),
-			PortTCP:  l.PortTCP(),
 		}, lurker.Addr{
 			Protocol: network,
 			IP:       addr,

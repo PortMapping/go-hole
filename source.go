@@ -24,40 +24,14 @@ type Addr struct {
 	Port     int    `json:"port"`
 }
 
-// HandshakeRequest ...
-type HandshakeRequest struct {
-	ProtocolVersion int    `json:"protocol_version"`
-	Data            []byte `json:"data"`
-}
-
-// Service ...
-type Service struct {
-	ID          string `json:"id"`
-	Addr        []Addr `json:"addr"`
-	ISP         net.IP `json:"isp"`
-	Local       net.IP `json:"local"`
-	PortUDP     int    `json:"port_udp"`
-	PortHole    int    `json:"port_hole"`
-	PortTCP     int    `json:"port_tcp"`
-	KeepConnect bool   `json:"keep_connect"`
-	RequestType int    `json:"request_type"`
-}
-
-// HandshakeResponse ...
-type HandshakeResponse struct {
-	ProtocolVersion string `json:"protocol_version"`
-	Status          int    `json:"status"`
-	Data            []byte `json:"data"`
-}
-
 type source struct {
-	addr    Addr
 	service Service
+	addr    Addr
 	support Support
 	timeout time.Duration
 }
 
-// Service ...
+// service ...
 func (s source) Service() Service {
 	return s.service
 }
@@ -105,12 +79,6 @@ func (s Service) JSON() []byte {
 		return nil
 	}
 	return marshal
-}
-
-// ParseService ...
-func ParseService(data []byte) (service Service, err error) {
-	err = json.Unmarshal(data, &service)
-	return
 }
 
 // NewSource ...
