@@ -23,6 +23,11 @@ const RequestTypeConnect RequestType = 0x02
 // RequestTypeAdapter ...
 const RequestTypeAdapter RequestType = 0x03
 
+// Handshake ...
+type Handshake struct {
+	Type RequestType `json:"type"`
+}
+
 // HandshakeRequest ...
 type HandshakeRequest struct {
 	ProtocolVersion Version `json:"protocol_version"`
