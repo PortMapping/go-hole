@@ -25,7 +25,8 @@ func (l *udpListener) Stop() error {
 	return nil
 }
 
-func newUDPListener(cfg *Config) Listener {
+// NewUDPListener ...
+func NewUDPListener(cfg *Config) Listener {
 	udp := &udpListener{
 		ctx:    nil,
 		cancel: nil,

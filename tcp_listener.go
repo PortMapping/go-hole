@@ -21,7 +21,8 @@ type tcpListener struct {
 	cfg         *Config
 }
 
-func newTCPListener(cfg *Config) Listener {
+// NewTCPListener ...
+func NewTCPListener(cfg *Config) Listener {
 	tcp := &tcpListener{
 		ctx:    nil,
 		cancel: nil,
