@@ -11,8 +11,6 @@ import (
 )
 
 func main() {
-	lurker.DefaultTCP = 16004
-	lurker.DefaultUDP = 16005
 	network := "tcp"
 	address := ""
 	list := sync.Map{}
@@ -24,6 +22,8 @@ func main() {
 	}
 
 	cfg := lurker.DefaultConfig()
+	cfg.TCP = 16004
+	cfg.UDP = 16005
 
 	l := lurker.New(cfg)
 	localAddr := net.IPv4zero
