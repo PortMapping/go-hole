@@ -40,7 +40,10 @@ func (l *httpListener) Listen() (c <-chan Source, err error) {
 
 // Stop ...
 func (l *httpListener) Stop() error {
-	return l.srv.Close()
+	if l.srv != nil {
+		return l.srv.Close()
+	}
+	return nil
 }
 
 // NewHTTPListener ...
