@@ -18,6 +18,7 @@ type httpListener struct {
 	tcpListener net.Listener
 	cfg         *Config
 	handler     http.Handler
+	srv         *http.Server
 }
 
 // Listen ...
@@ -31,7 +32,8 @@ func (l *httpListener) Listen() (c <-chan Source, err error) {
 	if err != nil {
 		return nil, err
 	}
-	go listenHTTP(l.ctx, l.tcpListener, l.handler, l.source)
+	l.srv = &http.Server{Handler: l.handler}
+	go listenHTTP(l.ctx, l.srv, l.tcpListener, l.source)
 
 	return
 }
@@ -54,8 +56,7 @@ func NewHTTPListener(cfg *Config, handler http.Handler) Listener {
 	h.ctx, h.cancel = context.WithCancel(context.TODO())
 	return h
 }
-func listenHTTP(ctx context.Context, l net.Listener, handler http.Handler, s chan<- Source) {
-	srv := &http.Server{Handler: handler}
+func listenHTTP(ctx context.Context, srv *http.Server, l net.Listener, s chan<- Source) {
 	err := srv.Serve(l)
 	if err != nil {
 		return
