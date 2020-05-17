@@ -97,7 +97,7 @@ func (l *lurker) Listen() (c <-chan Source, err error) {
 	for _, listener := range l.listeners {
 		go listener.Listen(l.sources)
 	}
-
+	return l.sources, nil
 }
 
 func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Source) (err error) {
