@@ -9,7 +9,6 @@ import (
 type udpListener struct {
 	ctx         context.Context
 	cancel      context.CancelFunc
-	source      chan Source
 	port        int
 	mappingPort int
 	nat         bool //unused now
@@ -32,24 +31,23 @@ func NewUDPListener(cfg *Config) Listener {
 		cancel: nil,
 		nat:    cfg.NAT,
 		port:   cfg.UDP,
-		source: make(chan Source),
 	}
 	udp.ctx, udp.cancel = context.WithCancel(context.TODO())
 	return udp
 }
 
 // Listen ...
-func (l *udpListener) Listen() (c <-chan Source, err error) {
+func (l *udpListener) Listen(c chan<- Source) (err error) {
 	udpAddr := LocalUDPAddr(l.port)
 	fmt.Println("listen udp on address:", udpAddr.String())
 	l.udpListener, err = net.ListenUDP("udp", udpAddr)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	go listenUDP(l.ctx, l.udpListener, l.source)
+	go listenUDP(l.ctx, l.udpListener, c)
 
-	return l.source, nil
+	return nil
 }
 
 func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (err error) {

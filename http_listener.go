@@ -11,7 +11,6 @@ import (
 type httpListener struct {
 	ctx         context.Context
 	cancel      context.CancelFunc
-	source      chan Source
 	port        int
 	mappingPort int
 	nat         nat.NAT
@@ -22,7 +21,7 @@ type httpListener struct {
 }
 
 // Listen ...
-func (l *httpListener) Listen() (c <-chan Source, err error) {
+func (l *httpListener) Listen(c chan<- Source) (err error) {
 	tcpAddr := LocalTCPAddr(l.port)
 	if l.cfg.Secret != nil {
 		l.tcpListener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.Secret)
@@ -30,10 +29,10 @@ func (l *httpListener) Listen() (c <-chan Source, err error) {
 		l.tcpListener, err = reuse.ListenTCP("tcp", tcpAddr)
 	}
 	if err != nil {
-		return nil, err
+		return err
 	}
 	l.srv = &http.Server{Handler: l.handler}
-	go listenHTTP(l.ctx, l.srv, l.tcpListener, l.source)
+	go listenHTTP(l.ctx, l.srv, l.tcpListener, c)
 
 	return
 }
@@ -54,7 +53,6 @@ func NewHTTPListener(cfg *Config, handler http.Handler) Listener {
 		handler: handler,
 		port:    cfg.HTTP,
 		cfg:     cfg,
-		source:  make(chan Source),
 	}
 	h.ctx, h.cancel = context.WithCancel(context.TODO())
 	return h

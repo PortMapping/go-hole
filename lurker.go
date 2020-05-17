@@ -7,17 +7,14 @@ import (
 	"net"
 	"time"
 
-	"github.com/portmapping/go-reuse"
 	"github.com/portmapping/lurker/nat"
-
-	p2pnat "github.com/libp2p/go-nat"
 )
 
 const maxByteSize = 65520
 
 // Listener ...
 type Listener interface {
-	Listen() (c <-chan Source, err error)
+	Listen(chan<- Source) (err error)
 	Stop() error
 }
 
@@ -43,7 +40,7 @@ type lurker struct {
 	cfg         *Config
 	nat         nat.NAT
 	holePort    int
-	client      chan Source
+	sources     chan Source
 	timeout     time.Duration
 }
 
@@ -75,7 +72,7 @@ func (l *lurker) Stop() error {
 func New(cfg *Config) Lurker {
 	o := &lurker{
 		cfg:     cfg,
-		client:  make(chan Source, 5),
+		sources: make(chan Source, 5),
 		timeout: DefaultTimeout,
 	}
 	return o
@@ -97,49 +94,10 @@ func (l *lurker) Listen() (c <-chan Source, err error) {
 		}
 	}()
 
-	if l.cfg.TCP != 0 {
-		tcpAddr := LocalTCPAddr(l.cfg.TCP)
-		if l.cfg.Secret != nil {
-			l.tcpListener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.Secret)
-		} else {
-			l.tcpListener, err = reuse.ListenTCP("tcp", tcpAddr)
-		}
-		if err != nil {
-			return nil, err
-		}
-		go listenTCP(l.ctx, l.tcpListener, l.client)
-
-		if !l.cfg.NAT {
-			return l.client, nil
-		}
-
-		l.nat, err = nat.FromLocal(l.cfg.TCP)
-		if err != nil {
-			log.Debugw("nat error", "error", err)
-			if err == p2pnat.ErrNoNATFound {
-				fmt.Println("listen tcp on address:", tcpAddr.String())
-			}
-			l.cfg.NAT = false
-		} else {
-			extPort, err := l.nat.Mapping()
-			if err != nil {
-				log.Debugw("nat mapping error", "error", err)
-				l.cfg.NAT = false
-				return l.client, nil
-			}
-			l.holePort = extPort
-
-			address, err := l.nat.GetExternalAddress()
-			if err != nil {
-				log.Debugw("get external address error", "error", err)
-				l.cfg.NAT = false
-				return l.client, nil
-			}
-			addr := ParseSourceAddr("tcp", address, extPort)
-			fmt.Println("mapping on address:", addr.String())
-		}
+	for _, listener := range l.listeners {
+		go listener.Listen(l.sources)
 	}
-	return l.client, nil
+
 }
 
 func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Source) (err error) {

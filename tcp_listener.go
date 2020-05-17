@@ -13,7 +13,6 @@ import (
 type tcpListener struct {
 	ctx         context.Context
 	cancel      context.CancelFunc
-	source      chan Source
 	port        int
 	mappingPort int
 	nat         nat.NAT
@@ -28,14 +27,13 @@ func NewTCPListener(cfg *Config) Listener {
 		cancel: nil,
 		port:   cfg.TCP,
 		cfg:    cfg,
-		source: make(chan Source),
 	}
 	tcp.ctx, tcp.cancel = context.WithCancel(context.TODO())
 	return tcp
 }
 
 // Listen ...
-func (l *tcpListener) Listen() (c <-chan Source, err error) {
+func (l *tcpListener) Listen(c chan<- Source) (err error) {
 	tcpAddr := LocalTCPAddr(l.port)
 	if l.cfg.Secret != nil {
 		l.tcpListener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.Secret)
@@ -43,12 +41,12 @@ func (l *tcpListener) Listen() (c <-chan Source, err error) {
 		l.tcpListener, err = reuse.ListenTCP("tcp", tcpAddr)
 	}
 	if err != nil {
-		return nil, err
+		return err
 	}
-	go listenTCP(l.ctx, l.tcpListener, l.source)
+	go listenTCP(l.ctx, l.tcpListener, c)
 
 	if !l.cfg.NAT {
-		return l.source, nil
+		return nil
 	}
 
 	l.nat, err = nat.FromLocal(l.cfg.TCP)
@@ -63,7 +61,7 @@ func (l *tcpListener) Listen() (c <-chan Source, err error) {
 		if err != nil {
 			log.Debugw("nat mapping error", "error", err)
 			l.cfg.NAT = false
-			return l.source, nil
+			return nil
 		}
 		l.mappingPort = extPort
 
@@ -71,7 +69,7 @@ func (l *tcpListener) Listen() (c <-chan Source, err error) {
 		if err != nil {
 			log.Debugw("get external address error", "error", err)
 			l.cfg.NAT = false
-			return l.source, nil
+			return nil
 		}
 		addr := ParseSourceAddr("tcp", address, extPort)
 		fmt.Println("mapping on address:", addr.String())
