@@ -229,7 +229,10 @@ func tcpRW(s *source, conn net.Conn, data []byte) (n int, err error) {
 			return 0, err
 		}
 	}
-	_, err = conn.Write(s.service.JSON())
+	handshake := Handshake{
+		Type: HandshakeTypePing,
+	}
+	_, err = conn.Write(handshake.JSON())
 	if err != nil {
 		log.Debugw("debug|tcpRW|Write", "error", err)
 		return 0, err
