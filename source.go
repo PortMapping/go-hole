@@ -99,12 +99,12 @@ func (s source) String() string {
 func (s *source) TryConnect() error {
 	log.Infow("connect to", "ip", s.addr.String())
 	var err error
-	if err = tryPublicConnect(s); err == nil {
-		log.Debugw("tryPublicConnect|success")
+	if err = tryPublicNetworkConnect(s); err == nil {
+		log.Debugw("tryPublicNetworkConnect|success")
 		return nil
 	}
 
-	log.Debugw("tryPublicConnect|error", "error", err)
+	log.Debugw("tryPublicNetworkConnect|error", "error", err)
 	if err = tryTCP(s); err == nil {
 		log.Debugw("tryTCP|success")
 		return nil
@@ -129,11 +129,11 @@ func (s *source) TryConnect() error {
 
 }
 
-func tryPublicConnect(s *source) error {
+func tryPublicNetworkConnect(s *source) error {
 	switch s.addr.Network() {
-	case "tcp":
+	case "tcp", "tcp4", "tcp6":
 		return tryTCP(s)
-	case "udp":
+	case "udp", "udp4", "udp6":
 		return tryUDP(s)
 	default:
 	}
