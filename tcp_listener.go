@@ -86,7 +86,7 @@ func (l *tcpListener) Stop() error {
 	return nil
 }
 
-func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Source) (err error) {
+func (l *tcpListener) listenTCP(ctx context.Context, listener net.Listener, cli chan<- Source) (err error) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -97,12 +97,12 @@ func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Source) (e
 				log.Debugw("debug|getClientFromTCP|Accept", "error", err)
 				continue
 			}
-			go getClientFromTCP(ctx, acceptTCP, cli)
+			go l.getClientFromTCP(ctx, acceptTCP, cli)
 		}
 	}
 }
 
-func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) error {
+func (l *tcpListener) getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) error {
 	close := true
 	defer func() {
 		if close {

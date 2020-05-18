@@ -28,6 +28,11 @@ type Handshake struct {
 	Type RequestType `json:"type"`
 }
 
+// HandshakeAble ...
+type HandshakeAble interface {
+	Ping() error
+}
+
 // HandshakeRequest ...
 type HandshakeRequest struct {
 	ProtocolVersion Version `json:"protocol_version"`
@@ -109,4 +114,9 @@ func (h Handshake) JSON() []byte {
 		return nil
 	}
 	return marshal
+}
+
+// ProcessHandshake ...
+func ProcessHandshake(able HandshakeAble) {
+
 }
