@@ -49,7 +49,7 @@ func (l *tcpListener) Listen(c chan<- Source) (err error) {
 		return nil
 	}
 
-	l.nat, err = nat.FromLocal(l.cfg.TCP)
+	l.nat, err = nat.FromLocal("tcp", l.cfg.TCP)
 	if err != nil {
 		log.Debugw("nat error", "error", err)
 		if err == p2pnat.ErrNoNATFound {

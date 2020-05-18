@@ -1,7 +1,6 @@
 package lurker
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -15,7 +14,6 @@ const maxByteSize = 65520
 // Listener ...
 type Listener interface {
 	Listen(chan<- Source) (err error)
-	Ping()
 	Stop() error
 }
 
