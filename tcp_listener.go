@@ -58,11 +58,14 @@ func (t *tcpHandshake) Connect() error {
 
 	netAddr := ParseNetAddr(t.conn.RemoteAddr())
 	log.Debugw("debug|getClientFromTCP|ParseNetAddr", netAddr)
-	response, err := EncodeHandshakeResponse(r.ProtocolVersion)
-	if err != nil {
-		return err
-	}
-	_, err = t.conn.Write(response)
+	var resp HandshakeResponse
+	resp.Status = HandshakeStatusSuccess
+	resp.Data = []byte("Connected")
+	//response, err := EncodeHandshakeResponse(r.ProtocolVersion, &resp)
+	//if err != nil {
+	//	return err
+	//}
+	_, err = t.conn.Write(resp.JSON())
 	if err != nil {
 		log.Debugw("debug|getClientFromTCP|write", "error", err)
 		return err

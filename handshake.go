@@ -115,9 +115,12 @@ func encodeHandshakeRequestV1(request *HandshakeRequest) ([]byte, error) {
 }
 
 // EncodeHandshakeResponse ...
-func EncodeHandshakeResponse(ver Version) ([]byte, error) {
-	var r HandshakeResponse
-	return encodeHandshakeResponseV1(&r)
+func EncodeHandshakeResponse(ver Version, r *HandshakeResponse) ([]byte, error) {
+	switch ver {
+	default:
+
+	}
+	return encodeHandshakeResponseV1(r)
 }
 
 func encodeHandshakeResponseV1(r *HandshakeResponse) ([]byte, error) {
