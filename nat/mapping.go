@@ -9,14 +9,17 @@ import (
 	"go.uber.org/atomic"
 )
 
+const description = "mapping_port"
+
 // DefaultTimeOut ...
 var DefaultTimeOut time.Duration = 60
 
 type natClient struct {
-	stop    *atomic.Bool
-	timeout time.Duration
-	nat     nat.NAT
-	port    int
+	stop     *atomic.Bool
+	timeout  time.Duration
+	nat      nat.NAT
+	port     int
+	protocol string
 }
 
 func defaultNAT() nat.NAT {
@@ -28,27 +31,29 @@ func defaultNAT() nat.NAT {
 }
 
 // FromLocal ...
-func FromLocal(port int) (nat NAT, err error) {
+func FromLocal(protocol string, port int) (nat NAT, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			err = e.(error)
 		}
 	}()
 	return &natClient{
-		stop:    atomic.NewBool(false),
-		nat:     defaultNAT(),
-		timeout: DefaultTimeOut,
-		port:    port,
+		stop:     atomic.NewBool(false),
+		nat:      defaultNAT(),
+		timeout:  DefaultTimeOut,
+		protocol: protocol,
+		port:     port,
 	}, nil
 }
 
 // New ...
-func New(n nat.NAT, port int) NAT {
+func New(n nat.NAT, protocol string, port int) NAT {
 	return &natClient{
-		stop:    atomic.NewBool(false),
-		nat:     n,
-		timeout: DefaultTimeOut,
-		port:    port,
+		stop:     atomic.NewBool(false),
+		nat:      n,
+		timeout:  DefaultTimeOut,
+		protocol: protocol,
+		port:     port,
 	}
 }
 
@@ -60,7 +65,7 @@ func (n *natClient) SetTimeOut(t int) {
 // Mapping ...
 func (n *natClient) Mapping() (port int, err error) {
 	n.stop.Store(false)
-	eport, err := n.nat.AddPortMapping("tcp", n.port, "mapping", n.timeout)
+	eport, err := n.nat.AddPortMapping(n.protocol, n.port, description, n.timeout)
 	if err != nil {
 		return 0, err
 	}
@@ -81,7 +86,7 @@ func (n *natClient) Mapping() (port int, err error) {
 			if n.stop.Load() {
 				return
 			}
-			_, err = n.nat.AddPortMapping("tcp", n.port, "http", n.timeout)
+			_, err = n.nat.AddPortMapping(n.protocol, n.port, description, n.timeout)
 			if err != nil {
 				panic(err)
 			}
