@@ -2,38 +2,44 @@ package lurker
 
 import (
 	"encoding/json"
-	"errors"
 	"net"
 )
 
 // HandshakeStatus ...
 type HandshakeStatus int
 
+// HandshakeStatusSuccess ...
+const HandshakeStatusSuccess HandshakeStatus = 0x01
+
+// HandshakeStatusFailed ...
+const HandshakeStatusFailed HandshakeStatus = 0x00
+
 // Version ...
 type Version string
 
-// RequestType ...
-type RequestType int
+// HandshakeType ...
+type HandshakeType int
 
-// RequestTypePing ...
-const RequestTypePing RequestType = 0x01
+// HandshakeTypePing ...
+const HandshakeTypePing HandshakeType = 0x01
 
-// RequestTypeConnect ...
-const RequestTypeConnect RequestType = 0x02
+// HandshakeTypeConnect ...
+const HandshakeTypeConnect HandshakeType = 0x02
 
-// RequestTypeAdapter ...
-const RequestTypeAdapter RequestType = 0x03
+// HandshakeTypeAdapter ...
+const HandshakeTypeAdapter HandshakeType = 0x03
 
 // Handshake ...
 type Handshake struct {
-	Type RequestType `json:"type"`
+	Type HandshakeType `json:"type"`
 }
 
 // HandshakeAble ...
 type HandshakeAble interface {
+	Do() error
 	Ping() error
 	Connect() error
-	Adapter() error
+	ConnectCallback(func(f Source))
 }
 
 // HandshakeRequest ...
@@ -46,6 +52,15 @@ type HandshakeRequest struct {
 type HandshakeResponse struct {
 	Status HandshakeStatus `json:"status"`
 	Data   []byte          `json:"data"`
+}
+
+// JSON ...
+func (r *HandshakeResponse) JSON() []byte {
+	marshal, err := json.Marshal(r)
+	if err != nil {
+		return nil
+	}
+	return marshal
 }
 
 // Service ...
@@ -71,13 +86,12 @@ func ParseHandshake(data []byte) (Handshake, error) {
 }
 
 // DecodeHandshakeRequest ...
-func DecodeHandshakeRequest(data []byte) (Service, error) {
-	var r HandshakeRequest
-	err := json.Unmarshal(data, &r)
+func DecodeHandshakeRequest(data []byte, r *HandshakeRequest) (Service, error) {
+	err := json.Unmarshal(data, r)
 	if err != nil {
 		return Service{}, err
 	}
-	return decodeHandshakeRequestV1(&r)
+	return decodeHandshakeRequestV1(r)
 }
 
 func decodeHandshakeRequestV1(request *HandshakeRequest) (Service, error) {
@@ -119,16 +133,15 @@ func (h Handshake) JSON() []byte {
 	return marshal
 }
 
-// ProcessHandshake ...
-func (h Handshake) ProcessHandshake(able HandshakeAble) (er error) {
+// Process ...
+func (h *Handshake) Process(able HandshakeAble) error {
 	switch h.Type {
-	case RequestTypePing:
+	case HandshakeTypePing:
 		return able.Ping()
-	case RequestTypeConnect:
+	case HandshakeTypeConnect:
 		return able.Connect()
-	case RequestTypeAdapter:
-		return able.Adapter()
-	default:
+	case HandshakeTypeAdapter:
+
 	}
-	return errors.New("wrong type")
+	return nil
 }
