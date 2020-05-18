@@ -105,21 +105,21 @@ func (s *source) TryConnect() error {
 	}
 
 	log.Debugw("tryPublicNetworkConnect|error", "error", err)
-	if err = tryTCP(s); err == nil {
-		log.Debugw("tryTCP|success")
+	if err = tryPublicNetworkTCP(s); err == nil {
+		log.Debugw("tryPublicNetworkTCP|success")
 		return nil
 	}
-	log.Debugw("tryTCP|error", "error", err)
+	log.Debugw("tryPublicNetworkTCP|error", "error", err)
 	if err = tryReverseTCP(s); err == nil {
 		log.Debugw("tryReverseTCP|success")
 		return nil
 	}
 	log.Debugw("tryReverseTCP|error", "error", err)
-	if err := tryUDP(s); err == nil {
-		log.Debugw("tryUDP|success")
+	if err := tryPublicNetworkUDP(s); err == nil {
+		log.Debugw("tryPublicNetworkUDP|success")
 		return nil
 	}
-	log.Debugw("tryUDP|error", "error", err)
+	log.Debugw("tryPublicNetworkUDP|error", "error", err)
 	if err := tryReverseUDP(s); err != nil {
 		log.Debugw("tryReverseUDP|success")
 		return nil
@@ -132,9 +132,9 @@ func (s *source) TryConnect() error {
 func tryPublicNetworkConnect(s *source) error {
 	switch s.addr.Network() {
 	case "tcp", "tcp4", "tcp6":
-		return tryTCP(s)
+		return tryPublicNetworkTCP(s)
 	case "udp", "udp4", "udp6":
-		return tryUDP(s)
+		return tryPublicNetworkUDP(s)
 	default:
 	}
 	return fmt.Errorf("network not supported")
@@ -207,11 +207,11 @@ func tryReverseUDP(s *source) error {
 	return nil
 }
 
-func tryUDP(s *source) error {
+func tryPublicNetworkUDP(s *source) error {
 	addr := ParseSourceAddr("udp", s.addr.IP, s.service.PortUDP)
 	udp, err := multiPortDialUDP(addr.UDP(), s.service.PortHole)
 	if err != nil {
-		log.Debugw("debug|tryUDP|DialUDP", "error", err)
+		log.Debugw("debug|tryPublicNetworkUDP|DialUDP", "error", err)
 		return err
 	}
 	data := make([]byte, maxByteSize)
@@ -280,12 +280,12 @@ func udpRW(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
 	return n, nil
 }
 
-func tryTCP(s *source) error {
+func tryPublicNetworkTCP(s *source) error {
 	addr := ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
 	//tcp, err := net.Dial("tcp", tcpAddr.String())
 	tcp, keep, err := multiPortDialTCP(addr.TCP(), 3*time.Second, s.service.PortHole)
 	if err != nil {
-		log.Debugw("debug|tryTCP|DialTCP", "error", err)
+		log.Debugw("debug|tryPublicNetworkTCP|DialTCP", "error", err)
 		return err
 	}
 	if !keep {
