@@ -2,6 +2,7 @@ package lurker
 
 import (
 	"encoding/json"
+	"errors"
 	"net"
 )
 
@@ -31,6 +32,8 @@ type Handshake struct {
 // HandshakeAble ...
 type HandshakeAble interface {
 	Ping() error
+	Connect() error
+	Adapter() error
 }
 
 // HandshakeRequest ...
@@ -117,6 +120,15 @@ func (h Handshake) JSON() []byte {
 }
 
 // ProcessHandshake ...
-func ProcessHandshake(able HandshakeAble) {
-
+func (h Handshake) ProcessHandshake(able HandshakeAble) (er error) {
+	switch h.Type {
+	case RequestTypePing:
+		return able.Ping()
+	case RequestTypeConnect:
+		return able.Connect()
+	case RequestTypeAdapter:
+		return able.Adapter()
+	default:
+	}
+	return errors.New("wrong type")
 }

@@ -124,13 +124,6 @@ func (l *tcpListener) getClientFromTCP(ctx context.Context, conn net.Conn, cli c
 		if err != nil {
 			return err
 		}
-		switch handshake.Type {
-		case RequestTypePing:
-
-		case RequestTypeConnect:
-		case RequestTypeAdapter:
-		default:
-		}
 
 		ip, port := ParseAddr(conn.RemoteAddr().String())
 		service, err := DecodeHandshakeRequest(data[:n])
