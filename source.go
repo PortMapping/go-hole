@@ -240,6 +240,7 @@ func tcpPing(s *source, conn net.Conn, data []byte) (n int, err error) {
 	handshake := HandshakeHead{
 		Type: HandshakeTypePing,
 	}
+
 	_, err = conn.Write(handshake.JSON())
 	if err != nil {
 		log.Debugw("debug|tcpPing|Write", "error", err)

@@ -30,8 +30,8 @@ func (t *tcpHandshake) ConnectCallback(f func(f Source)) {
 	t.connBack = f
 }
 
-// Connect ...
-func (t *tcpHandshake) Connect() error {
+// Reply ...
+func (t *tcpHandshake) Reply() error {
 	data := make([]byte, maxByteSize)
 	n, err := t.conn.Read(data)
 	if err != nil {
@@ -69,8 +69,8 @@ func (t *tcpHandshake) Connect() error {
 	return nil
 }
 
-// Ping ...
-func (t *tcpHandshake) Ping() error {
+// Pong ...
+func (t *tcpHandshake) Pong() error {
 	response := HandshakeResponse{
 		Status: HandshakeStatusSuccess,
 		Data:   []byte("PONG"),

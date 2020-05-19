@@ -37,8 +37,8 @@ type HandshakeHead struct {
 // HandshakeResponder ...
 type HandshakeResponder interface {
 	Do() error
-	Ping() error
-	Connect() error
+	Pong() error
+	Reply() error
 	ConnectCallback(func(f Source))
 }
 
@@ -156,9 +156,9 @@ func (h HandshakeHead) JSON() []byte {
 func (h *HandshakeHead) Process(able HandshakeResponder) error {
 	switch h.Type {
 	case HandshakeTypePing:
-		return able.Ping()
+		return able.Pong()
 	case HandshakeTypeConnect:
-		return able.Connect()
+		return able.Reply()
 	case HandshakeTypeAdapter:
 
 	}
