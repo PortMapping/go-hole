@@ -251,7 +251,6 @@ func tcpPing(s *source, conn net.Conn, data []byte) (n int, err error) {
 		}
 	}
 	n, err = conn.Read(data)
-	EncodeHandshakeResponse()
 	if err != nil {
 		log.Debugw("debug|tcpPing|ReadFromUDP", "error", err)
 		return 0, err

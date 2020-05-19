@@ -99,8 +99,8 @@ func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (e
 			//if err != nil {
 			//	return err
 			//}
-
-			service, err := DecodeHandshakeRequest(data[:n])
+			var req HandshakeRequest
+			service, err := DecodeHandshakeRequest(data[:n], &req)
 			if err != nil {
 				//waiting for next
 				log.Debugw("debug|listenUDP|ParseService", "error", err)
