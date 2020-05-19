@@ -119,11 +119,11 @@ func (s *source) TryConnect() error {
 	}
 	log.Debugw("tryReverseTCP|error", "error", err)
 	addr = ParseSourceAddr("udp", s.addr.IP, s.service.PortUDP)
-	if err := tryPublicNetworkUDP(s, addr); err == nil {
-		log.Debugw("tryPublicNetworkUDP|success")
+	if err := tryUDP(s, addr); err == nil {
+		log.Debugw("tryUDP|success")
 		return nil
 	}
-	log.Debugw("tryPublicNetworkUDP|error", "error", err)
+	log.Debugw("tryUDP|error", "error", err)
 	if err := tryReverseUDP(s); err != nil {
 		log.Debugw("tryReverseUDP|success")
 		return nil
@@ -134,16 +134,21 @@ func (s *source) TryConnect() error {
 }
 
 func tryPublicNetworkConnect(s *source) error {
-	switch s.addr.Network() {
-	case "tcp", "tcp4", "tcp6":
-		addr := ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
-		return tryTCP(s, addr)
-	case "udp", "udp4", "udp6":
-		addr := ParseSourceAddr("udp", s.addr.IP, s.service.PortUDP)
-		return tryPublicNetworkUDP(s, addr)
-	default:
+	//switch s.addr.Network() {
+	//case "tcp", "tcp4", "tcp6":
+	tcpAddr := ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
+	if err := tryTCP(s, tcpAddr); err != nil {
+		return err
 	}
-	return fmt.Errorf("network not supported")
+	s.support.List[PublicNetworkTCP] = true
+	//case "udp", "udp4", "udp6":
+	udpAddr := ParseSourceAddr("udp", s.addr.IP, s.service.PortUDP)
+	if err := tryUDP(s, udpAddr); err != nil {
+		return err
+	}
+	s.support.List[PublicNetworkUDP] = true
+	log.Debugw("tryPublicNetworkConnect|success")
+	return nil
 }
 
 func multiPortDialTCP(addr *net.TCPAddr, timeout time.Duration, lport int) (net.Conn, bool, error) {
@@ -213,11 +218,11 @@ func tryReverseUDP(s *source) error {
 	return nil
 }
 
-func tryPublicNetworkUDP(s *source, addr *Addr) error {
+func tryUDP(s *source, addr *Addr) error {
 
 	udp, err := multiPortDialUDP(addr.UDP(), s.service.PortHole)
 	if err != nil {
-		log.Debugw("debug|tryPublicNetworkUDP|DialUDP", "error", err)
+		log.Debugw("debug|tryUDP|DialUDP", "error", err)
 		return err
 	}
 	data := make([]byte, maxByteSize)
