@@ -132,7 +132,8 @@ func (s *source) TryConnect() error {
 func tryPublicNetworkConnect(s *source) error {
 	switch s.addr.Network() {
 	case "tcp", "tcp4", "tcp6":
-		return tryPublicNetworkTCP(s)
+		addr := ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
+		return tryPublicNetworkTCP(s, addr)
 	case "udp", "udp4", "udp6":
 		return tryPublicNetworkUDP(s)
 	default:
@@ -223,6 +224,7 @@ func tryPublicNetworkUDP(s *source) error {
 	_ = n
 	return nil
 }
+
 func tcpRW(s *source, conn net.Conn, data []byte) (n int, err error) {
 	if s.timeout != 0 {
 		err = conn.SetWriteDeadline(time.Now().Add(s.timeout))
@@ -280,9 +282,7 @@ func udpRW(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
 	return n, nil
 }
 
-func tryPublicNetworkTCP(s *source) error {
-	addr := ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
-	//tcp, err := net.Dial("tcp", tcpAddr.String())
+func tryPublicNetworkTCP(s *source, addr Addr) error {
 	tcp, keep, err := multiPortDialTCP(addr.TCP(), 3*time.Second, s.service.PortHole)
 	if err != nil {
 		log.Debugw("debug|tryPublicNetworkTCP|DialTCP", "error", err)
