@@ -237,7 +237,7 @@ func tcpPing(s *source, conn net.Conn, data []byte) (n int, err error) {
 			return 0, err
 		}
 	}
-	handshake := HandshakeHeader{
+	handshake := HandshakeHead{
 		Type: HandshakeTypePing,
 	}
 	_, err = conn.Write(handshake.JSON())

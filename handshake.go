@@ -34,12 +34,19 @@ type HandshakeHead struct {
 	Type HandshakeType `json:"type"`
 }
 
-// HandshakeAble ...
-type HandshakeAble interface {
+// HandshakeResponder ...
+type HandshakeResponder interface {
 	Do() error
 	Ping() error
 	Connect() error
 	ConnectCallback(func(f Source))
+}
+
+// HandshakeRequester ...
+type HandshakeRequester interface {
+	Ping() error
+	Connect() error
+	Adapter() error
 }
 
 // HandshakeRequest ...
@@ -76,11 +83,11 @@ type Service struct {
 }
 
 // ParseHandshake ...
-func ParseHandshake(data []byte) (HandshakeHeader, error) {
-	var h HandshakeHeader
+func ParseHandshake(data []byte) (HandshakeHead, error) {
+	var h HandshakeHead
 	err := json.Unmarshal(data, &h)
 	if err != nil {
-		return HandshakeHeader{}, err
+		return HandshakeHead{}, err
 	}
 	return h, nil
 }
@@ -137,7 +144,7 @@ func decodeHandshakeResponse(data []byte) (*HandshakeResponse, error) {
 }
 
 // JSON ...
-func (h HandshakeHeader) JSON() []byte {
+func (h HandshakeHead) JSON() []byte {
 	marshal, err := json.Marshal(h)
 	if err != nil {
 		return nil
@@ -146,7 +153,7 @@ func (h HandshakeHeader) JSON() []byte {
 }
 
 // Process ...
-func (h *HandshakeHeader) Process(able HandshakeAble) error {
+func (h *HandshakeHead) Process(able HandshakeResponder) error {
 	switch h.Type {
 	case HandshakeTypePing:
 		return able.Ping()
