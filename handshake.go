@@ -127,6 +127,15 @@ func encodeHandshakeResponseV1(r *HandshakeResponse) ([]byte, error) {
 	return json.Marshal(r)
 }
 
+func decodeHandshakeResponse(data []byte) (*HandshakeResponse, error) {
+	var resp HandshakeResponse
+	err := json.Unmarshal(data, &resp)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
 // JSON ...
 func (h Handshake) JSON() []byte {
 	marshal, err := json.Marshal(h)

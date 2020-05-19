@@ -175,7 +175,7 @@ func tryReverseTCP(s *source) error {
 	s.service.ID = GlobalID
 	s.service.KeepConnect = keep
 	data := make([]byte, maxByteSize)
-	n, err := tcpRW(s, tcp, data)
+	n, err := tcpPing(s, tcp, data)
 	if err != nil {
 		return err
 	}
@@ -203,7 +203,7 @@ func tryReverseUDP(s *source) error {
 	}
 	//s.service.ExtData = []byte("tryReverseUDP")
 	data := make([]byte, maxByteSize)
-	n, err := udpRW(s, udp, data)
+	n, err := udpPing(s, udp, data)
 	if err != nil {
 		return err
 	}
@@ -220,7 +220,7 @@ func tryPublicNetworkUDP(s *source, addr *Addr) error {
 		return err
 	}
 	data := make([]byte, maxByteSize)
-	n, err := udpRW(s, udp, data)
+	n, err := udpPing(s, udp, data)
 	if err != nil {
 		return err
 	}
@@ -229,7 +229,7 @@ func tryPublicNetworkUDP(s *source, addr *Addr) error {
 	return nil
 }
 
-func tcpRW(s *source, conn net.Conn, data []byte) (n int, err error) {
+func tcpPing(s *source, conn net.Conn, data []byte) (n int, err error) {
 	if s.timeout != 0 {
 		err = conn.SetWriteDeadline(time.Now().Add(s.timeout))
 		if err != nil {
@@ -241,7 +241,7 @@ func tcpRW(s *source, conn net.Conn, data []byte) (n int, err error) {
 	}
 	_, err = conn.Write(handshake.JSON())
 	if err != nil {
-		log.Debugw("debug|tcpRW|Write", "error", err)
+		log.Debugw("debug|tcpPing|Write", "error", err)
 		return 0, err
 	}
 	if s.timeout != 0 {
@@ -251,14 +251,15 @@ func tcpRW(s *source, conn net.Conn, data []byte) (n int, err error) {
 		}
 	}
 	n, err = conn.Read(data)
+	EncodeHandshakeResponse()
 	if err != nil {
-		log.Debugw("debug|tcpRW|ReadFromUDP", "error", err)
+		log.Debugw("debug|tcpPing|ReadFromUDP", "error", err)
 		return 0, err
 	}
 	log.Infow("tcp received", "data", string(data[:n]))
 	return n, nil
 }
-func udpRW(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
+func udpPing(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
 	if s.timeout != 0 {
 		err = conn.SetWriteDeadline(time.Now().Add(s.timeout))
 		if err != nil {
@@ -267,7 +268,7 @@ func udpRW(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
 	}
 	_, err = conn.Write(s.service.JSON())
 	if err != nil {
-		log.Debugw("debug|udpRW|Write", "error", err)
+		log.Debugw("debug|udpPing|Write", "error", err)
 		return 0, err
 	}
 	//data := make([]byte, maxByteSize)
@@ -279,7 +280,7 @@ func udpRW(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
 	}
 	n, remote, errR := conn.ReadFromUDP(data)
 	if errR != nil {
-		log.Debugw("debug|udpRW|ReadFromUDP", "error", errR)
+		log.Debugw("debug|udpPing|ReadFromUDP", "error", errR)
 		return 0, errR
 	}
 	log.Infow("udp received", "remote info", remote.String(), "data", string(data[:n]))
@@ -298,7 +299,7 @@ func tryPublicNetworkTCP(s *source, addr *Addr) error {
 	s.service.ID = GlobalID
 	s.service.KeepConnect = true
 	data := make([]byte, maxByteSize)
-	n, err := tcpRW(s, tcp, data)
+	n, err := tcpPing(s, tcp, data)
 	if err != nil {
 		return err
 	}
