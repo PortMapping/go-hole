@@ -107,11 +107,12 @@ func (s *source) TryConnect() error {
 
 	log.Debugw("tryPublicNetworkConnect|error", "error", err)
 	addr = ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
-	if err = tryPublicNetworkTCP(s, addr); err == nil {
-		log.Debugw("tryPublicNetworkTCP|success")
+	if err = tryTCP(s, addr); err == nil {
+		log.Debugw("tryTCP|success")
 		return nil
 	}
-	log.Debugw("tryPublicNetworkTCP|error", "error", err)
+	log.Debugw("tryTCP|error", "error", err)
+
 	if err = tryReverseTCP(s); err == nil {
 		log.Debugw("tryReverseTCP|success")
 		return nil
@@ -136,7 +137,7 @@ func tryPublicNetworkConnect(s *source) error {
 	switch s.addr.Network() {
 	case "tcp", "tcp4", "tcp6":
 		addr := ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
-		return tryPublicNetworkTCP(s, addr)
+		return tryTCP(s, addr)
 	case "udp", "udp4", "udp6":
 		addr := ParseSourceAddr("udp", s.addr.IP, s.service.PortUDP)
 		return tryPublicNetworkUDP(s, addr)
@@ -236,7 +237,7 @@ func tcpPing(s *source, conn net.Conn, data []byte) (n int, err error) {
 			return 0, err
 		}
 	}
-	handshake := Handshake{
+	handshake := HandshakeHeader{
 		Type: HandshakeTypePing,
 	}
 	_, err = conn.Write(handshake.JSON())
@@ -286,10 +287,10 @@ func udpPing(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
 	return n, nil
 }
 
-func tryPublicNetworkTCP(s *source, addr *Addr) error {
+func tryTCP(s *source, addr *Addr) error {
 	tcp, keep, err := multiPortDialTCP(addr.TCP(), 3*time.Second, s.service.PortHole)
 	if err != nil {
-		log.Debugw("debug|tryPublicNetworkTCP|DialTCP", "error", err)
+		log.Debugw("debug|tryTCP|DialTCP", "error", err)
 		return err
 	}
 	if !keep {
