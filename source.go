@@ -99,13 +99,15 @@ func (s source) String() string {
 func (s *source) TryConnect() error {
 	log.Infow("connect to", "ip", s.addr.String())
 	var err error
+	var addr *Addr
 	if err = tryPublicNetworkConnect(s); err == nil {
 		log.Debugw("tryPublicNetworkConnect|success")
 		return nil
 	}
 
 	log.Debugw("tryPublicNetworkConnect|error", "error", err)
-	if err = tryPublicNetworkTCP(s); err == nil {
+	addr = ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
+	if err = tryPublicNetworkTCP(s, addr); err == nil {
 		log.Debugw("tryPublicNetworkTCP|success")
 		return nil
 	}
@@ -115,7 +117,8 @@ func (s *source) TryConnect() error {
 		return nil
 	}
 	log.Debugw("tryReverseTCP|error", "error", err)
-	if err := tryPublicNetworkUDP(s); err == nil {
+	addr = ParseSourceAddr("udp", s.addr.IP, s.service.PortUDP)
+	if err := tryPublicNetworkUDP(s, addr); err == nil {
 		log.Debugw("tryPublicNetworkUDP|success")
 		return nil
 	}
@@ -135,7 +138,8 @@ func tryPublicNetworkConnect(s *source) error {
 		addr := ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
 		return tryPublicNetworkTCP(s, addr)
 	case "udp", "udp4", "udp6":
-		return tryPublicNetworkUDP(s)
+		addr := ParseSourceAddr("udp", s.addr.IP, s.service.PortUDP)
+		return tryPublicNetworkUDP(s, addr)
 	default:
 	}
 	return fmt.Errorf("network not supported")
@@ -208,8 +212,8 @@ func tryReverseUDP(s *source) error {
 	return nil
 }
 
-func tryPublicNetworkUDP(s *source) error {
-	addr := ParseSourceAddr("udp", s.addr.IP, s.service.PortUDP)
+func tryPublicNetworkUDP(s *source, addr *Addr) error {
+
 	udp, err := multiPortDialUDP(addr.UDP(), s.service.PortHole)
 	if err != nil {
 		log.Debugw("debug|tryPublicNetworkUDP|DialUDP", "error", err)
@@ -282,7 +286,7 @@ func udpRW(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
 	return n, nil
 }
 
-func tryPublicNetworkTCP(s *source, addr Addr) error {
+func tryPublicNetworkTCP(s *source, addr *Addr) error {
 	tcp, keep, err := multiPortDialTCP(addr.TCP(), 3*time.Second, s.service.PortHole)
 	if err != nil {
 		log.Debugw("debug|tryPublicNetworkTCP|DialTCP", "error", err)
