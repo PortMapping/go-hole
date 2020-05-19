@@ -197,6 +197,9 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) err
 		t := tcpHandshake{
 			conn: conn,
 		}
+		t.ConnectCallback(func(f Source) {
+			cli <- f
+		})
 		err := t.Do()
 		if err != nil {
 			return err
