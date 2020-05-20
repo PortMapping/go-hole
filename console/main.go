@@ -60,7 +60,7 @@ func main() {
 				KeepConnect: false,
 			}, source.Addr())
 			go func(id string, s lurker.Source) {
-				err := s.TryConnect()
+				err := s.Try()
 				fmt.Println("reverse connected:", err)
 				if err != nil {
 					return
@@ -98,7 +98,7 @@ func main() {
 			if ok {
 				return
 			}
-			err := s.TryConnect()
+			err := s.Try()
 			fmt.Println("target connected:", err)
 			if err != nil {
 				list.Store(s.Service().ID, s)

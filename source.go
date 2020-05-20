@@ -12,7 +12,8 @@ import (
 
 // Source ...
 type Source interface {
-	TryConnect() error
+	Connect() error
+	Try() error
 	Service() Service
 	Addr() Addr
 }
@@ -95,8 +96,8 @@ func (s source) String() string {
 	return s.addr.String()
 }
 
-// TryConnect ...
-func (s *source) TryConnect() error {
+// Try ...
+func (s *source) Try() error {
 	log.Infow("connect to", "ip", s.addr.String())
 	defer func() {
 		fmt.Println("supported", s.support.List)
@@ -134,6 +135,19 @@ func (s *source) TryConnect() error {
 
 }
 
+// Connect ...
+func (s *source) Connect() error {
+	log.Infow("connect to", "ip", s.addr.String())
+
+	var err error
+	//var addr *Addr
+	err = tryConnect(s, &s.addr)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func tryReverseNetworkConnect(s *source) error {
 	switch s.addr.Network() {
 	case "tcp", "tcp4", "tcp6":
@@ -144,6 +158,26 @@ func tryReverseNetworkConnect(s *source) error {
 		s.support.List[ProviderNetworkTCP] = true
 	case "udp", "udp4", "udp6":
 		udpAddr := ParseSourceAddr(s.addr.Protocol, s.addr.IP, s.addr.Port)
+		if err := tryUDP(s, udpAddr); err != nil {
+			return err
+		}
+		s.support.List[ProviderNetworkUDP] = true
+	default:
+		return fmt.Errorf("no reverse service found")
+	}
+	return nil
+}
+
+func tryConnect(s *source, addr *Addr) error {
+	switch s.addr.Network() {
+	case "tcp", "tcp4", "tcp6":
+		tcpAddr := ParseSourceAddr(addr.Protocol, addr.IP, addr.Port)
+		if err := tryTCP(s, tcpAddr); err != nil {
+			return err
+		}
+		s.support.List[ProviderNetworkTCP] = true
+	case "udp", "udp4", "udp6":
+		udpAddr := ParseSourceAddr(addr.Protocol, addr.IP, addr.Port)
 		if err := tryUDP(s, udpAddr); err != nil {
 			return err
 		}
@@ -243,7 +277,6 @@ func tryReverseUDP(s *source) error {
 }
 
 func tryUDP(s *source, addr *Addr) error {
-
 	udp, err := multiPortDialUDP(addr.UDP(), s.service.PortHole)
 	if err != nil {
 		log.Debugw("debug|tryUDP|DialUDP", "error", err)
