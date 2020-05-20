@@ -3,7 +3,6 @@ package lurker
 import (
 	"encoding/json"
 	"fmt"
-	"net"
 	"time"
 
 	"github.com/portmapping/lurker/nat"
@@ -14,6 +13,7 @@ const maxByteSize = 65520
 // Listener ...
 type Listener interface {
 	Listen(chan<- Source) (err error)
+	MappingPort() int
 	Stop() error
 }
 
@@ -28,30 +28,20 @@ type ListenResponse struct {
 type Lurker interface {
 	Listen() (c <-chan Source, err error)
 	RegisterListener(name string, listener Listener)
-	NAT() nat.NAT
 	Config() Config
-	PortHole() int
 }
 
 type lurker struct {
 	listeners map[string]Listener
-
-	tcpListener net.Listener
-	cfg         *Config
-	nat         nat.NAT
-	holePort    int
-	sources     chan Source
-	timeout     time.Duration
+	cfg       *Config
+	nat       nat.NAT
+	sources   chan Source
+	timeout   time.Duration
 }
 
 // PortUDP ...
 func (l *lurker) Config() Config {
 	return *l.cfg
-}
-
-// PortHole ...
-func (l *lurker) PortHole() int {
-	return l.holePort
 }
 
 // NAT ...

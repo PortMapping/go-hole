@@ -171,7 +171,7 @@ func tryConnect(s *source, addr *Addr) error {
 	switch s.addr.Network() {
 	case "tcp", "tcp4", "tcp6":
 		//tcpAddr := ParseSourceAddr(addr.Protocol, addr.IP, addr.Port)
-		tcpAddr, _, err := multiPortDialTCP(addr.TCP(), s.timeout, 0)
+		tcpAddr, _, err := multiPortDialTCP(addr.TCP(), s.timeout, s.service.PortHole)
 		if err != nil {
 			log.Debugw("debug|tryUDP|DialUDP", "error", err)
 			return err
