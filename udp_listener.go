@@ -89,7 +89,18 @@ type udpHandshake struct {
 
 // Pong ...
 func (h *udpHandshake) Pong() error {
-	panic("implement me")
+	response := HandshakeResponse{
+		Status: HandshakeStatusSuccess,
+		Data:   []byte("PONG"),
+	}
+	write, err := h.conn.WriteToUDP(response.JSON(), h.addr)
+	if err != nil {
+		return err
+	}
+	if write == 0 {
+		log.Warnw("write pong", "written", 0)
+	}
+	return nil
 }
 
 // Reply ...
@@ -123,7 +134,7 @@ func (h *udpHandshake) Reply() error {
 	var resp HandshakeResponse
 	resp.Status = HandshakeStatusSuccess
 	resp.Data = []byte("Connected")
-	_, err = h.conn.Write(resp.JSON())
+	_, err = h.conn.WriteToUDP(resp.JSON(), h.addr)
 	if err != nil {
 		log.Debugw("debug|getClientFromTCP|write", "error", err)
 		return err
