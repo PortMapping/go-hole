@@ -104,13 +104,11 @@ func (s *source) TryConnect() error {
 	var err error
 	//var addr *Addr
 	if err = tryPublicNetworkConnect(s); err != nil {
-		log.Debugw("tryPublicNetworkConnect|success")
-		return err
+		log.Debugw("debug|tryPublicNetworkConnect|error")
 	}
 
-	if err := tryReverseNetworkConnect(s); err == nil {
-		log.Debugw("tryReverseNetworkConnect|success")
-		return err
+	if err := tryReverseNetworkConnect(s); err != nil {
+		log.Debugw("debug|tryReverseNetworkConnect|error")
 	}
 
 	//log.Debugw("tryPublicNetworkConnect|error", "error", err)
