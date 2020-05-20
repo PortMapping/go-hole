@@ -28,6 +28,7 @@ type ListenResponse struct {
 type Lurker interface {
 	Listen() (c <-chan Source, err error)
 	RegisterListener(name string, listener Listener)
+	Listener(name string) (Listener, bool)
 	Config() Config
 }
 
@@ -37,6 +38,12 @@ type lurker struct {
 	nat       nat.NAT
 	sources   chan Source
 	timeout   time.Duration
+}
+
+// Listener ...
+func (l *lurker) Listener(name string) (lis Listener, b bool) {
+	lis, b = l.listeners[name]
+	return
 }
 
 // PortUDP ...
