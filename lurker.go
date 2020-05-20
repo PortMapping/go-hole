@@ -71,9 +71,10 @@ func (l *lurker) Stop() error {
 // New ...
 func New(cfg *Config) Lurker {
 	o := &lurker{
-		cfg:     cfg,
-		sources: make(chan Source, 5),
-		timeout: DefaultTimeout,
+		cfg:       cfg,
+		sources:   make(chan Source, 5),
+		listeners: make(map[string]Listener),
+		timeout:   DefaultTimeout,
 	}
 	return o
 }
