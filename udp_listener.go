@@ -18,6 +18,11 @@ type udpListener struct {
 	cfg         *Config
 }
 
+// MappingPort ...
+func (l *udpListener) MappingPort() int {
+	return l.mappingPort
+}
+
 // Stop ...
 func (l *udpListener) Stop() error {
 	if l.cancel != nil {

@@ -20,6 +20,11 @@ type tcpListener struct {
 	cfg         *Config
 }
 
+// MappingPort ...
+func (l *tcpListener) MappingPort() int {
+	return l.mappingPort
+}
+
 type tcpHandshake struct {
 	conn     net.Conn
 	connBack func(s Source)

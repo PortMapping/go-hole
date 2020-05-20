@@ -75,10 +75,10 @@ func main() {
 		addr, i := lurker.ParseAddr(address)
 		localAddr := net.IPv4zero
 		ispAddr := net.IPv4zero
-		if l.NAT() != nil {
-			localAddr, _ = l.NAT().GetInternalAddress()
-			ispAddr, _ = l.NAT().GetExternalAddress()
-		}
+		//if l.NAT() != nil {
+		//	localAddr, _ = l.NAT().GetInternalAddress()
+		//	ispAddr, _ = l.NAT().GetExternalAddress()
+		//}
 		fmt.Println("remote addr:", addr.String(), i)
 
 		s := lurker.NewSource(lurker.Service{
