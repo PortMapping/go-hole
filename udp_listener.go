@@ -81,58 +81,136 @@ func (l *udpListener) Listen(c chan<- Source) (err error) {
 	return nil
 }
 
-func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (err error) {
+type udpHandshake struct {
+	conn     *net.UDPConn
+	addr     *net.UDPAddr
+	connBack func(f Source)
+}
+
+// Pong ...
+func (h *udpHandshake) Pong() error {
+	panic("implement me")
+}
+
+// Reply ...
+func (h *udpHandshake) Reply() error {
 	data := make([]byte, maxByteSize)
+	n, err := h.conn.Read(data)
+	if err != nil {
+		log.Debugw("debug|getClientFromTCP|Read", "error", err)
+		return err
+	}
+	ip, port := ParseAddr(h.conn.RemoteAddr().String())
+	var r HandshakeRequest
+	service, err := DecodeHandshakeRequest(data[:n], &r)
+	if err != nil {
+		log.Debugw("debug|getClientFromTCP|ParseService", "error", err)
+		return err
+	}
+
+	c := source{
+		addr: Addr{
+			Protocol: h.addr.Network(),
+			IP:       ip,
+			Port:     port,
+		},
+		service: service,
+	}
+	h.connBack(&c)
+
+	netAddr := ParseNetAddr(h.addr)
+	log.Debugw("debug|getClientFromTCP|ParseNetAddr", netAddr)
+	var resp HandshakeResponse
+	resp.Status = HandshakeStatusSuccess
+	resp.Data = []byte("Connected")
+	_, err = h.conn.Write(resp.JSON())
+	if err != nil {
+		log.Debugw("debug|getClientFromTCP|write", "error", err)
+		return err
+	}
+	return nil
+}
+
+// ConnectCallback ...
+func (h *udpHandshake) ConnectCallback(f func(f Source)) {
+	h.connBack = f
+}
+
+// Do ...
+func (h *udpHandshake) Do() (err error) {
+	data := make([]byte, maxByteSize)
+	var n int
+	n, h.addr, err = h.conn.ReadFromUDP(data)
+	if err != nil {
+		//waiting for next
+		log.Debugw("debug|listenUDP|ReadFromUDP", "error", err)
+		return err
+	}
+	handshake, err := ParseHandshake(data[:n])
+	if err != nil {
+		return err
+	}
+	return handshake.Process(h)
+}
+
+func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (err error) {
+
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		default:
-			n, remoteAddr, err := listener.ReadFromUDP(data)
+			u := udpHandshake{
+				conn: listener,
+			}
+			u.ConnectCallback(func(f Source) {
+				cli <- f
+			})
+			err = u.Do()
 			if err != nil {
-				//waiting for next
-				log.Debugw("debug|listenUDP|ReadFromUDP", "error", err)
 				continue
 			}
+
+			return nil
 			//handshake, err := ParseHandshake(data)
 			//if err != nil {
 			//	return err
 			//}
-			var req HandshakeRequest
-			service, err := DecodeHandshakeRequest(data[:n], &req)
-			if err != nil {
-				//waiting for next
-				log.Debugw("debug|listenUDP|ParseService", "error", err)
-				continue
-			}
+			//var req HandshakeRequest
+			//service, err := DecodeHandshakeRequest(data[:n], &req)
+			//if err != nil {
+			//	//waiting for next
+			//	log.Debugw("debug|listenUDP|ParseService", "error", err)
+			//	continue
+			//}
 
-			netAddr := ParseNetAddr(remoteAddr)
-			c := source{
-				addr:    *netAddr,
-				service: service,
-			}
-			cli <- &c
-			err = tryReverseUDP(&source{
-				addr: *netAddr,
-				service: Service{
-					ID:          GlobalID,
-					KeepConnect: false,
-				}})
-			status := 0
-			if err != nil {
-				status = -1
-				log.Debugw("debug|listenUDP|tryReverseUDP", "error", err)
-			}
-
-			r := &ListenResponse{
-				Status: status,
-				Addr:   *netAddr,
-				Error:  err,
-			}
-			_, err = listener.WriteToUDP(r.JSON(), remoteAddr)
-			if err != nil {
-				return err
-			}
+			//netAddr := ParseNetAddr(remoteAddr)
+			//c := source{
+			//	addr:    *netAddr,
+			//	service: service,
+			//}
+			//cli <- &c
+			//err = tryReverseUDP(&source{
+			//	addr: *netAddr,
+			//	service: Service{
+			//		ID:          GlobalID,
+			//		KeepConnect: false,
+			//	}})
+			//status := 0
+			//if err != nil {
+			//	status = -1
+			//	log.Debugw("debug|listenUDP|tryReverseUDP", "error", err)
+			//}
+			//
+			//r := &ListenResponse{
+			//	Status: status,
+			//	Addr:   *netAddr,
+			//	Error:  err,
+			//}
+			//_, err = listener.WriteToUDP(r.JSON(), remoteAddr)
+			//if err != nil {
+			//	return err
+			//}
 		}
 	}
 }
