@@ -134,8 +134,8 @@ func (l *tcpListener) Listen(c chan<- Source) (err error) {
 	if err != nil {
 		return err
 	}
+	fmt.Println("listen tcp on address:", tcpAddr.String())
 	go listenTCP(l.ctx, l.tcpListener, c)
-
 	if !l.cfg.NAT {
 		return nil
 	}
@@ -144,7 +144,7 @@ func (l *tcpListener) Listen(c chan<- Source) (err error) {
 	if err != nil {
 		log.Debugw("nat error", "error", err)
 		if err == p2pnat.ErrNoNATFound {
-			fmt.Println("listen tcp on address:", tcpAddr.String())
+			//fmt.Println("listen tcp on address:", tcpAddr.String())
 		}
 		l.cfg.NAT = false
 	} else {
