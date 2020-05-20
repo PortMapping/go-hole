@@ -27,6 +27,7 @@ type ListenResponse struct {
 // Lurker ...
 type Lurker interface {
 	Listen() (c <-chan Source, err error)
+	RegisterListener(name string, listener Listener)
 	NAT() nat.NAT
 	Config() Config
 	PortHole() int

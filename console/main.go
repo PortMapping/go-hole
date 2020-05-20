@@ -32,6 +32,10 @@ func main() {
 		localAddr, _ = l.NAT().GetInternalAddress()
 		ispAddr, _ = l.NAT().GetExternalAddress()
 	}
+	t := lurker.NewTCPListener(cfg)
+	u := lurker.NewUDPListener(cfg)
+	l.RegisterListener("tcp", t)
+	l.RegisterListener("udp", u)
 	listener, err := l.Listen()
 	if err != nil {
 		panic(err)
