@@ -42,7 +42,6 @@ func NewUDPListener(cfg *Config) Listener {
 // Listen ...
 func (l *udpListener) Listen(c chan<- Source) (err error) {
 	udpAddr := LocalUDPAddr(l.port)
-	fmt.Println("listen udp on address:", udpAddr.String())
 	l.udpListener, err = net.ListenUDP("udp", udpAddr)
 	if err != nil {
 		return err
@@ -58,7 +57,7 @@ func (l *udpListener) Listen(c chan<- Source) (err error) {
 	if err != nil {
 		log.Debugw("nat error", "error", err)
 		if err == p2pnat.ErrNoNATFound {
-			fmt.Println("listen tcp on address:", udpAddr.String())
+			fmt.Println("listen udp on address:", udpAddr.String())
 		}
 		l.cfg.NAT = false
 	} else {
