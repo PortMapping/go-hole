@@ -402,7 +402,7 @@ func udpPing(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
 }
 
 func tryTCP(s *source, addr *Addr) error {
-	tcp, keep, err := multiPortDialTCP(addr.TCP(), 3*time.Second, s.service.PortHole)
+	tcp, keep, err := multiPortDialTCP(addr.TCP(), 5*time.Second, s.service.PortHole)
 	if err != nil {
 		log.Debugw("debug|tryTCP|DialTCP", "error", err)
 		return err

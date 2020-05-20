@@ -32,6 +32,12 @@ func (t *tcpHandshake) ConnectCallback(f func(f Source)) {
 
 // Reply ...
 func (t *tcpHandshake) Reply() error {
+	close := true
+	defer func() {
+		if close {
+			t.conn.Close()
+		}
+	}()
 	data := make([]byte, maxByteSize)
 	n, err := t.conn.Read(data)
 	if err != nil {
@@ -44,6 +50,9 @@ func (t *tcpHandshake) Reply() error {
 	if err != nil {
 		log.Debugw("debug|getClientFromTCP|ParseService", "error", err)
 		return err
+	}
+	if !service.KeepConnect {
+		close = false
 	}
 
 	c := source{
