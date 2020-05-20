@@ -152,7 +152,7 @@ func (l *tcpListener) Listen(c chan<- Source) (err error) {
 			return nil
 		}
 		addr := ParseSourceAddr("tcp", address, extPort)
-		fmt.Println("mapping on address:", addr.String())
+		fmt.Println("tcp mapping on address:", addr.String())
 	}
 	return
 }
