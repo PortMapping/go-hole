@@ -98,6 +98,9 @@ func (s source) String() string {
 // TryConnect ...
 func (s *source) TryConnect() error {
 	log.Infow("connect to", "ip", s.addr.String())
+	defer func() {
+		fmt.Println("supported", s.support.List)
+	}()
 	var err error
 	//var addr *Addr
 	if err = tryPublicNetworkConnect(s); err != nil {
