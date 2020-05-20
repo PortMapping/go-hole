@@ -170,13 +170,21 @@ func tryReverseNetworkConnect(s *source) error {
 func tryConnect(s *source, addr *Addr) error {
 	switch s.addr.Network() {
 	case "tcp", "tcp4", "tcp6":
-		tcpAddr := ParseSourceAddr(addr.Protocol, addr.IP, addr.Port)
-		if err := tryTCP(s, tcpAddr); err != nil {
+		//tcpAddr := ParseSourceAddr(addr.Protocol, addr.IP, addr.Port)
+		tcpAddr, _, err := multiPortDialTCP(addr.TCP(), s.timeout, 0)
+		if err != nil {
+			log.Debugw("debug|tryUDP|DialUDP", "error", err)
+			return err
+		}
+		data := make([]byte, maxByteSize)
+
+		if _, err := tcpConnect(s, tcpAddr, data); err != nil {
 			return err
 		}
 		s.support.List[ProviderNetworkTCP] = true
 	case "udp", "udp4", "udp6":
 		udpAddr := ParseSourceAddr(addr.Protocol, addr.IP, addr.Port)
+
 		if err := tryUDP(s, udpAddr); err != nil {
 			return err
 		}
