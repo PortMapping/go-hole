@@ -310,7 +310,7 @@ func tcpConnect(s *source, conn net.Conn, data []byte) (n int, err error) {
 	}
 	_, err = conn.Write(handshake.JSON())
 	if err != nil {
-		log.Debugw("debug|tcpPing|Write", "error", err)
+		log.Debugw("debug|tcpConnect|Write", "error", err)
 		return 0, err
 	}
 	if s.timeout != 0 {
@@ -321,7 +321,7 @@ func tcpConnect(s *source, conn net.Conn, data []byte) (n int, err error) {
 	}
 	n, err = conn.Read(data)
 	if err != nil {
-		log.Debugw("debug|tcpPing|ReadFromUDP", "error", err)
+		log.Debugw("debug|tcpConnect|Read", "error", err)
 		return 0, err
 	}
 	log.Infow("tcp received", "data", string(data[:n]))
