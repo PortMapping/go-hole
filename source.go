@@ -99,38 +99,58 @@ func (s source) String() string {
 func (s *source) TryConnect() error {
 	log.Infow("connect to", "ip", s.addr.String())
 	var err error
-	var addr *Addr
+	//var addr *Addr
 	if err = tryPublicNetworkConnect(s); err == nil {
 		log.Debugw("tryPublicNetworkConnect|success")
 		return nil
 	}
 
-	log.Debugw("tryPublicNetworkConnect|error", "error", err)
-	addr = ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
-	if err = tryTCP(s, addr); err == nil {
-		log.Debugw("tryTCP|success")
-		return nil
+	if err := tryReverseNetworkConnect(s); err == nil {
+		log.Debugw("tryReverseNetworkConnect|success")
+		return err
 	}
-	log.Debugw("tryTCP|error", "error", err)
 
-	if err = tryReverseTCP(s); err == nil {
-		log.Debugw("tryReverseTCP|success")
-		return nil
-	}
-	log.Debugw("tryReverseTCP|error", "error", err)
-	addr = ParseSourceAddr("udp", s.addr.IP, s.service.PortUDP)
-	if err := tryUDP(s, addr); err == nil {
-		log.Debugw("tryUDP|success")
-		return nil
-	}
-	log.Debugw("tryUDP|error", "error", err)
-	if err := tryReverseUDP(s); err != nil {
-		log.Debugw("tryReverseUDP|success")
-		return nil
-	}
-	log.Debugw("tryReverseUDP|error", "error", err)
+	//log.Debugw("tryPublicNetworkConnect|error", "error", err)
+	//addr = ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
+	//if err = tryTCP(s, addr); err == nil {
+	//	log.Debugw("tryTCP|success")
+	//	return nil
+	//}
+	//log.Debugw("tryTCP|error", "error", err)
+	//
+	//addr = ParseSourceAddr("udp", s.addr.IP, s.service.PortUDP)
+	//if err := tryUDP(s, addr); err == nil {
+	//	log.Debugw("tryUDP|success")
+	//	return nil
+	//}
+	//log.Debugw("tryUDP|error", "error", err)
+	//if err := tryReverseUDP(s); err != nil {
+	//	log.Debugw("tryReverseUDP|success")
+	//	return nil
+	//}
+	//log.Debugw("tryReverseUDP|error", "error", err)
 	return fmt.Errorf("all try connect is failed")
 
+}
+
+func tryReverseNetworkConnect(s *source) error {
+	switch s.addr.Network() {
+	case "tcp", "tcp4", "tcp6":
+		tcpAddr := ParseSourceAddr(s.addr.Protocol, s.addr.IP, s.addr.Port)
+		if err := tryTCP(s, tcpAddr); err != nil {
+			return err
+		}
+		s.support.List[ProviderNetworkTCP] = true
+	case "udp", "udp4", "udp6":
+		udpAddr := ParseSourceAddr(s.addr.Protocol, s.addr.IP, s.addr.Port)
+		if err := tryUDP(s, udpAddr); err != nil {
+			return err
+		}
+		s.support.List[ProviderNetworkUDP] = true
+	default:
+		return fmt.Errorf("no reverse service found")
+	}
+	return nil
 }
 
 func tryPublicNetworkConnect(s *source) error {
@@ -169,7 +189,7 @@ func multiPortDialTCP(addr *net.TCPAddr, timeout time.Duration, lport int) (net.
 func tryReverseTCP(s *source) error {
 	tcp, keep, err := multiPortDialTCP(s.addr.TCP(), 3*time.Second, s.service.PortHole)
 	if err != nil {
-		log.Debugw("debug|tryReverse|DialTCP", "error", err)
+		log.Debugw("debug|tryReverseNetworkConnect|DialTCP", "error", err)
 		return err
 	}
 	//never close
