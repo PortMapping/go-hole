@@ -54,7 +54,9 @@ func (t *tcpHandshake) Reply() error {
 		},
 		service: service,
 	}
-	t.connBack(&c)
+	if t.connBack != nil {
+		t.connBack(&c)
+	}
 
 	netAddr := ParseNetAddr(t.conn.RemoteAddr())
 	log.Debugw("debug|getClientFromTCP|ParseNetAddr", netAddr)
