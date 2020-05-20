@@ -290,6 +290,35 @@ func tryUDP(s *source, addr *Addr) error {
 	_ = n
 	return nil
 }
+func tcpConnect(s *source, conn net.Conn, data []byte) (n int, err error) {
+	if s.timeout != 0 {
+		err = conn.SetWriteDeadline(time.Now().Add(s.timeout))
+		if err != nil {
+			return 0, err
+		}
+	}
+	handshake := HandshakeHead{
+		Type: HandshakeTypeConnect,
+	}
+	_, err = conn.Write(handshake.JSON())
+	if err != nil {
+		log.Debugw("debug|tcpPing|Write", "error", err)
+		return 0, err
+	}
+	if s.timeout != 0 {
+		err = conn.SetReadDeadline(time.Now().Add(s.timeout))
+		if err != nil {
+			return 0, err
+		}
+	}
+	n, err = conn.Read(data)
+	if err != nil {
+		log.Debugw("debug|tcpPing|ReadFromUDP", "error", err)
+		return 0, err
+	}
+	log.Infow("tcp received", "data", string(data[:n]))
+	return n, nil
+}
 
 func tcpPing(s *source, conn net.Conn, data []byte) (n int, err error) {
 	if s.timeout != 0 {

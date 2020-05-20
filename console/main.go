@@ -98,7 +98,7 @@ func main() {
 			if ok {
 				return
 			}
-			err := s.Try()
+			err := s.Connect()
 			fmt.Println("target connected:", err)
 			if err != nil {
 				list.Store(s.Service().ID, s)
