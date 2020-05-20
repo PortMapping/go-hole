@@ -109,7 +109,7 @@ func (s *source) Try() error {
 	}
 
 	if err := tryReverseNetworkConnect(s); err != nil {
-		log.Debugw("debug|tryReverseNetworkConnect|error")
+		log.Debugw("debug|tryReverseNetworkConnect|error", "error", err)
 	}
 
 	//log.Debugw("tryPublicNetworkConnect|error", "error", err)
@@ -212,7 +212,7 @@ func tryPublicNetworkConnect(s *source) error {
 	} else {
 		s.support.List[PublicNetworkUDP] = true
 	}
-	log.Debugw("tryPublicNetworkConnect|success")
+	log.Debugw("tryPublicNetworkConnect|finished")
 	return nil
 }
 
@@ -309,6 +309,21 @@ func tcpConnect(s *source, conn net.Conn, data []byte) (n int, err error) {
 		Type: HandshakeTypeConnect,
 	}
 	_, err = conn.Write(handshake.JSON())
+	if err != nil {
+		log.Debugw("debug|tcpConnect|Write", "error", err)
+		return 0, err
+	}
+	if s.timeout != 0 {
+		err = conn.SetWriteDeadline(time.Now().Add(s.timeout))
+		if err != nil {
+			return 0, err
+		}
+	}
+	req, err := EncodeHandshakeRequest(s.service)
+	if err != nil {
+		return 0, err
+	}
+	_, err = conn.Write(req)
 	if err != nil {
 		log.Debugw("debug|tcpConnect|Write", "error", err)
 		return 0, err
