@@ -140,7 +140,6 @@ func (s *source) Connect() error {
 	log.Infow("connect to", "ip", s.addr.String())
 
 	var err error
-	//var addr *Addr
 	err = tryConnect(s, &s.addr)
 	if err != nil {
 		return err
