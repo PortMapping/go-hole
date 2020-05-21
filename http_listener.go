@@ -20,6 +20,12 @@ type httpListener struct {
 	cfg         *Config
 	handler     http.Handler
 	srv         *http.Server
+	ready       bool
+}
+
+// IsReady ...
+func (l *httpListener) IsReady() bool {
+	return l.ready
 }
 
 // MappingPort ...
@@ -70,6 +76,7 @@ func (l *httpListener) Listen(c chan<- Source) (err error) {
 		addr := ParseSourceAddr("tcp", address, extPort)
 		fmt.Println("http mapping on address:", addr.String())
 	}
+	l.ready = true
 	return
 }
 
