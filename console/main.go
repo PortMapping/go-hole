@@ -86,7 +86,7 @@ func main() {
 			Local:    localAddr,
 			PortUDP:  l.Config().UDP,
 			PortTCP:  l.Config().TCP,
-			PortHole: l.PortHole(),
+			PortHole: l.NetworkMappingPort(network),
 		}, lurker.Addr{
 			Protocol: network,
 			IP:       addr,
