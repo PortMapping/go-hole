@@ -16,6 +16,7 @@ type Source interface {
 	Try() error
 	Service() Service
 	Addr() Addr
+	SetMappingPort(string, int)
 }
 
 // Addr ...
@@ -26,10 +27,22 @@ type Addr struct {
 }
 
 type source struct {
-	service Service
-	addr    Addr
-	support Support
-	timeout time.Duration
+	mappingPortUDP int
+	mappingPortTCP int
+	service        Service
+	addr           Addr
+	support        Support
+	timeout        time.Duration
+}
+
+// SetMappingPort ...
+func (s *source) SetMappingPort(network string, i int) {
+	switch network {
+	case "tcp", "tcp6", "tcp4":
+		s.mappingPortTCP = i
+	case "udp", "udp6", "udp4":
+		s.mappingPortUDP = i
+	}
 }
 
 // service ...
@@ -171,7 +184,7 @@ func tryConnect(s *source, addr *Addr) error {
 	switch s.addr.Network() {
 	case "tcp", "tcp4", "tcp6":
 		//tcpAddr := ParseSourceAddr(addr.Protocol, addr.IP, addr.Port)
-		tcpAddr, _, err := multiPortDialTCP(addr.TCP(), s.timeout, s.service.PortHole)
+		tcpAddr, _, err := multiPortDialTCP(addr.TCP(), s.timeout, s.mappingPortTCP)
 		if err != nil {
 			log.Debugw("debug|tryUDP|DialUDP", "error", err)
 			return err
@@ -232,7 +245,7 @@ func multiPortDialTCP(addr *net.TCPAddr, timeout time.Duration, lport int) (net.
 }
 
 func tryReverseTCP(s *source) error {
-	tcp, keep, err := multiPortDialTCP(s.addr.TCP(), 3*time.Second, s.service.PortHole)
+	tcp, keep, err := multiPortDialTCP(s.addr.TCP(), 3*time.Second, s.mappingPortTCP)
 	if err != nil {
 		log.Debugw("debug|tryReverseNetworkConnect|DialTCP", "error", err)
 		return err
@@ -267,7 +280,7 @@ func multiPortDialUDP(addr *net.UDPAddr, lport int) (*net.UDPConn, error) {
 }
 
 func tryReverseUDP(s *source) error {
-	udp, err := multiPortDialUDP(s.addr.UDP(), s.service.PortHole)
+	udp, err := multiPortDialUDP(s.addr.UDP(), s.mappingPortUDP)
 	if err != nil {
 		log.Debugw("debug|tryReverseUDP|DialUDP", "error", err)
 		return err
@@ -284,7 +297,7 @@ func tryReverseUDP(s *source) error {
 }
 
 func tryUDP(s *source, addr *Addr) error {
-	udp, err := multiPortDialUDP(addr.UDP(), s.service.PortHole)
+	udp, err := multiPortDialUDP(addr.UDP(), s.mappingPortUDP)
 	if err != nil {
 		log.Debugw("debug|tryUDP|DialUDP", "error", err)
 		return err
@@ -402,7 +415,7 @@ func udpPing(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
 }
 
 func tryTCP(s *source, addr *Addr) error {
-	tcp, keep, err := multiPortDialTCP(addr.TCP(), 5*time.Second, s.service.PortHole)
+	tcp, keep, err := multiPortDialTCP(addr.TCP(), 5*time.Second, s.mappingPortTCP)
 	if err != nil {
 		log.Debugw("debug|tryTCP|DialTCP", "error", err)
 		return err

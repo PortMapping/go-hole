@@ -56,7 +56,6 @@ func main() {
 				Local:       localAddr,
 				PortUDP:     l.Config().UDP,
 				PortTCP:     l.Config().TCP,
-				PortHole:    0,
 				KeepConnect: false,
 			}, source.Addr())
 			go func(id string, s lurker.Source) {
@@ -80,12 +79,11 @@ func main() {
 		//}
 		fmt.Println("remote addr:", addr.String(), i)
 		s := lurker.NewSource(lurker.Service{
-			ID:       lurker.GlobalID,
-			ISP:      ispAddr,
-			Local:    localAddr,
-			PortUDP:  l.Config().UDP,
-			PortTCP:  l.Config().TCP,
-			PortHole: l.NetworkMappingPort(network),
+			ID:      lurker.GlobalID,
+			ISP:     ispAddr,
+			Local:   localAddr,
+			PortUDP: l.Config().UDP,
+			PortTCP: l.Config().TCP,
 		}, lurker.Addr{
 			Protocol: network,
 			IP:       addr,
