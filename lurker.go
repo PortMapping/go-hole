@@ -17,6 +17,12 @@ type Listener interface {
 	Stop() error
 }
 
+// NATer ...
+type NATer interface {
+	IsSupport() bool
+	NAT() nat.NAT
+}
+
 // ListenResponse ...
 type ListenResponse struct {
 	Status int
@@ -29,6 +35,8 @@ type Lurker interface {
 	Listen() (c <-chan Source, err error)
 	RegisterListener(name string, listener Listener)
 	Listener(name string) (Listener, bool)
+	NetworkNAT(name string) nat.NAT
+	NetworkMappingPort(name string) int
 	Config() Config
 }
 
@@ -38,6 +46,27 @@ type lurker struct {
 	nat       nat.NAT
 	sources   chan Source
 	timeout   time.Duration
+}
+
+// NetworkNAT ...
+func (l *lurker) NetworkNAT(name string) nat.NAT {
+	listener, b := l.listeners[name]
+	if b {
+		ter, b := listener.(NATer)
+		if b && ter.IsSupport() {
+			return ter.NAT()
+		}
+	}
+	return nil
+}
+
+// NetworkMappingPort ...
+func (l *lurker) NetworkMappingPort(name string) int {
+	listener, b := l.listeners[name]
+	if b {
+		return listener.MappingPort()
+	}
+	return 0
 }
 
 // Listener ...

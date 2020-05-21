@@ -28,10 +28,10 @@ func main() {
 	l := lurker.New(cfg)
 	localAddr := net.IPv4zero
 	ispAddr := net.IPv4zero
-	if l.NAT() != nil {
-		localAddr, _ = l.NAT().GetInternalAddress()
-		ispAddr, _ = l.NAT().GetExternalAddress()
-	}
+	//if l.NAT() != nil {
+	//	localAddr, _ = l.NAT().GetInternalAddress()
+	//	ispAddr, _ = l.NAT().GetExternalAddress()
+	//}
 	t := lurker.NewTCPListener(cfg)
 	u := lurker.NewUDPListener(cfg)
 	l.RegisterListener("tcp", t)
@@ -56,7 +56,7 @@ func main() {
 				Local:       localAddr,
 				PortUDP:     l.Config().UDP,
 				PortTCP:     l.Config().TCP,
-				PortHole:    l.PortHole(),
+				PortHole:    0,
 				KeepConnect: false,
 			}, source.Addr())
 			go func(id string, s lurker.Source) {
@@ -80,7 +80,6 @@ func main() {
 		//	ispAddr, _ = l.NAT().GetExternalAddress()
 		//}
 		fmt.Println("remote addr:", addr.String(), i)
-
 		s := lurker.NewSource(lurker.Service{
 			ID:       lurker.GlobalID,
 			ISP:      ispAddr,
