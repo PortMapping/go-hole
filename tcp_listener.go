@@ -73,7 +73,7 @@ func (t *tcpHandshake) Reply() error {
 	}
 
 	netAddr := ParseNetAddr(t.conn.RemoteAddr())
-	log.Debugw("debug|getClientFromTCP|ParseNetAddr", netAddr)
+	log.Debugw("debug|getClientFromTCP|ParseNetAddr", "addr", netAddr)
 	var resp HandshakeResponse
 	resp.Status = HandshakeStatusSuccess
 	resp.Data = []byte("Connected")
