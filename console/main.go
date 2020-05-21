@@ -58,7 +58,6 @@ func main() {
 				PortTCP:     l.Config().TCP,
 				KeepConnect: false,
 			}, source.Addr())
-			s.SetMappingPort(network, l.NetworkMappingPort(network))
 			go func(id string, s lurker.Source) {
 				err := s.Try()
 				fmt.Println("reverse connected:", err)
@@ -90,7 +89,8 @@ func main() {
 			IP:       addr,
 			Port:     i,
 		})
-		s.SetMappingPort(network, l.NetworkMappingPort(network))
+		s.SetMappingPort("tcp", l.NetworkMappingPort("tcp"))
+		s.SetMappingPort("udp", l.NetworkMappingPort("udp"))
 		go func() {
 			_, ok := list.Load(s.Service().ID)
 			if ok {
