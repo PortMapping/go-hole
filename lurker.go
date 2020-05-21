@@ -15,6 +15,7 @@ type Listener interface {
 	Listen(chan<- Source) (err error)
 	MappingPort() int
 	Stop() error
+	IsReady() bool
 }
 
 // NATer ...
@@ -113,6 +114,22 @@ func (l *lurker) RegisterListener(name string, listener Listener) {
 	l.listeners[name] = listener
 }
 
+func (l *lurker) waitingForReady() {
+	total := len(l.listeners)
+	for {
+		count := 0
+		for _, listener := range l.listeners {
+			if listener.IsReady() {
+				count++
+			}
+		}
+		if count == total {
+			return
+		}
+		time.Sleep(3 * time.Second)
+	}
+}
+
 // Listen ...
 func (l *lurker) Listen() (c <-chan Source, err error) {
 	defer func() {
@@ -124,6 +141,7 @@ func (l *lurker) Listen() (c <-chan Source, err error) {
 	for _, listener := range l.listeners {
 		go listener.Listen(l.sources)
 	}
+	l.waitingForReady()
 	return l.sources, nil
 }
 

@@ -70,7 +70,6 @@ func main() {
 
 		}
 	}()
-
 	if len(os.Args) > 2 {
 		addr, i := lurker.ParseAddr(address)
 		localAddr := net.IPv4zero

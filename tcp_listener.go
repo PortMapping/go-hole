@@ -18,6 +18,12 @@ type tcpListener struct {
 	nat         nat.NAT
 	tcpListener net.Listener
 	cfg         *Config
+	ready       bool
+}
+
+// IsReady ...
+func (l *tcpListener) IsReady() bool {
+	return l.ready
 }
 
 // MappingPort ...
@@ -170,6 +176,7 @@ func (l *tcpListener) Listen(c chan<- Source) (err error) {
 		addr := ParseSourceAddr("tcp", address, extPort)
 		fmt.Println("tcp mapping on address:", addr.String())
 	}
+	l.ready = true
 	return
 }
 

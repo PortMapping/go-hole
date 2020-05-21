@@ -16,6 +16,12 @@ type udpListener struct {
 	nat         nat.NAT
 	udpListener *net.UDPConn
 	cfg         *Config
+	ready       bool
+}
+
+// IsReady ...
+func (l *udpListener) IsReady() bool {
+	return l.ready
 }
 
 // MappingPort ...
@@ -83,6 +89,7 @@ func (l *udpListener) Listen(c chan<- Source) (err error) {
 		addr := ParseSourceAddr("tcp", address, extPort)
 		fmt.Println("udp mapping on address:", addr.String())
 	}
+	l.ready = true
 	return nil
 }
 
