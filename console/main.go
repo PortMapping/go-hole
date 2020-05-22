@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/portmapping/lurker/nat"
 	"net"
 	"os"
 	"strconv"
@@ -39,6 +40,7 @@ func main() {
 	//	localAddr, _ = l.NAT().GetInternalAddress()
 	//	ispAddr, _ = l.NAT().GetExternalAddress()
 	//}
+	tcpPort, udpPort := 0, 0
 	if listen {
 		t := lurker.NewTCPListener(cfg)
 		u := lurker.NewUDPListener(cfg)
@@ -77,6 +79,18 @@ func main() {
 				}(source.Service().ID, s)
 			}
 		}()
+		tcpPort = l.NetworkMappingPort("tcp")
+		udpPort = l.NetworkMappingPort("udp")
+	} else {
+		nat, err := nat.FromLocal("tcp", l.Config().TCP)
+		if err != nil {
+			fmt.Println("error tcpport", err)
+		}
+		mapping, err := nat.Mapping()
+		if err != nil {
+			fmt.Println("error tcpport", err)
+		}
+		tcpPort = mapping
 	}
 	if len(os.Args) > 2 {
 		addr, i := lurker.ParseAddr(address)
@@ -98,8 +112,8 @@ func main() {
 			IP:       addr,
 			Port:     i,
 		})
-		s.SetMappingPort("tcp", l.NetworkMappingPort("tcp"))
-		s.SetMappingPort("udp", l.NetworkMappingPort("udp"))
+		s.SetMappingPort("tcp", tcpPort)
+		s.SetMappingPort("udp", udpPort)
 		go func() {
 			_, ok := list.Load(s.Service().ID)
 			if ok {
