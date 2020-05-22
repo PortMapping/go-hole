@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 
@@ -18,7 +19,13 @@ func main() {
 		network = os.Args[1]
 		address = os.Args[2]
 	}
+	listen := true
 	if len(os.Args) > 3 {
+		parseBool, err := strconv.ParseBool(os.Args[3])
+		if err != nil {
+
+		}
+		listen = parseBool
 	}
 
 	cfg := lurker.DefaultConfig()
@@ -32,43 +39,45 @@ func main() {
 	//	localAddr, _ = l.NAT().GetInternalAddress()
 	//	ispAddr, _ = l.NAT().GetExternalAddress()
 	//}
-	t := lurker.NewTCPListener(cfg)
-	u := lurker.NewUDPListener(cfg)
-	l.RegisterListener("tcp", t)
-	l.RegisterListener("udp", u)
-	listener, err := l.Listen()
-	if err != nil {
-		panic(err)
-		return
-	}
-	fmt.Println("your connect id:", lurker.GlobalID)
-	go func() {
-		for source := range listener {
-			fmt.Println("connect from:", source.Addr().String(), string(source.Service().JSON()))
-			_, ok := list.Load(source.Service().ID)
-			if ok {
-				fmt.Println("exist:", source.Service().ID)
-				continue
-			}
-			s := lurker.NewSource(lurker.Service{
-				ID:          lurker.GlobalID,
-				ISP:         ispAddr,
-				Local:       localAddr,
-				PortUDP:     l.Config().UDP,
-				PortTCP:     l.Config().TCP,
-				KeepConnect: false,
-			}, source.Addr())
-			go func(id string, s lurker.Source) {
-				err := s.Try()
-				fmt.Println("reverse connected:", err)
-				if err != nil {
-					return
-				}
-				list.Store(id, s)
-			}(source.Service().ID, s)
-
+	if listen {
+		t := lurker.NewTCPListener(cfg)
+		u := lurker.NewUDPListener(cfg)
+		l.RegisterListener("tcp", t)
+		l.RegisterListener("udp", u)
+		listener, err := l.Listen()
+		if err != nil {
+			panic(err)
+			return
 		}
-	}()
+
+		fmt.Println("your connect id:", lurker.GlobalID)
+		go func() {
+			for source := range listener {
+				fmt.Println("connect from:", source.Addr().String(), string(source.Service().JSON()))
+				_, ok := list.Load(source.Service().ID)
+				if ok {
+					fmt.Println("exist:", source.Service().ID)
+					continue
+				}
+				s := lurker.NewSource(lurker.Service{
+					ID:          lurker.GlobalID,
+					ISP:         ispAddr,
+					Local:       localAddr,
+					PortUDP:     l.Config().UDP,
+					PortTCP:     l.Config().TCP,
+					KeepConnect: false,
+				}, source.Addr())
+				go func(id string, s lurker.Source) {
+					err := s.Try()
+					fmt.Println("reverse connected:", err)
+					if err != nil {
+						return
+					}
+					list.Store(id, s)
+				}(source.Service().ID, s)
+			}
+		}()
+	}
 	if len(os.Args) > 2 {
 		addr, i := lurker.ParseAddr(address)
 		localAddr := net.IPv4zero
