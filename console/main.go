@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/portmapping/lurker/nat"
+	"log"
 	"net"
 	"os"
 	"strconv"
@@ -93,6 +94,7 @@ func main() {
 		if err != nil {
 			fmt.Println("error tcpport", err)
 		}
+		log.SetOutput(os.Stdout)
 		tcpPort = mapping
 	}
 	if len(os.Args) > 2 {

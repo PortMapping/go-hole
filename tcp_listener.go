@@ -28,6 +28,9 @@ func (l *tcpListener) IsReady() bool {
 
 // MappingPort ...
 func (l *tcpListener) MappingPort() int {
+	if l.mappingPort == 0 {
+		return l.cfg.TCP
+	}
 	return l.mappingPort
 }
 
