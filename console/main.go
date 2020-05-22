@@ -24,9 +24,11 @@ func main() {
 	if len(os.Args) > 3 {
 		parseBool, err := strconv.ParseBool(os.Args[3])
 		if err != nil {
-
+			listen = true
+		} else {
+			listen = parseBool
 		}
-		listen = parseBool
+
 	}
 
 	cfg := lurker.DefaultConfig()
@@ -42,6 +44,7 @@ func main() {
 	//}
 	tcpPort, udpPort := 0, 0
 	if listen {
+		fmt.Println("listen with port mapping")
 		t := lurker.NewTCPListener(cfg)
 		u := lurker.NewUDPListener(cfg)
 		l.RegisterListener("tcp", t)
