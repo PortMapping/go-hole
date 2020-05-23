@@ -125,25 +125,6 @@ func (s *source) Try() error {
 		log.Debugw("debug|tryReverseNetworkConnect|error", "error", err)
 	}
 
-	//log.Debugw("tryPublicNetworkConnect|error", "error", err)
-	//addr = ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
-	//if err = tryTCP(s, addr); err == nil {
-	//	log.Debugw("tryTCP|success")
-	//	return nil
-	//}
-	//log.Debugw("tryTCP|error", "error", err)
-	//
-	//addr = ParseSourceAddr("udp", s.addr.IP, s.service.PortUDP)
-	//if err := tryUDP(s, addr); err == nil {
-	//	log.Debugw("tryUDP|success")
-	//	return nil
-	//}
-	//log.Debugw("tryUDP|error", "error", err)
-	//if err := tryReverseUDP(s); err != nil {
-	//	log.Debugw("tryReverseUDP|success")
-	//	return nil
-	//}
-	//log.Debugw("tryReverseUDP|error", "error", err)
 	return fmt.Errorf("all try connect is failed")
 
 }
