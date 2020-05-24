@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
-	"strconv"
 	"time"
 
 	"github.com/portmapping/go-reuse"
@@ -17,13 +16,6 @@ type Source interface {
 	Service() Service
 	Addr() Addr
 	SetMappingPort(string, int)
-}
-
-// Addr ...
-type Addr struct {
-	Protocol string `json:"protocol"`
-	IP       net.IP `json:"ip"`
-	Port     int    `json:"port"`
 }
 
 type source struct {
@@ -53,37 +45,6 @@ func (s source) Service() Service {
 // Addr ...
 func (s source) Addr() Addr {
 	return s.addr
-}
-
-// Network ...
-func (addr Addr) Network() string {
-	return addr.Protocol
-}
-
-// Network ...
-func (addr Addr) String() string {
-	return net.JoinHostPort(addr.IP.String(), strconv.Itoa(addr.Port))
-}
-
-// UDP ...
-func (addr Addr) UDP() *net.UDPAddr {
-	return &net.UDPAddr{
-		IP:   addr.IP,
-		Port: addr.Port,
-	}
-}
-
-// TCP ...
-func (addr Addr) TCP() *net.TCPAddr {
-	return &net.TCPAddr{
-		IP:   addr.IP,
-		Port: addr.Port,
-	}
-}
-
-// IsZero ...
-func (addr Addr) IsZero() bool {
-	return addr.Protocol == "" && addr.IP.Equal(net.IPv4zero) && addr.Port == 0
 }
 
 // JSON ...
