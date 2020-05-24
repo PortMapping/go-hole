@@ -11,7 +11,7 @@ const (
 	NetworkSupportMax
 )
 
-type SupportType int
+type SupportType uint64
 
 type Support2 uint64
 
@@ -20,6 +20,6 @@ type Support struct {
 	List [NetworkSupportMax]bool
 }
 
-func (s *Support2) Add() {
-
+func (s *SupportType) Add(t SupportType) {
+	*s = (*s) | (t)
 }
