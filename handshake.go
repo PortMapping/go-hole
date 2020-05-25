@@ -36,10 +36,8 @@ type HandshakeHead struct {
 
 // HandshakeResponder ...
 type HandshakeResponder interface {
-	//Do() error
 	Pong() error
 	Reply() error
-	//ConnectCallback(func(f Connector))
 }
 
 // HandshakeRequester ...
