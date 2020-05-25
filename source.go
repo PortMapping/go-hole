@@ -128,7 +128,7 @@ func tryConnect(s *source, addr *Addr) error {
 		//tcpAddr := ParseSourceAddr(addr.Protocol, addr.IP, addr.Port)
 		tcpAddr, _, err := multiPortDialTCP(addr.TCP(), s.timeout, s.mappingPortTCP)
 		if err != nil {
-			log.Debugw("debug|tryUDP|DialUDP", "error", err)
+			log.Debugw("debug|tryConnect|multiPortDialTCP", "error", err)
 			return err
 		}
 		data := make([]byte, maxByteSize)
@@ -138,9 +138,13 @@ func tryConnect(s *source, addr *Addr) error {
 		}
 		s.support.List[ProviderNetworkTCP] = true
 	case "udp", "udp4", "udp6":
-		udpAddr := ParseSourceAddr(addr.Protocol, addr.IP, addr.Port)
-
-		if err := tryUDP(s, udpAddr); err != nil {
+		udp, err := multiPortDialUDP(addr.UDP(), s.mappingPortUDP)
+		if err != nil {
+			log.Debugw("debug|tryConnect|multiPortDialUDP", "error", err)
+			return err
+		}
+		data := make([]byte, maxByteSize)
+		if _, err := udpConnect(s, udp, data); err != nil {
 			return err
 		}
 		s.support.List[ProviderNetworkUDP] = true
@@ -353,6 +357,51 @@ func udpPing(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
 		return 0, errR
 	}
 	log.Infow("udp received", "remote info", remote.String(), "data", string(data[:n]))
+	return n, nil
+}
+
+func udpConnect(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
+	if s.timeout != 0 {
+		err = conn.SetWriteDeadline(time.Now().Add(s.timeout))
+		if err != nil {
+			return 0, err
+		}
+	}
+	handshake := HandshakeHead{
+		Type: HandshakeTypeConnect,
+	}
+	_, err = conn.Write(handshake.JSON())
+	if err != nil {
+		log.Debugw("debug|tcpConnect|Write", "error", err)
+		return 0, err
+	}
+	if s.timeout != 0 {
+		err = conn.SetWriteDeadline(time.Now().Add(s.timeout))
+		if err != nil {
+			return 0, err
+		}
+	}
+	req, err := EncodeHandshakeRequest(s.service)
+	if err != nil {
+		return 0, err
+	}
+	_, err = conn.Write(req)
+	if err != nil {
+		log.Debugw("debug|tcpConnect|Write", "error", err)
+		return 0, err
+	}
+	if s.timeout != 0 {
+		err = conn.SetReadDeadline(time.Now().Add(s.timeout))
+		if err != nil {
+			return 0, err
+		}
+	}
+	n, _, err = conn.ReadFromUDP(data)
+	if err != nil {
+		log.Debugw("debug|tcpConnect|Read", "error", err)
+		return 0, err
+	}
+	log.Infow("tcp received", "data", string(data[:n]))
 	return n, nil
 }
 

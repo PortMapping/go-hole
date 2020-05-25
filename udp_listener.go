@@ -146,6 +146,7 @@ func (h *udpHandshake) Do() (err error) {
 		log.Debugw("debug|listenUDP|ReadFromUDP", "error", err)
 		return err
 	}
+	log.Debugw("received", "data", string(data[:n]))
 	handshake, err := ParseHandshake(data[:n])
 	if err != nil {
 		return err
@@ -172,45 +173,6 @@ func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (e
 			}
 
 			return nil
-			//handshake, err := ParseHandshake(data)
-			//if err != nil {
-			//	return err
-			//}
-			//var req HandshakeRequest
-			//service, err := DecodeHandshakeRequest(data[:n], &req)
-			//if err != nil {
-			//	//waiting for next
-			//	log.Debugw("debug|listenUDP|ParseService", "error", err)
-			//	continue
-			//}
-
-			//netAddr := ParseNetAddr(remoteAddr)
-			//c := source{
-			//	addr:    *netAddr,
-			//	service: service,
-			//}
-			//cli <- &c
-			//err = tryReverseUDP(&source{
-			//	addr: *netAddr,
-			//	service: Service{
-			//		ID:          GlobalID,
-			//		KeepConnect: false,
-			//	}})
-			//status := 0
-			//if err != nil {
-			//	status = -1
-			//	log.Debugw("debug|listenUDP|tryReverseUDP", "error", err)
-			//}
-			//
-			//r := &ListenResponse{
-			//	Status: status,
-			//	Addr:   *netAddr,
-			//	Error:  err,
-			//}
-			//_, err = listener.WriteToUDP(r.JSON(), remoteAddr)
-			//if err != nil {
-			//	return err
-			//}
 		}
 	}
 }
