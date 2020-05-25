@@ -150,11 +150,10 @@ func (l *tcpListener) Listen(c chan<- Source) (err error) {
 		return nil
 	}
 
-	n, err := mapping("tcp", l.cfg.TCP)
+	l.nat, err = mapping("tcp", l.cfg.TCP)
 	if err != nil {
 		return err
 	}
-	l.nat = n
 	l.ready = true
 	return
 }
