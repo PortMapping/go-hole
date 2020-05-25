@@ -19,20 +19,20 @@ type ListenResponse struct {
 
 // Lurker ...
 type Lurker interface {
-	Listen() (c <-chan Source, err error)
+	Listen() (c <-chan Connector, err error)
 	RegisterListener(name string, listener Listener)
 	Listener(name string) (Listener, bool)
 	NetworkNAT(name string) nat.NAT
-	NetworkMappingPort(name string) int
 	Config() Config
 }
 
 type lurker struct {
-	listeners map[string]Listener
-	cfg       *Config
-	nat       nat.NAT
-	sources   chan Source
-	timeout   time.Duration
+	listeners  map[string]Listener
+	cfg        *Config
+	nat        nat.NAT
+	sources    chan Source
+	timeout    time.Duration
+	connectors chan Connector
 }
 
 // NetworkNAT ...
@@ -45,15 +45,6 @@ func (l *lurker) NetworkNAT(name string) nat.NAT {
 		}
 	}
 	return nil
-}
-
-// NetworkMappingPort ...
-func (l *lurker) NetworkMappingPort(name string) int {
-	listener, b := l.listeners[name]
-	if b {
-		return listener.MappingPort()
-	}
-	return 0
 }
 
 // Listener ...
@@ -84,10 +75,11 @@ func (l *lurker) Stop() error {
 // New ...
 func New(cfg *Config) Lurker {
 	o := &lurker{
-		cfg:       cfg,
-		sources:   make(chan Source, 5),
-		listeners: make(map[string]Listener),
-		timeout:   DefaultTimeout,
+		cfg:        cfg,
+		sources:    make(chan Source, 5),
+		listeners:  make(map[string]Listener),
+		connectors: make(chan Connector),
+		timeout:    DefaultTimeout,
 	}
 	return o
 }
@@ -117,18 +109,21 @@ func (l *lurker) waitingForReady() {
 }
 
 // Listen ...
-func (l *lurker) Listen() (c <-chan Source, err error) {
+func (l *lurker) Listen() (c <-chan Connector, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			log.Errorw("listener error found", "error", e)
 		}
 	}()
 
-	for _, listener := range l.listeners {
-		go listener.Listen(l.sources)
+	var lis []string
+	for name, listener := range l.listeners {
+		lis = append(lis, name)
+		go listener.Listen(l.connectors)
 	}
 	l.waitingForReady()
-	return l.sources, nil
+
+	return l.connectors, nil
 }
 
 // JSON ...
