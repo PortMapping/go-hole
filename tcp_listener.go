@@ -102,6 +102,7 @@ func (t *tcpHandshake) Reply() error {
 
 // Pong ...
 func (t *tcpHandshake) Pong() error {
+	defer t.conn.Close()
 	response := HandshakeResponse{
 		Status: HandshakeStatusSuccess,
 		Data:   []byte("PONG"),
@@ -113,6 +114,7 @@ func (t *tcpHandshake) Pong() error {
 	if write == 0 {
 		log.Warnw("write pong", "written", 0)
 	}
+
 	return nil
 }
 
@@ -156,14 +158,13 @@ func (l *tcpListener) Listen(c chan<- Connector) (err error) {
 	}
 	fmt.Println("listen tcp on address:", tcpAddr.String())
 	go listenTCP(l.ctx, l.listener, c)
-	if !l.cfg.NAT {
-		return nil
+	if l.cfg.NAT {
+		l.nat, err = mapping("tcp", l.cfg.TCP)
+		if err != nil {
+			return err
+		}
 	}
 
-	l.nat, err = mapping("tcp", l.cfg.TCP)
-	if err != nil {
-		return err
-	}
 	l.ready = true
 	return
 }
