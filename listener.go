@@ -4,7 +4,7 @@ import "github.com/portmapping/lurker/nat"
 
 // Listener ...
 type Listener interface {
-	Listen(c <-chan Connector) (err error)
+	Listen(c chan<- Connector) (err error)
 	Stop() error
 	IsReady() bool
 }

@@ -39,7 +39,7 @@ type HandshakeResponder interface {
 	Do() error
 	Pong() error
 	Reply() error
-	ConnectCallback(func(f Source))
+	ConnectCallback(func(f Connector))
 }
 
 // HandshakeRequester ...

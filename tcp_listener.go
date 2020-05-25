@@ -20,6 +20,16 @@ type tcpListener struct {
 	ready       bool
 }
 
+// IsSupport ...
+func (l *tcpListener) IsSupport() bool {
+	return l.cfg.NAT && l.nat != nil
+}
+
+// NAT ...
+func (l *tcpListener) NAT() nat.NAT {
+	return l.nat
+}
+
 // IsReady ...
 func (l *tcpListener) IsReady() bool {
 	return l.ready
@@ -32,11 +42,11 @@ func (l *tcpListener) MappingPort() int {
 
 type tcpHandshake struct {
 	conn     net.Conn
-	connBack func(s Source)
+	connBack func(s Connector)
 }
 
 // ConnectCallback ...
-func (t *tcpHandshake) ConnectCallback(f func(f Source)) {
+func (t *tcpHandshake) ConnectCallback(f func(f Connector)) {
 	t.connBack = f
 }
 
@@ -134,7 +144,7 @@ func NewTCPListener(cfg *Config) Listener {
 }
 
 // Listen ...
-func (l *tcpListener) Listen(c chan<- Source) (err error) {
+func (l *tcpListener) Listen(c chan<- Connector) (err error) {
 	tcpAddr := LocalTCPAddr(l.port)
 	if l.cfg.Secret != nil {
 		l.listener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.Secret)
@@ -167,7 +177,7 @@ func (l *tcpListener) Stop() error {
 	return nil
 }
 
-func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Source) (err error) {
+func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Connector) (err error) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -183,7 +193,7 @@ func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Source) (e
 	}
 }
 
-func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) error {
+func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Connector) error {
 	close := true
 	defer func() {
 		if close {
@@ -198,55 +208,13 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Source) err
 		t := tcpHandshake{
 			conn: conn,
 		}
-		t.ConnectCallback(func(f Source) {
+		t.ConnectCallback(func(f Connector) {
 			cli <- f
 		})
 		err := t.Do()
 		if err != nil {
 			return err
 		}
-		//
-		//	ip, port := ParseAddr(conn.RemoteAddr().String())
-		//	service, err := DecodeHandshakeRequest(data[:n])
-		//	if err != nil {
-		//		log.Debugw("debug|getClientFromTCP|ParseService", "error", err)
-		//		return err
-		//	}
-		//	if service.KeepConnect {
-		//		close = false
-		//	}
-		//	c := source{
-		//		addr: Addr{
-		//			Protocol: conn.RemoteAddr().Network(),
-		//			IP:       ip,
-		//			Port:     port,
-		//		},
-		//		service: service,
-		//	}
-		//	cli <- &c
-		//	netAddr := ParseNetAddr(conn.RemoteAddr())
-		//
-		//	err = tryReverseTCP(&source{addr: *netAddr,
-		//		service: Service{
-		//			ID:          GlobalID,
-		//			KeepConnect: false,
-		//		}})
-		//	status := 0
-		//	if err != nil {
-		//		status = -1
-		//		log.Debugw("debug|getClientFromTCP|tryReverseTCP", "error", err)
-		//	}
-		//
-		//	r := &ListenResponse{
-		//		Status: status,
-		//		Addr:   *netAddr,
-		//		Error:  err,
-		//	}
-		//	_, err = conn.Write(r.JSON())
-		//	if err != nil {
-		//		log.Debugw("debug|getClientFromTCP|write", "error", err)
-		//		return err
-		//	}
 	}
 	return nil
 }
