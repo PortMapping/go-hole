@@ -139,7 +139,7 @@ func tryConnect(s *source, addr *Addr) error {
 		}
 		s.support.List[ProviderNetworkTCP] = true
 	case "udp", "udp4", "udp6":
-		udp, err := dialKCP(addr.UDP())
+		udp, err := multiPortDialUDP(addr.UDP(), s.mappingPortUDP)
 		if err != nil {
 			log.Debugw("debug|tryConnect|multiPortDialUDP", "error", err)
 			return err
@@ -206,7 +206,7 @@ func dialKCP(addr *net.UDPAddr) (net.Conn, error) {
 	return udp, nil
 }
 func tryUDP(s *source, addr *Addr) error {
-	udp, err := dialKCP(addr.UDP())
+	udp, err := multiPortDialUDP(addr.UDP(), s.mappingPortUDP)
 	if err != nil {
 		log.Debugw("debug|tryUDP|DialUDP", "error", err)
 		return err
@@ -289,7 +289,7 @@ func tcpPing(s *source, conn net.Conn, data []byte) (n int, err error) {
 	}
 	n, err = conn.Read(data)
 	if err != nil {
-		log.Debugw("debug|tcpPing|ReadFromUDP", "error", err)
+		log.Debugw("debug|tcpPing|Read", "error", err)
 		return 0, err
 	}
 	log.Infow("tcp received", "data", string(data[:n]))
