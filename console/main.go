@@ -33,7 +33,7 @@ func main() {
 
 	cfg := lurker.DefaultConfig()
 	cfg.TCP = 16004
-	cfg.UDP = 16005
+	//cfg.UDP = 16005
 
 	l := lurker.New(cfg)
 	localAddr := net.IPv4zero
@@ -46,9 +46,9 @@ func main() {
 	if listen {
 		fmt.Println("listen with port mapping")
 		t := lurker.NewTCPListener(cfg)
-		u := lurker.NewUDPListener(cfg)
+		//u := lurker.NewUDPListener(cfg)
 		l.RegisterListener("tcp", t)
-		l.RegisterListener("udp", u)
+		//l.RegisterListener("udp", u)
 		listener, err := l.Listen()
 		if err != nil {
 			panic(err)
