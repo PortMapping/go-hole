@@ -138,7 +138,7 @@ func tryConnect(s *source, addr *Addr) error {
 		}
 		s.support.List[ProviderNetworkTCP] = true
 	case "udp", "udp4", "udp6":
-		udp, err := multiPortDialUDP(addr.UDP(), s.mappingPortUDP)
+		udp, err := multiPortDialUDP(addr.UDP(), 0)
 		if err != nil {
 			log.Debugw("debug|tryConnect|multiPortDialUDP", "error", err)
 			return err
@@ -372,7 +372,7 @@ func udpConnect(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
 	}
 	_, err = conn.Write(handshake.JSON())
 	if err != nil {
-		log.Debugw("debug|tcpConnect|Write", "error", err)
+		log.Debugw("debug|udpConnect|Write", "error", err)
 		return 0, err
 	}
 	if s.timeout != 0 {

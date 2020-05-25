@@ -95,12 +95,12 @@ func (h *udpHandshake) Pong() error {
 // Reply ...
 func (h *udpHandshake) Reply() error {
 	data := make([]byte, maxByteSize)
-	n, err := h.conn.Read(data)
+	n, addr, err := h.conn.ReadFromUDP(data)
 	if err != nil {
 		log.Debugw("debug|getClientFromTCP|Read", "error", err)
 		return err
 	}
-	ip, port := ParseAddr(h.conn.RemoteAddr().String())
+	ip, port := ParseAddr(addr.String())
 	var r HandshakeRequest
 	service, err := DecodeHandshakeRequest(data[:n], &r)
 	if err != nil {
@@ -123,7 +123,7 @@ func (h *udpHandshake) Reply() error {
 	var resp HandshakeResponse
 	resp.Status = HandshakeStatusSuccess
 	resp.Data = []byte("Connected")
-	_, err = h.conn.WriteToUDP(resp.JSON(), h.addr)
+	_, err = h.conn.WriteToUDP(resp.JSON(), addr)
 	if err != nil {
 		log.Debugw("debug|getClientFromTCP|write", "error", err)
 		return err
