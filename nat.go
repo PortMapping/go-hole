@@ -17,9 +17,6 @@ const (
 	NetworkSupportMax
 )
 
-// SupportType ...
-type SupportType uint64
-
 // PublicNetworkTCP ...
 const (
 	SupportTypePubliccTCP SupportType = 1 << iota
@@ -31,10 +28,19 @@ const (
 	SupportTypeMax
 )
 
+// SupportType ...
+type SupportType uint64
+
 // Support ...
 type Support struct {
 	List [NetworkSupportMax]bool
 	Type SupportType
+}
+
+// NATer ...
+type NATer interface {
+	IsSupport() bool
+	NAT() nat.NAT
 }
 
 // Add ...

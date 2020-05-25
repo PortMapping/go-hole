@@ -10,12 +10,6 @@ import (
 
 const maxByteSize = 65520
 
-// NATer ...
-type NATer interface {
-	IsSupport() bool
-	NAT() nat.NAT
-}
-
 // ListenResponse ...
 type ListenResponse struct {
 	Status int
