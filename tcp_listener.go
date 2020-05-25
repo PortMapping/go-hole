@@ -40,21 +40,6 @@ func (l *tcpListener) MappingPort() int {
 	return l.mappingPort
 }
 
-type tcpHandshake struct {
-	conn     net.Conn
-	connBack func(s Connector)
-}
-
-// ConnectCallback ...
-func (t *tcpHandshake) ConnectCallback(f func(f Connector)) {
-	t.connBack = f
-}
-
-// Do ...
-func (t *tcpHandshake) Do() error {
-
-}
-
 // NewTCPListener ...
 func NewTCPListener(cfg *Config) Listener {
 	tcp := &tcpListener{
