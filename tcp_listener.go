@@ -6,7 +6,6 @@ import (
 	"github.com/portmapping/go-reuse"
 	"net"
 
-	p2pnat "github.com/libp2p/go-nat"
 	"github.com/portmapping/lurker/nat"
 )
 
@@ -151,31 +150,11 @@ func (l *tcpListener) Listen(c chan<- Source) (err error) {
 		return nil
 	}
 
-	l.nat, err = nat.FromLocal("tcp", l.cfg.TCP)
+	n, err := mapping("tcp", l.cfg.TCP)
 	if err != nil {
-		log.Debugw("nat error", "error", err)
-		if err == p2pnat.ErrNoNATFound {
-			//fmt.Println("listen tcp on address:", tcpAddr.String())
-		}
-		l.cfg.NAT = false
-	} else {
-		err := l.nat.Mapping()
-		if err != nil {
-			log.Debugw("nat mapping error", "error", err)
-			l.cfg.NAT = false
-			return nil
-		}
-		l.mappingPort = l.nat.ExtPort()
-
-		address, err := l.nat.GetExternalAddress()
-		if err != nil {
-			log.Debugw("get external address error", "error", err)
-			l.cfg.NAT = false
-			return nil
-		}
-		addr := ParseSourceAddr("tcp", address, extPort)
-		fmt.Println("tcp mapping on address:", addr.String())
+		return err
 	}
+	l.nat = n
 	l.ready = true
 	return
 }
