@@ -89,11 +89,11 @@ func main() {
 		if err != nil {
 			fmt.Println("error tcpport", err)
 		}
-		mapping, err := nat.Mapping()
+		err = nat.Mapping()
 		if err != nil {
 			fmt.Println("error tcpport", err)
 		}
-		tcpPort = mapping
+		tcpPort = nat.ExtPort()
 	}
 	if len(os.Args) > 2 {
 		addr, i := lurker.ParseAddr(address)
