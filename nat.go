@@ -33,6 +33,11 @@ func (s *SupportType) Add(t SupportType) {
 	*s = (*s) | (t)
 }
 
+// Del ...
+func (s *SupportType) Del(t SupportType) {
+	*s = (*s) ^ (t)
+}
+
 func mapping(network string, port int) (n nat.NAT, err error) {
 	n, err = nat.FromLocal(network, port)
 	if err != nil {
