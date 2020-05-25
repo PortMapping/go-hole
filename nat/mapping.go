@@ -20,6 +20,7 @@ type natClient struct {
 	nat      nat.NAT
 	port     int
 	protocol string
+	extport  int
 }
 
 func defaultNAT() nat.NAT {
@@ -43,6 +44,7 @@ func FromLocal(protocol string, port int) (nat NAT, err error) {
 		timeout:  DefaultTimeOut,
 		protocol: protocol,
 		port:     port,
+		extport:  0,
 	}, nil
 }
 
@@ -65,11 +67,10 @@ func (n *natClient) SetTimeOut(t int) {
 // Mapping ...
 func (n *natClient) Mapping() (port int, err error) {
 	n.stop.Store(false)
-	eport, err := n.nat.AddPortMapping(n.protocol, n.port, description, n.timeout)
+	n.extport, err = n.nat.AddPortMapping(n.protocol, n.port, description, n.timeout)
 	if err != nil {
 		return 0, err
 	}
-	port = eport
 
 	go func() {
 		t := time.NewTicker(30 * time.Second)
@@ -94,7 +95,7 @@ func (n *natClient) Mapping() (port int, err error) {
 		}
 	}()
 
-	return port, nil
+	return n.extport, nil
 }
 
 // Remapping ...
@@ -119,6 +120,11 @@ func (n *natClient) StopMapping() (err error) {
 // GetExternalAddress ...
 func (n *natClient) GetExternalAddress() (addr net.IP, err error) {
 	return n.nat.GetExternalAddress()
+}
+
+// ExtPort ...
+func (n *natClient) ExtPort() int {
+	return n.extport
 }
 
 // GetDeviceAddress ...

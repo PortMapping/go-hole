@@ -15,7 +15,7 @@ type Source interface {
 	Try() error
 	Service() Service
 	Addr() Addr
-	SetMappingPort(string, int)
+	SetMappingPort(string, int) //T.B.D
 }
 
 type source struct {
