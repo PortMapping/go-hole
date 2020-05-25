@@ -20,6 +20,17 @@ const (
 // SupportType ...
 type SupportType uint64
 
+// PublicNetworkTCP ...
+const (
+	SupportTypePubliccTCP SupportType = 1 << iota
+	SupportTypePublicUDP
+	SupportTypeProviderTCP
+	SupportTypeProviderUDP
+	SupportTypePrivateTCP
+	SupportTypePrivateUDP
+	SupportTypeMax
+)
+
 // Support2 ...
 type Support2 uint64
 
