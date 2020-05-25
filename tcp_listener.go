@@ -52,17 +52,7 @@ func (t *tcpHandshake) ConnectCallback(f func(f Connector)) {
 
 // Do ...
 func (t *tcpHandshake) Do() error {
-	data := make([]byte, maxByteSize)
-	n, err := t.conn.Read(data)
-	if err != nil {
-		log.Debugw("debug|getClientFromTCP|Read", "error", err)
-		return err
-	}
-	handshake, err := ParseHandshake(data[:n])
-	if err != nil {
-		return err
-	}
-	return handshake.Process(t)
+
 }
 
 // NewTCPListener ...
@@ -116,31 +106,15 @@ func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Connector)
 		case <-ctx.Done():
 			return
 		default:
-			acceptTCP, err := listener.Accept()
+			conn, err := listener.Accept()
 			if err != nil {
 				log.Debugw("debug|getClientFromTCP|Accept", "error", err)
 				continue
 			}
-			go getClientFromTCP(ctx, acceptTCP, cli)
+			t := newTCPConnector(conn)
+			go t.Process()
+			cli <- t
+			return nil
 		}
 	}
-}
-
-func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Connector) error {
-	close := true
-	defer func() {
-		if close {
-			conn.Close()
-		}
-	}()
-
-	select {
-	case <-ctx.Done():
-		return nil
-	default:
-		t := newTCPConnector(conn)
-		go t.Process()
-		cli <- t
-	}
-	return nil
 }

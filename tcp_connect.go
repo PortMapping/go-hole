@@ -75,6 +75,18 @@ func (c *tcpConnector) Pong() error {
 }
 
 // Process ...
-func (c *tcpConnector) Process() error {
-	return nil
+func (c *tcpConnector) Process() {
+	var err error
+	data := make([]byte, maxByteSize)
+	n, err := c.conn.Read(data)
+	if err != nil {
+		log.Debugw("debug|getClientFromTCP|Read", "error", err)
+		return
+	}
+	handshake, err := ParseHandshake(data[:n])
+	if err != nil {
+		return
+	}
+	handshake.Process(c)
+	return
 }
