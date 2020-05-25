@@ -151,8 +151,8 @@ func (h HandshakeHead) JSON() []byte {
 	return marshal
 }
 
-// Process ...
-func (h *HandshakeHead) Process(able HandshakeResponder) error {
+// Run ...
+func (h *HandshakeHead) Run(able HandshakeResponder) error {
 	switch h.Type {
 	case HandshakeTypePing:
 		return able.Pong()

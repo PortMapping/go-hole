@@ -74,7 +74,7 @@ func (c *tcpConnector) Pong() error {
 	return nil
 }
 
-// Process ...
+// Run ...
 func (c *tcpConnector) Process() {
 	var err error
 	data := make([]byte, maxByteSize)
@@ -87,6 +87,6 @@ func (c *tcpConnector) Process() {
 	if err != nil {
 		return
 	}
-	handshake.Process(c)
+	handshake.Run(c)
 	return
 }

@@ -157,7 +157,7 @@ func (h *udpHandshake) Do() (err error) {
 	if err != nil {
 		return err
 	}
-	return handshake.Process(h)
+	return handshake.Run(h)
 }
 
 func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (err error) {
