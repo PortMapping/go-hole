@@ -31,12 +31,10 @@ const (
 	SupportTypeMax
 )
 
-// Support2 ...
-type Support2 uint64
-
 // Support ...
 type Support struct {
 	List [NetworkSupportMax]bool
+	Type SupportType
 }
 
 // Add ...
