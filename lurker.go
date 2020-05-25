@@ -10,14 +10,6 @@ import (
 
 const maxByteSize = 65520
 
-// Listener ...
-type Listener interface {
-	Listen(chan<- Source) (err error)
-	MappingPort() int
-	Stop() error
-	IsReady() bool
-}
-
 // NATer ...
 type NATer interface {
 	IsSupport() bool

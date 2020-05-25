@@ -2,6 +2,6 @@ package lurker
 
 import "net"
 
-func newSourceTCP(conn net.Conn) {
+func connector(conn net.Conn) {
 
 }
