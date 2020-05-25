@@ -48,8 +48,7 @@ func (c *tcpConnector) Reply() (err error) {
 		return err
 	}
 	if !service.KeepConnect {
-		go c.KeepConnect()
-		close = false
+		close = true
 	}
 
 	netAddr := ParseNetAddr(c.conn.RemoteAddr())
@@ -90,6 +89,13 @@ func (c *tcpConnector) Pong() error {
 	response := HandshakeResponse{
 		Status: HandshakeStatusSuccess,
 		Data:   []byte("PONG"),
+	}
+	if c.timeout != 0 {
+		err := c.conn.SetWriteDeadline(time.Now().Add(c.timeout))
+		if err != nil {
+			log.Debugw("debug|Reply|SetWriteDeadline", "error", err)
+			return err
+		}
 	}
 	write, err := c.conn.Write(response.JSON())
 	if err != nil {
