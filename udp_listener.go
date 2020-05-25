@@ -52,7 +52,7 @@ func NewUDPListener(cfg *Config) Listener {
 }
 
 // Listen ...
-func (l *udpListener) Listen(c chan<- Source) (err error) {
+func (l *udpListener) Listen(c chan<- Connector) (err error) {
 	udpAddr := LocalUDPAddr(l.port)
 	//l.listener, err = kcp.Listen(udpAddr.String())
 	//if err != nil {
@@ -79,7 +79,7 @@ func (l *udpListener) Listen(c chan<- Source) (err error) {
 type udpHandshake struct {
 	conn     *net.UDPConn
 	addr     *net.UDPAddr
-	connBack func(f Source)
+	connBack func(f Connector)
 }
 
 // Pong ...
@@ -106,23 +106,25 @@ func (h *udpHandshake) Reply() error {
 		log.Debugw("debug|getClientFromTCP|Read", "error", err)
 		return err
 	}
-	ip, port := ParseAddr(addr.String())
-	var r HandshakeRequest
-	service, err := DecodeHandshakeRequest(data[:n], &r)
-	if err != nil {
-		log.Debugw("debug|getClientFromTCP|ParseService", "error", err)
-		return err
-	}
+	//ip, port := ParseAddr(addr.String())
+	//var r HandshakeRequest
+	//service, err := DecodeHandshakeRequest(data[:n], &r)
+	//if err != nil {
+	//	log.Debugw("debug|getClientFromTCP|ParseService", "error", err)
+	//	return err
+	//}
 
-	c := source{
-		addr: Addr{
-			Protocol: h.addr.Network(),
-			IP:       ip,
-			Port:     port,
-		},
-		service: service,
-	}
-	h.connBack(&c)
+	//c := source{
+	//	addr: Addr{
+	//		Protocol: h.addr.Network(),
+	//		IP:       ip,
+	//		Port:     port,
+	//	},
+	//	service: service,
+	//}
+	//h.connBack(&c)
+	//todo:udpConnector
+	_ = n
 
 	netAddr := ParseNetAddr(h.addr)
 	log.Debugw("debug|getClientFromTCP|ParseNetAddr", netAddr)
@@ -138,7 +140,7 @@ func (h *udpHandshake) Reply() error {
 }
 
 // ConnectCallback ...
-func (h *udpHandshake) ConnectCallback(f func(f Source)) {
+func (h *udpHandshake) ConnectCallback(f func(f Connector)) {
 	h.connBack = f
 }
 
@@ -160,7 +162,7 @@ func (h *udpHandshake) Do() (err error) {
 	return handshake.Run(h)
 }
 
-func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (err error) {
+func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Connector) (err error) {
 
 	for {
 		select {
@@ -170,7 +172,7 @@ func listenUDP(ctx context.Context, listener *net.UDPConn, cli chan<- Source) (e
 			u := udpHandshake{
 				conn: listener,
 			}
-			u.ConnectCallback(func(f Source) {
+			u.ConnectCallback(func(f Connector) {
 				cli <- f
 			})
 			err = u.Do()

@@ -33,7 +33,7 @@ func (l *httpListener) MappingPort() int {
 }
 
 // Listen ...
-func (l *httpListener) Listen(c chan<- Source) (err error) {
+func (l *httpListener) Listen(c chan<- Connector) (err error) {
 	tcpAddr := LocalTCPAddr(l.port)
 	if l.cfg.Secret != nil {
 		l.tcpListener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.Secret)
@@ -70,7 +70,7 @@ func NewHTTPListener(cfg *Config, handler http.Handler) Listener {
 	h.ctx, h.cancel = context.WithCancel(context.TODO())
 	return h
 }
-func listenHTTP(ctx context.Context, srv *http.Server, l net.Listener, s chan<- Source) {
+func listenHTTP(ctx context.Context, srv *http.Server, l net.Listener, s chan<- Connector) {
 	err := srv.Serve(l)
 	if err != nil {
 		return
