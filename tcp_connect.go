@@ -1,9 +1,13 @@
 package lurker
 
-import "net"
+import (
+	"net"
+	"time"
+)
 
 type tcpConnector struct {
-	conn net.Conn
+	conn   net.Conn
+	ticker *time.Ticker
 }
 
 func newTCPConnector(conn net.Conn) Connector {
@@ -18,8 +22,6 @@ func (c *tcpConnector) Reply() (err error) {
 	defer func() {
 		if close {
 			c.conn.Close()
-		} else {
-			go c.Heartbeat()
 		}
 	}()
 	data := make([]byte, maxByteSize)
@@ -36,6 +38,7 @@ func (c *tcpConnector) Reply() (err error) {
 		return err
 	}
 	if !service.KeepConnect {
+		go c.KeepConnect()
 		close = false
 	}
 
@@ -53,8 +56,15 @@ func (c *tcpConnector) Reply() (err error) {
 }
 
 // Heartbeat ...
-func (c *tcpConnector) Heartbeat() {
-
+func (c *tcpConnector) KeepConnect() {
+	c.ticker = time.NewTicker(time.Second * 30)
+	for {
+		select {
+		case <-c.ticker.C:
+			//todo
+			return
+		}
+	}
 }
 
 // Pong ...
