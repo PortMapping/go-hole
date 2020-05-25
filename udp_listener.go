@@ -3,8 +3,10 @@ package lurker
 import (
 	"context"
 	"fmt"
-	"github.com/portmapping/lurker/nat"
 	"net"
+
+	"github.com/portmapping/lurker/nat"
+	"github.com/xtaci/kcp-go/v5"
 )
 
 type udpListener struct {
@@ -13,6 +15,7 @@ type udpListener struct {
 	port        int
 	mappingPort int
 	nat         nat.NAT
+	listener    net.Listener
 	udpListener *net.UDPConn
 	cfg         *Config
 	ready       bool
@@ -52,12 +55,16 @@ func NewUDPListener(cfg *Config) Listener {
 // Listen ...
 func (l *udpListener) Listen(c chan<- Source) (err error) {
 	udpAddr := LocalUDPAddr(l.port)
-	l.udpListener, err = net.ListenUDP("udp", udpAddr)
+	l.listener, err = kcp.Listen(udpAddr.String())
 	if err != nil {
 		return err
 	}
+	//l.udpListener, err = net.ListenUDP("udp", udpAddr)
+	//if err != nil {
+	//	return err
+	//}
 	fmt.Println("listen udp on address:", udpAddr.String())
-	go listenUDP(l.ctx, l.udpListener, c)
+	go listenTCP(l.ctx, l.listener, c)
 
 	if !l.cfg.NAT {
 		return nil

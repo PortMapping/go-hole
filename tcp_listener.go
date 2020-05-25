@@ -15,7 +15,7 @@ type tcpListener struct {
 	port        int
 	mappingPort int
 	nat         nat.NAT
-	tcpListener net.Listener
+	listener    net.Listener
 	cfg         *Config
 	ready       bool
 }
@@ -137,15 +137,15 @@ func NewTCPListener(cfg *Config) Listener {
 func (l *tcpListener) Listen(c chan<- Source) (err error) {
 	tcpAddr := LocalTCPAddr(l.port)
 	if l.cfg.Secret != nil {
-		l.tcpListener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.Secret)
+		l.listener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.Secret)
 	} else {
-		l.tcpListener, err = reuse.ListenTCP("tcp", tcpAddr)
+		l.listener, err = reuse.ListenTCP("tcp", tcpAddr)
 	}
 	if err != nil {
 		return err
 	}
 	fmt.Println("listen tcp on address:", tcpAddr.String())
-	go listenTCP(l.ctx, l.tcpListener, c)
+	go listenTCP(l.ctx, l.listener, c)
 	if !l.cfg.NAT {
 		return nil
 	}

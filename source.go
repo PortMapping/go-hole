@@ -3,6 +3,7 @@ package lurker
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/xtaci/kcp-go/v5"
 	"net"
 	"time"
 
@@ -138,7 +139,7 @@ func tryConnect(s *source, addr *Addr) error {
 		}
 		s.support.List[ProviderNetworkTCP] = true
 	case "udp", "udp4", "udp6":
-		udp, err := multiPortDialUDP(addr.UDP(), 0)
+		udp, err := dialKCP(addr.UDP())
 		if err != nil {
 			log.Debugw("debug|tryConnect|multiPortDialUDP", "error", err)
 			return err
@@ -197,9 +198,15 @@ func multiPortDialUDP(addr *net.UDPAddr, lport int) (*net.UDPConn, error) {
 	}
 	return udp, nil
 }
-
+func dialKCP(addr *net.UDPAddr) (net.Conn, error) {
+	udp, err := kcp.Dial(addr.String())
+	if err != nil {
+		return nil, err
+	}
+	return udp, nil
+}
 func tryUDP(s *source, addr *Addr) error {
-	udp, err := multiPortDialUDP(addr.UDP(), s.mappingPortUDP)
+	udp, err := dialKCP(addr.UDP())
 	if err != nil {
 		log.Debugw("debug|tryUDP|DialUDP", "error", err)
 		return err
@@ -288,7 +295,7 @@ func tcpPing(s *source, conn net.Conn, data []byte) (n int, err error) {
 	log.Infow("tcp received", "data", string(data[:n]))
 	return n, nil
 }
-func udpPing(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
+func udpPing(s *source, conn net.Conn, data []byte) (n int, err error) {
 	if s.timeout != 0 {
 		err = conn.SetWriteDeadline(time.Now().Add(s.timeout))
 		if err != nil {
@@ -307,16 +314,16 @@ func udpPing(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
 			return 0, err
 		}
 	}
-	n, remote, err := conn.ReadFromUDP(data)
+	n, err = conn.Read(data)
 	if err != nil {
 		log.Debugw("debug|udpPing|ReadFromUDP", "error", err)
 		return 0, err
 	}
-	log.Infow("udp received", "remote info", remote.String(), "data", string(data[:n]))
+	log.Infow("udp received", "data", string(data[:n]))
 	return n, nil
 }
 
-func udpConnect(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
+func udpConnect(s *source, conn net.Conn, data []byte) (n int, err error) {
 	if s.timeout != 0 {
 		err = conn.SetWriteDeadline(time.Now().Add(s.timeout))
 		if err != nil {
@@ -352,7 +359,7 @@ func udpConnect(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
 			return 0, err
 		}
 	}
-	n, _, err = conn.ReadFromUDP(data)
+	n, err = conn.Read(data)
 	if err != nil {
 		log.Debugw("debug|udpConnect|ReadFromUDP", "error", err)
 		return 0, err
