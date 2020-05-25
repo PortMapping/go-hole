@@ -6,9 +6,11 @@ import (
 
 // NAT ...
 type NAT interface {
-	Mapping() (port int, err error)
+	Mapping() (err error)
+	ExtPort() int
+	Port() int
 	StopMapping() (err error)
-	Remapping() (port int, err error)
+	Remapping() (err error)
 	GetExternalAddress() (addr net.IP, err error)
 	GetDeviceAddress() (addr net.IP, err error)
 	GetInternalAddress() (addr net.IP, err error)

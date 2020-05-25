@@ -23,6 +23,11 @@ type natClient struct {
 	extport  int
 }
 
+// Port ...
+func (n *natClient) Port() int {
+	return n.port
+}
+
 func defaultNAT() nat.NAT {
 	n, err := nat.DiscoverGateway()
 	if err != nil {
@@ -65,11 +70,11 @@ func (n *natClient) SetTimeOut(t int) {
 }
 
 // Mapping ...
-func (n *natClient) Mapping() (port int, err error) {
+func (n *natClient) Mapping() (err error) {
 	n.stop.Store(false)
 	n.extport, err = n.nat.AddPortMapping(n.protocol, n.port, description, n.timeout)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	go func() {
@@ -95,13 +100,13 @@ func (n *natClient) Mapping() (port int, err error) {
 		}
 	}()
 
-	return n.extport, nil
+	return nil
 }
 
 // Remapping ...
-func (n *natClient) Remapping() (port int, err error) {
+func (n *natClient) Remapping() (err error) {
 	if err := n.StopMapping(); err != nil {
-		return 0, err
+		return err
 	}
 	return n.Mapping()
 }
@@ -109,10 +114,10 @@ func (n *natClient) Remapping() (port int, err error) {
 // StopMapping ...
 func (n *natClient) StopMapping() (err error) {
 	if n.nat != nil {
+		n.stop.Store(true)
 		if err := n.nat.DeletePortMapping("tcp", n.port); err != nil {
 			return err
 		}
-		n.stop.Store(true)
 	}
 	return nil
 }
