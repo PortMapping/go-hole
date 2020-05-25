@@ -50,74 +50,6 @@ func (t *tcpHandshake) ConnectCallback(f func(f Connector)) {
 	t.connBack = f
 }
 
-// Reply ...
-func (t *tcpHandshake) Reply() error {
-	close := true
-	defer func() {
-		if close {
-			t.conn.Close()
-		}
-	}()
-	data := make([]byte, maxByteSize)
-	n, err := t.conn.Read(data)
-	if err != nil {
-		log.Debugw("debug|getClientFromTCP|Read", "error", err)
-		return err
-	}
-	ip, port := ParseAddr(t.conn.RemoteAddr().String())
-	var r HandshakeRequest
-	service, err := DecodeHandshakeRequest(data[:n], &r)
-	if err != nil {
-		log.Debugw("debug|getClientFromTCP|ParseService", "error", err)
-		return err
-	}
-	if !service.KeepConnect {
-		close = false
-	}
-
-	c := source{
-		addr: Addr{
-			Protocol: t.conn.RemoteAddr().Network(),
-			IP:       ip,
-			Port:     port,
-		},
-		service: service,
-	}
-	if t.connBack != nil {
-		t.connBack(&c)
-	}
-
-	netAddr := ParseNetAddr(t.conn.RemoteAddr())
-	log.Debugw("debug|getClientFromTCP|ParseNetAddr", "addr", netAddr)
-	var resp HandshakeResponse
-	resp.Status = HandshakeStatusSuccess
-	resp.Data = []byte("Connected")
-	_, err = t.conn.Write(resp.JSON())
-	if err != nil {
-		log.Debugw("debug|getClientFromTCP|write", "error", err)
-		return err
-	}
-	return nil
-}
-
-// Pong ...
-func (t *tcpHandshake) Pong() error {
-	defer t.conn.Close()
-	response := HandshakeResponse{
-		Status: HandshakeStatusSuccess,
-		Data:   []byte("PONG"),
-	}
-	write, err := t.conn.Write(response.JSON())
-	if err != nil {
-		return err
-	}
-	if write == 0 {
-		log.Warnw("write pong", "written", 0)
-	}
-
-	return nil
-}
-
 // Do ...
 func (t *tcpHandshake) Do() error {
 	data := make([]byte, maxByteSize)
@@ -206,16 +138,9 @@ func getClientFromTCP(ctx context.Context, conn net.Conn, cli chan<- Connector) 
 	case <-ctx.Done():
 		return nil
 	default:
-		t := tcpHandshake{
-			conn: conn,
-		}
-		t.ConnectCallback(func(f Connector) {
-			cli <- f
-		})
-		err := t.Do()
-		if err != nil {
-			return err
-		}
+		t := newTCPConnector(conn)
+		go t.Process()
+		cli <- t
 	}
 	return nil
 }
