@@ -155,8 +155,6 @@ func tryConnect(s *source, addr *Addr) error {
 }
 
 func tryPublicNetworkConnect(s *source) error {
-	//switch s.addr.Network() {
-	//case "tcp", "tcp4", "tcp6":
 	tcpAddr := ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
 	if err := tryTCP(s, tcpAddr); err != nil {
 		log.Debugw("debug|tryPublicNetworkConnect|tryTCP", "error", err)
@@ -164,7 +162,6 @@ func tryPublicNetworkConnect(s *source) error {
 		s.support.List[PublicNetworkTCP] = true
 	}
 
-	//case "udp", "udp4", "udp6":
 	udpAddr := ParseSourceAddr("udp", s.addr.IP, s.service.PortUDP)
 	if err := tryUDP(s, udpAddr); err != nil {
 		log.Debugw("debug|tryPublicNetworkConnect|tryUDP", "error", err)
@@ -188,30 +185,6 @@ func multiPortDialTCP(addr *net.TCPAddr, timeout time.Duration, lport int) (net.
 		return tcp, false, nil
 	}
 	return tcp, true, nil
-}
-
-func tryReverseTCP(s *source) error {
-	tcp, keep, err := multiPortDialTCP(s.addr.TCP(), 3*time.Second, s.mappingPortTCP)
-	if err != nil {
-		log.Debugw("debug|tryReverseNetworkConnect|DialTCP", "error", err)
-		return err
-	}
-	//never close
-	if !keep {
-		defer tcp.Close()
-	}
-
-	//s.service.ExtData = []byte("tryReverseTCP")
-	s.service.ID = GlobalID
-	s.service.KeepConnect = keep
-	data := make([]byte, maxByteSize)
-	n, err := tcpPing(s, tcp, data)
-	if err != nil {
-		return err
-	}
-	//ignore n
-	_ = n
-	return nil
 }
 
 func multiPortDialUDP(addr *net.UDPAddr, lport int) (*net.UDPConn, error) {
@@ -370,7 +343,7 @@ func udpConnect(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
 	}
 	_, err = conn.Write(req)
 	if err != nil {
-		log.Debugw("debug|tcpConnect|Write", "error", err)
+		log.Debugw("debug|udpConnect|Write", "error", err)
 		return 0, err
 	}
 	if s.timeout != 0 {
@@ -381,10 +354,10 @@ func udpConnect(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
 	}
 	n, _, err = conn.ReadFromUDP(data)
 	if err != nil {
-		log.Debugw("debug|tcpConnect|Read", "error", err)
+		log.Debugw("debug|udpConnect|ReadFromUDP", "error", err)
 		return 0, err
 	}
-	log.Infow("tcp received", "data", string(data[:n]))
+	log.Infow("udp received", "data", string(data[:n]))
 	return n, nil
 }
 
