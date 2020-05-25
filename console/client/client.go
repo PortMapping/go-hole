@@ -199,18 +199,18 @@ func bidirectionalHoleTCP(srcAddr *net.TCPAddr, anotherAddr *net.TCPAddr) {
 }
 
 func reuseHandle() {
-	local, err := nat.FromLocal(16005)
+	local, err := nat.FromLocal("tcp", 16005)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	mapping, err := local.Mapping()
+	err = local.Mapping()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	defer local.StopMapping()
-	addr := fmt.Sprintf("0.0.0.0:%d", mapping)
+	addr := fmt.Sprintf("0.0.0.0:%d", local.ExtPort())
 	l1, err := reuse.Listen("tcp", "0.0.0.0:16005")
 	if err != nil {
 		fmt.Println(err)
@@ -273,9 +273,8 @@ func reuseHandle() {
 				if err != nil {
 					log.Printf("error during read: %s\n", err)
 					return
-				} else {
-					log.Printf("from:%s recevied:%s\n", addr, data[:n])
 				}
+				log.Printf("from:%s recevied:%s\n", addr, data[:n])
 			}
 		}()
 	}

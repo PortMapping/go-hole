@@ -44,7 +44,7 @@ func main() {
 		}
 		log.Printf("external address: %s", eaddr)
 
-		log.Printf("test-page: http://%s:%d/", eaddr, eport)
+		log.Printf("test-page: http://%s:%d/", eaddr, 16005)
 
 		go func() {
 			for {
@@ -66,7 +66,7 @@ func main() {
 			fmt.Fprintf(rw, "device address: %s\n", daddr)
 			fmt.Fprintf(rw, "internal address: %s\n", iaddr)
 			fmt.Fprintf(rw, "external address: %s\n", eaddr)
-			fmt.Fprintf(rw, "test-page: http://%s:%d/\n", eaddr, eport)
+			fmt.Fprintf(rw, "test-page: http://%s:%d/\n", eaddr, 16005)
 		}))
 	} else {
 		log.Println("handling on port", port)
