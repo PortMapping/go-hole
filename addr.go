@@ -42,3 +42,22 @@ func (addr Addr) TCP() *net.TCPAddr {
 func (addr Addr) IsZero() bool {
 	return addr.Protocol == "" && addr.IP.Equal(net.IPv4zero) && addr.Port == 0
 }
+
+// ParseSourceAddr ...
+func ParseSourceAddr(network string, ip net.IP, port int) *Addr {
+	return &Addr{
+		Protocol: network,
+		IP:       ip,
+		Port:     port,
+	}
+}
+
+// ParseNetAddr ...
+func ParseNetAddr(addr net.Addr) *Addr {
+	ip, port := ParseAddr(addr.String())
+	return &Addr{
+		Protocol: addr.Network(),
+		IP:       ip,
+		Port:     port,
+	}
+}

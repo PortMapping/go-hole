@@ -225,23 +225,6 @@ func multiPortDialUDP(addr *net.UDPAddr, lport int) (*net.UDPConn, error) {
 	return udp, nil
 }
 
-func tryReverseUDP(s *source) error {
-	udp, err := multiPortDialUDP(s.addr.UDP(), s.mappingPortUDP)
-	if err != nil {
-		log.Debugw("debug|tryReverseUDP|DialUDP", "error", err)
-		return err
-	}
-	//s.service.ExtData = []byte("tryReverseUDP")
-	data := make([]byte, maxByteSize)
-	n, err := udpPing(s, udp, data)
-	if err != nil {
-		return err
-	}
-	//ignore n
-	_ = n
-	return nil
-}
-
 func tryUDP(s *source, addr *Addr) error {
 	udp, err := multiPortDialUDP(addr.UDP(), s.mappingPortUDP)
 	if err != nil {
@@ -351,10 +334,10 @@ func udpPing(s *source, conn *net.UDPConn, data []byte) (n int, err error) {
 			return 0, err
 		}
 	}
-	n, remote, errR := conn.ReadFromUDP(data)
-	if errR != nil {
-		log.Debugw("debug|udpPing|ReadFromUDP", "error", errR)
-		return 0, errR
+	n, remote, err := conn.ReadFromUDP(data)
+	if err != nil {
+		log.Debugw("debug|udpPing|ReadFromUDP", "error", err)
+		return 0, err
 	}
 	log.Infow("udp received", "remote info", remote.String(), "data", string(data[:n]))
 	return n, nil
@@ -425,23 +408,4 @@ func tryTCP(s *source, addr *Addr) error {
 	//ignore n
 	_ = n
 	return nil
-}
-
-// ParseSourceAddr ...
-func ParseSourceAddr(network string, ip net.IP, port int) *Addr {
-	return &Addr{
-		Protocol: network,
-		IP:       ip,
-		Port:     port,
-	}
-}
-
-// ParseNetAddr ...
-func ParseNetAddr(addr net.Addr) *Addr {
-	ip, port := ParseAddr(addr.String())
-	return &Addr{
-		Protocol: addr.Network(),
-		IP:       ip,
-		Port:     port,
-	}
 }
