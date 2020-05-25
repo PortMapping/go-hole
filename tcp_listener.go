@@ -159,13 +159,13 @@ func (l *tcpListener) Listen(c chan<- Source) (err error) {
 		}
 		l.cfg.NAT = false
 	} else {
-		extPort, err := l.nat.Mapping()
+		err := l.nat.Mapping()
 		if err != nil {
 			log.Debugw("nat mapping error", "error", err)
 			l.cfg.NAT = false
 			return nil
 		}
-		l.mappingPort = extPort
+		l.mappingPort = l.nat.ExtPort()
 
 		address, err := l.nat.GetExternalAddress()
 		if err != nil {

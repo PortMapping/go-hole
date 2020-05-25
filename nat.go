@@ -1,6 +1,7 @@
 package lurker
 
 import (
+	"fmt"
 	p2pnat "github.com/libp2p/go-nat"
 	"github.com/portmapping/lurker/nat"
 )
@@ -40,21 +41,19 @@ func mapping(network string, port int) (n nat.NAT, err error) {
 			//fmt.Println("listen tcp on address:", tcpAddr.String())
 		}
 		return nil, err
-	} else {
-		extPort, err := n.Mapping()
-		if err != nil {
-			log.Debugw("nat mapping error", "error", err)
-			return nil, err
-		}
-		l.mappingPort = extPort
-
-		address, err := l.nat.GetExternalAddress()
-		if err != nil {
-			log.Debugw("get external address error", "error", err)
-			l.cfg.NAT = false
-			return nil
-		}
-		addr := ParseSourceAddr("tcp", address, extPort)
-		fmt.Println("tcp mapping on address:", addr.String())
 	}
+	err = n.Mapping()
+	if err != nil {
+		log.Debugw("nat mapping error", "error", err)
+		return nil, err
+	}
+
+	address, err := n.GetExternalAddress()
+	if err != nil {
+		log.Debugw("get external address error", "error", err)
+		return nil, err
+	}
+	addr := ParseSourceAddr("tcp", address, n.ExtPort())
+	fmt.Printf("%s mapping on address: %v", network, addr)
+	return n, nil
 }
