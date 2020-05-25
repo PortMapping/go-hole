@@ -3,7 +3,6 @@ package lurker
 import (
 	"context"
 	"fmt"
-	p2pnat "github.com/libp2p/go-nat"
 	"github.com/portmapping/lurker/nat"
 	"net"
 )
@@ -63,31 +62,9 @@ func (l *udpListener) Listen(c chan<- Source) (err error) {
 	if !l.cfg.NAT {
 		return nil
 	}
-
-	l.nat, err = nat.FromLocal("udp", l.cfg.UDP)
+	l.nat, err = mapping("udp", l.cfg.UDP)
 	if err != nil {
-		log.Debugw("nat error", "error", err)
-		if err == p2pnat.ErrNoNATFound {
-
-		}
-		l.cfg.NAT = false
-	} else {
-		extPort, err := l.nat.Mapping()
-		if err != nil {
-			log.Debugw("nat mapping error", "error", err)
-			l.cfg.NAT = false
-			return nil
-		}
-		l.mappingPort = extPort
-
-		address, err := l.nat.GetExternalAddress()
-		if err != nil {
-			log.Debugw("get external address error", "error", err)
-			l.cfg.NAT = false
-			return nil
-		}
-		addr := ParseSourceAddr("tcp", address, extPort)
-		fmt.Println("udp mapping on address:", addr.String())
+		return err
 	}
 	l.ready = true
 	return nil
