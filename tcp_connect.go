@@ -6,12 +6,15 @@ import (
 )
 
 type tcpConnector struct {
-	conn   net.Conn
-	ticker *time.Ticker
+	timeout time.Duration
+	conn    net.Conn
+	ticker  *time.Ticker
 }
 
 func newTCPConnector(conn net.Conn) Connector {
-	c := tcpConnector{}
+	c := tcpConnector{
+		timeout: 5 * time.Second,
+	}
 	c.conn = conn
 	return &c
 }
@@ -25,16 +28,23 @@ func (c *tcpConnector) Reply() (err error) {
 		}
 	}()
 	data := make([]byte, maxByteSize)
+	if c.timeout != 0 {
+		err := c.conn.SetReadDeadline(time.Now().Add(c.timeout))
+		if err != nil {
+			log.Debugw("debug|Reply|SetReadDeadline", "error", err)
+			return err
+		}
+	}
 	n, err := c.conn.Read(data)
 	if err != nil {
-		log.Debugw("debug|getClientFromTCP|Read", "error", err)
+		log.Debugw("debug|Reply|Read", "error", err)
 		return err
 	}
 
 	var r HandshakeRequest
 	service, err := DecodeHandshakeRequest(data[:n], &r)
 	if err != nil {
-		log.Debugw("debug|getClientFromTCP|ParseService", "error", err)
+		log.Debugw("debug|Reply|DecodeHandshakeRequest", "error", err)
 		return err
 	}
 	if !service.KeepConnect {
@@ -43,13 +53,20 @@ func (c *tcpConnector) Reply() (err error) {
 	}
 
 	netAddr := ParseNetAddr(c.conn.RemoteAddr())
-	log.Debugw("debug|getClientFromTCP|ParseNetAddr", "addr", netAddr)
+	log.Debugw("debug|Reply|ParseNetAddr", "addr", netAddr)
 	var resp HandshakeResponse
 	resp.Status = HandshakeStatusSuccess
 	resp.Data = []byte("Connected")
+	if c.timeout != 0 {
+		err := c.conn.SetWriteDeadline(time.Now().Add(c.timeout))
+		if err != nil {
+			log.Debugw("debug|Reply|SetWriteDeadline", "error", err)
+			return err
+		}
+	}
 	_, err = c.conn.Write(resp.JSON())
 	if err != nil {
-		log.Debugw("debug|getClientFromTCP|write", "error", err)
+		log.Debugw("debug|Reply|Write", "error", err)
 		return err
 	}
 	return nil
