@@ -55,8 +55,8 @@ func NewTCPListener(cfg *Config) Listener {
 // Listen ...
 func (l *tcpListener) Listen(c chan<- Connector) (err error) {
 	tcpAddr := LocalTCPAddr(l.port)
-	if l.cfg.Secret != nil {
-		l.listener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.Secret)
+	if l.cfg.UseSecret {
+		l.listener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.secret)
 	} else {
 		l.listener, err = reuse.ListenTCP("tcp", tcpAddr)
 	}
