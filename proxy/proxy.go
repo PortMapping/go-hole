@@ -17,6 +17,7 @@ const HTTPS = "https"
 // Proxy ...
 type Proxy interface {
 	Monitor(conn net.Conn)
+	ListenPort(port int) (net.Listener, error)
 }
 
 // New ...

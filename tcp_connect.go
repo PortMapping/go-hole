@@ -12,6 +12,11 @@ type tcpConnector struct {
 	ticker  *time.Ticker
 }
 
+// RegisterCallback ...
+func (c *tcpConnector) RegisterCallback(cb ConnectorCallback) {
+
+}
+
 // ID ...
 func (c *tcpConnector) ID() string {
 	return c.id

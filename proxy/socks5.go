@@ -14,6 +14,19 @@ type socks5 struct {
 	Authenticate
 }
 
+// ListenPort ...
+func (s *socks5) ListenPort(port int) (net.Listener, error) {
+	tcpAddr := net.TCPAddr{
+		IP:   net.IPv4zero,
+		Port: port,
+	}
+	tcpLis, err := net.ListenTCP("tcp", &tcpAddr)
+	if err != nil {
+		return nil, err
+	}
+	return tcpLis, nil
+}
+
 // ListenTCP ...
 func (s *socks5) Monitor(conn net.Conn) {
 	if err := s.listenRequest(conn); err != nil {
