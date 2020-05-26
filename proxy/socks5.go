@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"fmt"
+	"github.com/portmapping/go-reuse"
 	"io"
 	"net"
 )
@@ -20,7 +21,7 @@ func (s *socks5) ListenPort(port int) (net.Listener, error) {
 		IP:   net.IPv4zero,
 		Port: port,
 	}
-	tcpLis, err := net.ListenTCP("tcp", &tcpAddr)
+	tcpLis, err := reuse.ListenTCP("tcp", &tcpAddr)
 	if err != nil {
 		return nil, err
 	}
