@@ -12,6 +12,11 @@ type tcpConnector struct {
 	ticker  *time.Ticker
 }
 
+// ID ...
+func (c *tcpConnector) ID() string {
+	return c.id
+}
+
 var _ HandshakeResponder = &tcpConnector{}
 
 func newTCPConnector(conn net.Conn) Connector {
@@ -77,7 +82,7 @@ func (c *tcpConnector) Interaction() (err error) {
 
 // Intermediary ...
 func (c *tcpConnector) Intermediary() error {
-
+	return nil
 }
 
 // Other ...
