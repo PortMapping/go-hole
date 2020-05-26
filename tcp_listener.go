@@ -51,7 +51,7 @@ func NewTCPListener(cfg *Config) Listener {
 	tcp.ctx, tcp.cancel = context.WithCancel(context.TODO())
 	var err error
 	if cfg.NAT {
-		tcp.nat, err = mapping("tcp", l.cfg.TCP)
+		tcp.nat, err = mapping("tcp", cfg.TCP)
 		if err != nil {
 			panic(err)
 		}
