@@ -20,6 +20,7 @@ type ListenResponse struct {
 // Lurker ...
 type Lurker interface {
 	Listen() (c <-chan Connector, err error)
+	ListenMonitor() error
 	RegisterListener(name string, listener Listener)
 	Listener(name string) (Listener, bool)
 	NetworkNAT(name string) nat.NAT
@@ -33,6 +34,18 @@ type lurker struct {
 	sources    chan Source
 	timeout    time.Duration
 	connectors chan Connector
+}
+
+// ListenNoMonitor ...
+func (l *lurker) ListenMonitor() error {
+	listen, err := l.Listen()
+	if err != nil {
+		return err
+	}
+	for l := range listen {
+		fmt.Println("connect from", l.ID())
+	}
+	return nil
 }
 
 // NetworkNAT ...
