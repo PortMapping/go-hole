@@ -26,5 +26,5 @@ func New(protocol string, auth Authenticate) (Proxy, error) {
 	case Socks5:
 		return newSocks5Proxy(auth)
 	}
-	return nil, errors.New("protocol was not supported ")
+	return nil, errors.New("protocol was not supported")
 }
