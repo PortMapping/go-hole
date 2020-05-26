@@ -13,6 +13,7 @@ import (
 // Proxy ...
 type Proxy struct {
 	Type string `json:"type"`
+	Port int    `json:"port"`
 	Name string `json:"name"`
 	Pass string `json:"pass"`
 }
@@ -23,7 +24,7 @@ type Config struct {
 	UDP         int
 	NAT         bool
 	UseProxy    bool
-	Proxy       Proxy
+	Proxy       []Proxy
 	UseSecret   bool
 	Certificate string
 	secret      *tls.Config
