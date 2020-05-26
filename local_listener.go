@@ -4,16 +4,21 @@ import (
 	"errors"
 )
 
+type baseLocalListener struct {
+}
 type localSocks5Listener struct {
+	baseLocalListener
 }
 
-// Server ...
-func Local(cfg *Config) (Listener, error) {
+// RegisterLocalProxy ...
+func RegisterLocalProxy(l Lurker, cfg *Config) (err error) {
 	if !cfg.UseProxy {
-		return nil, errors.New("not supported")
+		return errors.New("not supported")
 	}
-	if cfg.Proxy.Name != "" && cfg.Proxy.Pass != "" {
-	}
+	for _, proxy := range cfg.Proxy {
+		if proxy.Pass != "" && proxy.Name != "" {
 
+		}
+	}
 	return nil
 }
