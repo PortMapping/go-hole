@@ -57,7 +57,7 @@ func main() {
 
 		fmt.Println("your connect id:", lurker.GlobalID)
 		go func() {
-			for source := range listener {
+			for connector := range listener {
 				fmt.Println("connect from:", source.Addr().String(), string(source.Service().JSON()))
 				_, ok := list.Load(source.Service().ID)
 				if ok {

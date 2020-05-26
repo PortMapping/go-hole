@@ -38,6 +38,7 @@ type HandshakeHead struct {
 type HandshakeResponder interface {
 	Pong() error
 	Reply() error
+	Intermediary() error
 }
 
 // HandshakeRequester ...
@@ -157,6 +158,7 @@ func (h *HandshakeHead) Run(able HandshakeResponder) error {
 	case HandshakeTypeConnect:
 		return able.Reply()
 	case HandshakeTypeAdapter:
+		return able.Intermediary()
 
 	}
 	return nil
