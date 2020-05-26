@@ -11,6 +11,8 @@ type tcpConnector struct {
 	ticker  *time.Ticker
 }
 
+var _ HandshakeResponder = &tcpConnector{}
+
 func newTCPConnector(conn net.Conn) Connector {
 	c := tcpConnector{
 		timeout: 5 * time.Second,
@@ -19,8 +21,8 @@ func newTCPConnector(conn net.Conn) Connector {
 	return &c
 }
 
-// Reply ...
-func (c *tcpConnector) Reply() (err error) {
+// Interaction ...
+func (c *tcpConnector) Interaction() (err error) {
 	close := true
 	defer func() {
 		if close {
@@ -68,6 +70,16 @@ func (c *tcpConnector) Reply() (err error) {
 		log.Debugw("debug|Reply|Write", "error", err)
 		return err
 	}
+	return nil
+}
+
+// Intermediary ...
+func (c *tcpConnector) Intermediary() error {
+
+}
+
+// Other ...
+func (c *tcpConnector) Other() error {
 	return nil
 }
 

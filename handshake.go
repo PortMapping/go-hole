@@ -29,6 +29,9 @@ const HandshakeTypeConnect HandshakeType = 0x02
 // HandshakeTypeAdapter ...
 const HandshakeTypeAdapter HandshakeType = 0x03
 
+// HandshakeRequestTypeDummy ...
+const HandshakeRequestTypeDummy HandshakeRequestType = 0x01
+
 // HandshakeHead ...
 type HandshakeHead struct {
 	Type HandshakeType `json:"type"`
@@ -37,8 +40,9 @@ type HandshakeHead struct {
 // HandshakeResponder ...
 type HandshakeResponder interface {
 	Pong() error
-	Reply() error
 	Intermediary() error
+	Interaction() error
+	Other() error
 }
 
 // HandshakeRequester ...
@@ -48,10 +52,14 @@ type HandshakeRequester interface {
 	Adapter() error
 }
 
+// HandshakeRequestType ...
+type HandshakeRequestType int
+
 // HandshakeRequest ...
 type HandshakeRequest struct {
-	ProtocolVersion Version `json:"protocol_version"`
-	Data            []byte  `json:"data"`
+	RequestType     HandshakeRequestType `json:"request_type"`
+	ProtocolVersion Version              `json:"protocol_version"`
+	Data            []byte               `json:"data"`
 }
 
 // HandshakeResponse ...
@@ -156,10 +164,9 @@ func (h *HandshakeHead) Run(able HandshakeResponder) error {
 	case HandshakeTypePing:
 		return able.Pong()
 	case HandshakeTypeConnect:
-		return able.Reply()
+		return able.Interaction()
 	case HandshakeTypeAdapter:
 		return able.Intermediary()
-
 	}
-	return nil
+	return able.Other()
 }
