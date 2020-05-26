@@ -49,6 +49,13 @@ func NewTCPListener(cfg *Config) Listener {
 		cfg:    cfg,
 	}
 	tcp.ctx, tcp.cancel = context.WithCancel(context.TODO())
+	var err error
+	if cfg.NAT {
+		tcp.nat, err = mapping("tcp", l.cfg.TCP)
+		if err != nil {
+			panic(err)
+		}
+	}
 	return tcp
 }
 
@@ -65,13 +72,6 @@ func (l *tcpListener) Listen(c chan<- Connector) (err error) {
 	}
 	fmt.Println("listen tcp on address:", tcpAddr.String())
 	go listenTCP(l.ctx, l.listener, c)
-	if l.cfg.NAT {
-		l.nat, err = mapping("tcp", l.cfg.TCP)
-		if err != nil {
-			return err
-		}
-	}
-
 	l.ready = true
 	return
 }

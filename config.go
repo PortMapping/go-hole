@@ -69,9 +69,21 @@ func UUID() string {
 // DefaultConfig ...
 func DefaultConfig() *Config {
 	return &Config{
-		TCP: DefaultTCP,
-		UDP: DefaultUDP,
-		NAT: true,
+		TCP:      DefaultTCP,
+		UDP:      DefaultUDP,
+		NAT:      true,
+		UseProxy: true,
+		Proxy: []Proxy{
+			{
+				Type: "socks5",
+				Port: 10080,
+				Name: "test1",
+				Pass: "test2",
+			},
+		},
+		UseSecret:   false,
+		Certificate: "",
+		secret:      nil,
 	}
 }
 
