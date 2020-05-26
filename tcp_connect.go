@@ -6,6 +6,7 @@ import (
 )
 
 type tcpConnector struct {
+	id      string
 	timeout time.Duration
 	conn    net.Conn
 	ticker  *time.Ticker
@@ -53,6 +54,7 @@ func (c *tcpConnector) Interaction() (err error) {
 		close = true
 	}
 
+	c.id = service.ID
 	netAddr := ParseNetAddr(c.conn.RemoteAddr())
 	log.Debugw("debug|Reply|ParseNetAddr", "addr", netAddr)
 	var resp HandshakeResponse

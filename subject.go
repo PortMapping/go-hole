@@ -1,43 +1,25 @@
 package lurker
 
 import (
-	"crypto/sha256"
-	"fmt"
+	"sync"
 )
 
 // Subject ...
 type Subject interface {
+	Add(connector Connector) error
 }
 
 type subject struct {
-	sources map[string]map[string]Source
+	connectors sync.Map
+}
+
+// Add ...
+func (s *subject) Add(connector Connector) error {
+	s.connectors.Store(connector.ID(), connector)
+	return nil
 }
 
 // NewSubject ...
 func NewSubject() Subject {
-	return subject{
-		sources: make(map[string]map[string]Source),
-	}
-}
-
-// RegisterSource ...
-func (s *subject) RegisterSource(name string, source Source) {
-	//todo hash
-	hash := hashString("", "")
-	if _, b := s.sources[name]; b {
-		if _, b := s.sources[name][hash]; b {
-			return
-		}
-		s.sources[name][hash] = source
-		return
-	}
-	s.sources[name] = map[string]Source{
-		hash: source,
-	}
-	return
-}
-
-func hashString(network, address string) string {
-	s := sha256.Sum256([]byte(network + "_" + address))
-	return fmt.Sprintf("%x", s)
+	return &subject{}
 }
