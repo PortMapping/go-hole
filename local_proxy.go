@@ -33,6 +33,7 @@ func RegisterLocalProxy(l Lurker, cfg *Config) (err error) {
 			return err
 		}
 		ctx, cFunc := context.WithCancel(context.TODO())
+
 		l.RegisterListener("", &localProxy{
 			ctx:    ctx,
 			cancel: cFunc,

@@ -13,6 +13,7 @@ import (
 // Proxy ...
 type Proxy struct {
 	Type string `json:"type"`
+	Nat  bool   `json:"nat"`
 	Port int    `json:"port"`
 	Name string `json:"name"`
 	Pass string `json:"pass"`
