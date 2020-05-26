@@ -82,6 +82,21 @@ type udpHandshake struct {
 	connBack func(f Connector)
 }
 
+// Intermediary ...
+func (h *udpHandshake) Intermediary() error {
+	panic("implement me")
+}
+
+// Interaction ...
+func (h *udpHandshake) Interaction() error {
+	panic("implement me")
+}
+
+// Other ...
+func (h *udpHandshake) Other() error {
+	panic("implement me")
+}
+
 // Pong ...
 func (h *udpHandshake) Pong() error {
 	response := HandshakeResponse{

@@ -30,7 +30,6 @@ type Lurker interface {
 type lurker struct {
 	listeners  map[string]Listener
 	cfg        *Config
-	nat        nat.NAT
 	sources    chan Source
 	timeout    time.Duration
 	connectors chan Connector
@@ -71,16 +70,20 @@ func (l *lurker) Config() Config {
 	return *l.cfg
 }
 
-// NAT ...
-func (l *lurker) NAT() nat.NAT {
-	return l.nat
-}
-
 // Stop ...
 func (l *lurker) Stop() error {
-	if err := l.nat.StopMapping(); err != nil {
-		return err
+	//if l.nat != nil {
+	//	if err := l.nat.StopMapping(); err != nil {
+	//		return err
+	//	}
+	//}
+	for _, listener := range l.listeners {
+		err := listener.Stop()
+		if err != nil {
+			return err
+		}
 	}
+
 	fmt.Println("stopped")
 	return nil
 }
@@ -126,6 +129,7 @@ func (l *lurker) Listen() (c <-chan Connector, err error) {
 	defer func() {
 		if e := recover(); e != nil {
 			log.Errorw("listener error found", "error", e)
+			l.Stop()
 		}
 	}()
 
