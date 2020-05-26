@@ -77,8 +77,8 @@ func DefaultConfig() *Config {
 			{
 				Type: "socks5",
 				Port: 10080,
-				Name: "test1",
-				Pass: "test2",
+				Name: "",
+				Pass: "",
 			},
 		},
 		UseSecret:   false,

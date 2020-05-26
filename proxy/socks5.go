@@ -32,6 +32,9 @@ func (s *socks5) Monitor(conn net.Conn) {
 	if err := s.listenRequest(conn); err != nil {
 		return
 	}
+	if err := s.requests(conn); err != nil {
+		return
+	}
 }
 
 func newSocks5Proxy(auth Authenticate) (Proxy, error) {
@@ -121,6 +124,6 @@ func (s *socks5) requests(conn net.Conn) (err error) {
 	if err != nil {
 		return
 	}
-
+	fmt.Println("receive new data")
 	return nil
 }

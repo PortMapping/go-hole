@@ -20,10 +20,15 @@ type localProxy struct {
 // RegisterLocalProxy ...
 func RegisterLocalProxy(l Lurker, cfg *Config) (err error) {
 	for _, p := range cfg.Proxy {
-		lp, err := proxy.New(p.Type, proxy.Auth{
-			Name: p.Name,
-			Pass: p.Pass,
-		})
+		a := proxy.NoAuth()
+		if p.Name != "" && p.Pass != "" {
+			a = proxy.Auth{
+				Name: p.Name,
+				Pass: p.Pass,
+			}
+		}
+
+		lp, err := proxy.New(p.Type, a)
 		if err != nil {
 			return err
 		}

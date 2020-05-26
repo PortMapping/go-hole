@@ -25,6 +25,24 @@ type Auth struct {
 	Pass string
 }
 
+type dummyAuth struct {
+}
+
+// NeedAuthenticate ...
+func (d dummyAuth) NeedAuthenticate() bool {
+	return false
+}
+
+// Auth ...
+func (d dummyAuth) Auth(conn net.Conn) error {
+	return nil
+}
+
+// NoAuth ...
+func NoAuth() Authenticate {
+	return &dummyAuth{}
+}
+
 // NeedAuthenticate ...
 func (a Auth) NeedAuthenticate() bool {
 	return true
