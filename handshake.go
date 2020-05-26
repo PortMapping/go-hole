@@ -5,20 +5,11 @@ import (
 	"net"
 )
 
-// HandshakeStatus ...
-type HandshakeStatus int
-
 // HandshakeStatusSuccess ...
 const HandshakeStatusSuccess HandshakeStatus = 0x01
 
 // HandshakeStatusFailed ...
 const HandshakeStatusFailed HandshakeStatus = 0x00
-
-// Version ...
-type Version string
-
-// HandshakeType ...
-type HandshakeType int
 
 // HandshakeTypePing ...
 const HandshakeTypePing HandshakeType = 0x01
@@ -29,8 +20,20 @@ const HandshakeTypeConnect HandshakeType = 0x02
 // HandshakeTypeAdapter ...
 const HandshakeTypeAdapter HandshakeType = 0x03
 
-// HandshakeRequestTypeDummy ...
-const HandshakeRequestTypeDummy HandshakeRequestType = 0x01
+// HandshakeRequestTypeProxy ...
+const HandshakeRequestTypeProxy RequestType = 0x01
+
+// Version ...
+type Version string
+
+// HandshakeStatus ...
+type HandshakeStatus int
+
+// HandshakeType ...
+type HandshakeType int
+
+// RequestType ...
+type RequestType int
 
 // HandshakeHead ...
 type HandshakeHead struct {
@@ -52,14 +55,11 @@ type HandshakeRequester interface {
 	Adapter() error
 }
 
-// HandshakeRequestType ...
-type HandshakeRequestType int
-
 // HandshakeRequest ...
 type HandshakeRequest struct {
-	RequestType     HandshakeRequestType `json:"request_type"`
-	ProtocolVersion Version              `json:"protocol_version"`
-	Data            []byte               `json:"data"`
+	RequestType     RequestType `json:"request_type"`
+	ProtocolVersion Version     `json:"protocol_version"`
+	Data            []byte      `json:"data"`
 }
 
 // HandshakeResponse ...

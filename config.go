@@ -10,14 +10,23 @@ import (
 	"github.com/google/uuid"
 )
 
+// Proxy ...
+type Proxy struct {
+	Type string `json:"type"`
+	Name string `json:"name"`
+	Pass string `json:"pass"`
+}
+
 // Config ...
 type Config struct {
-	TCP    int
-	UDP    int
-	NAT    bool
-	Secret *tls.Config
-	HTTP   int
-	HTTPS  int
+	TCP         int
+	UDP         int
+	NAT         bool
+	UseProxy    bool
+	Proxy       Proxy
+	UseSecret   bool
+	Certificate string
+	secret      *tls.Config
 }
 
 // DefaultTimeout ...
@@ -59,10 +68,9 @@ func UUID() string {
 // DefaultConfig ...
 func DefaultConfig() *Config {
 	return &Config{
-		TCP:    DefaultTCP,
-		UDP:    DefaultUDP,
-		NAT:    true,
-		Secret: nil,
+		TCP: DefaultTCP,
+		UDP: DefaultUDP,
+		NAT: true,
 	}
 }
 
