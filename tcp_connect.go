@@ -1,9 +1,10 @@
 package lurker
 
 import (
-	"github.com/portmapping/lurker/common"
 	"net"
 	"time"
+
+	"github.com/portmapping/lurker/common"
 )
 
 type tcpConnector struct {
@@ -66,7 +67,7 @@ func (c *tcpConnector) Interaction() (err error) {
 	}
 
 	c.id = service.ID
-	netAddr := addr.ParseNetAddr(c.conn.RemoteAddr())
+	netAddr := common.ParseNetAddr(c.conn.RemoteAddr())
 	log.Debugw("debug|Reply|ParseNetAddr", "common", netAddr)
 	var resp HandshakeResponse
 	resp.Status = HandshakeStatusSuccess

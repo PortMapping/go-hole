@@ -214,13 +214,20 @@ func connect(cmd int, conn net.Conn) error {
 	if e != nil {
 		return e
 	}
-
-	dial, err := net.Dial("tcp", addr)
+	tcpAddr, e := net.ResolveTCPAddr("tcp", addr)
+	localTCPAddr := common.LocalTCPAddr(0)
+	dial, err := net.DialTCP("tcp", localTCPAddr, tcpAddr)
 	if err != nil {
 		return err
 	}
+
+	e = doReplies(conn, repSucceeded, atypIPv4Address)
+	if e != nil {
+		return e
+	}
 	wg := sync.WaitGroup{}
 	pool.AddConnections(pool.NewConnection(dial, conn, &wg))
+	wg.Wait()
 	return nil
 }
 

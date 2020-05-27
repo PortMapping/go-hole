@@ -3,12 +3,12 @@ package lurker
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/portmapping/lurker/common"
-	"github.com/xtaci/kcp-go/v5"
 	"net"
 	"time"
 
 	"github.com/portmapping/go-reuse"
+	"github.com/portmapping/lurker/common"
+	"github.com/xtaci/kcp-go/v5"
 )
 
 // Source ...
@@ -16,7 +16,7 @@ type Source interface {
 	Connect() error
 	Try() error
 	Service() Service
-	Addr() addr.Addr
+	Addr() common.Addr
 	SetMappingPort(string, int) //T.B.D
 }
 
@@ -24,7 +24,7 @@ type source struct {
 	mappingPortUDP int
 	mappingPortTCP int
 	service        Service
-	addr           addr.Addr
+	addr           common.Addr
 	support        Support
 	timeout        time.Duration
 }
@@ -45,7 +45,7 @@ func (s source) Service() Service {
 }
 
 // Addr ...
-func (s source) Addr() addr.Addr {
+func (s source) Addr() common.Addr {
 	return s.addr
 }
 
@@ -59,7 +59,7 @@ func (s Service) JSON() []byte {
 }
 
 // NewSource ...
-func NewSource(service Service, addr addr.Addr) Source {
+func NewSource(service Service, addr common.Addr) Source {
 	return &source{
 		service: service,
 		addr:    addr,
@@ -107,13 +107,13 @@ func (s *source) Connect() error {
 func tryReverseNetworkConnect(s *source) error {
 	switch s.addr.Network() {
 	case "tcp", "tcp4", "tcp6":
-		tcpAddr := addr.ParseSourceAddr(s.addr.Protocol, s.addr.IP, s.addr.Port)
+		tcpAddr := common.ParseSourceAddr(s.addr.Protocol, s.addr.IP, s.addr.Port)
 		if err := tryTCP(s, tcpAddr); err != nil {
 			return err
 		}
 		s.support.List[ProviderNetworkTCP] = true
 	case "udp", "udp4", "udp6":
-		udpAddr := addr.ParseSourceAddr(s.addr.Protocol, s.addr.IP, s.addr.Port)
+		udpAddr := common.ParseSourceAddr(s.addr.Protocol, s.addr.IP, s.addr.Port)
 		if err := tryUDP(s, udpAddr); err != nil {
 			return err
 		}
@@ -124,7 +124,7 @@ func tryReverseNetworkConnect(s *source) error {
 	return nil
 }
 
-func tryConnect(s *source, addr *addr.Addr) error {
+func tryConnect(s *source, addr *common.Addr) error {
 	switch s.addr.Network() {
 	case "tcp", "tcp4", "tcp6":
 		//tcpAddr := ParseSourceAddr(common.Protocol, common.IP, common.Port)
@@ -157,14 +157,14 @@ func tryConnect(s *source, addr *addr.Addr) error {
 }
 
 func tryPublicNetworkConnect(s *source) error {
-	tcpAddr := addr.ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
+	tcpAddr := common.ParseSourceAddr("tcp", s.addr.IP, s.service.PortTCP)
 	if err := tryTCP(s, tcpAddr); err != nil {
 		log.Debugw("debug|tryPublicNetworkConnect|tryTCP", "error", err)
 	} else {
 		s.support.List[PublicNetworkTCP] = true
 	}
 
-	udpAddr := addr.ParseSourceAddr("udp", s.addr.IP, s.service.PortUDP)
+	udpAddr := common.ParseSourceAddr("udp", s.addr.IP, s.service.PortUDP)
 	if err := tryUDP(s, udpAddr); err != nil {
 		log.Debugw("debug|tryPublicNetworkConnect|tryUDP", "error", err)
 	} else {
@@ -175,9 +175,9 @@ func tryPublicNetworkConnect(s *source) error {
 }
 
 func multiPortDialTCP(addr *net.TCPAddr, timeout time.Duration, lport int) (net.Conn, bool, error) {
-	tcp, err := reuse.DialTimeOut("tcp", addr.LocalTCPAddr(lport).String(), addr.String(), timeout)
+	tcp, err := reuse.DialTimeOut("tcp", common.LocalTCPAddr(lport).String(), addr.String(), timeout)
 	if err != nil {
-		tcp, err = reuse.DialTimeOut("tcp", addr.LocalTCPAddr(0).String(), addr.String(), timeout)
+		tcp, err = reuse.DialTimeOut("tcp", common.LocalTCPAddr(0).String(), addr.String(), timeout)
 		if err != nil {
 			return nil, false, err
 		}
@@ -190,9 +190,9 @@ func multiPortDialTCP(addr *net.TCPAddr, timeout time.Duration, lport int) (net.
 }
 
 func multiPortDialUDP(addr *net.UDPAddr, lport int) (*net.UDPConn, error) {
-	udp, err := net.DialUDP("udp", addr.LocalUDPAddr(lport), addr)
+	udp, err := net.DialUDP("udp", common.LocalUDPAddr(lport), addr)
 	if err != nil {
-		udp, err = net.DialUDP("udp", addr.LocalUDPAddr(0), addr)
+		udp, err = net.DialUDP("udp", common.LocalUDPAddr(0), addr)
 		if err != nil {
 			return nil, err
 		}
@@ -206,7 +206,7 @@ func dialKCP(addr *net.UDPAddr) (net.Conn, error) {
 	}
 	return udp, nil
 }
-func tryUDP(s *source, addr *addr.Addr) error {
+func tryUDP(s *source, addr *common.Addr) error {
 	udp, err := multiPortDialUDP(addr.UDP(), s.mappingPortUDP)
 	if err != nil {
 		log.Debugw("debug|tryUDP|DialUDP", "error", err)
@@ -369,7 +369,7 @@ func udpConnect(s *source, conn net.Conn, data []byte) (n int, err error) {
 	return n, nil
 }
 
-func tryTCP(s *source, addr *addr.Addr) error {
+func tryTCP(s *source, addr *common.Addr) error {
 	log.Debugw("connect tcp", "port", s.mappingPortTCP, "common", addr.TCP().String())
 	tcp, keep, err := multiPortDialTCP(addr.TCP(), 5*time.Second, s.mappingPortTCP)
 	if err != nil {

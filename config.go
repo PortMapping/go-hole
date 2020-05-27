@@ -3,8 +3,6 @@ package lurker
 import (
 	"crypto/tls"
 	"net"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"

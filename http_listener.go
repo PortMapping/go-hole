@@ -3,11 +3,12 @@ package lurker
 import (
 	"context"
 	"fmt"
+	"net"
+	"net/http"
+
 	"github.com/portmapping/go-reuse"
 	"github.com/portmapping/lurker/common"
 	"github.com/portmapping/lurker/nat"
-	"net"
-	"net/http"
 )
 
 type httpListener struct {
@@ -35,7 +36,7 @@ func (l *httpListener) MappingPort() int {
 
 // Listen ...
 func (l *httpListener) Listen(c chan<- Connector) (err error) {
-	tcpAddr := addr.LocalTCPAddr(l.port)
+	tcpAddr := common.LocalTCPAddr(l.port)
 	if l.cfg.UseSecret {
 		l.tcpListener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.secret)
 	} else {

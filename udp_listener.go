@@ -3,9 +3,9 @@ package lurker
 import (
 	"context"
 	"fmt"
-	"github.com/portmapping/lurker/common"
 	"net"
 
+	"github.com/portmapping/lurker/common"
 	"github.com/portmapping/lurker/nat"
 )
 
@@ -54,7 +54,7 @@ func NewUDPListener(cfg *Config) Listener {
 
 // Listen ...
 func (l *udpListener) Listen(c chan<- Connector) (err error) {
-	udpAddr := addr.LocalUDPAddr(l.port)
+	udpAddr := common.LocalUDPAddr(l.port)
 	//l.listener, err = kcp.Listen(udpAddr.String())
 	//if err != nil {
 	//	return err
@@ -142,7 +142,7 @@ func (h *udpHandshake) Reply() error {
 	//todo:udpConnector
 	_ = n
 
-	netAddr := addr.ParseNetAddr(h.addr)
+	netAddr := common.ParseNetAddr(h.addr)
 	log.Debugw("debug|getClientFromTCP|ParseNetAddr", netAddr)
 	var resp HandshakeResponse
 	resp.Status = HandshakeStatusSuccess

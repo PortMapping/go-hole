@@ -29,6 +29,7 @@ type pool struct {
 
 // Pool ...
 type Pool interface {
+	AddConnections(conn Connection)
 }
 
 var defaultPool Pool
@@ -83,30 +84,30 @@ func NewPool() Pool {
 	var p pool
 	p.pool = np
 	p.copyPool = fp
-	return p
+	return &p
 }
 
 // AddConnections ...
 func (p *pool) AddConnections(conn Connection) {
 	p.pool.Submit(func() {
-
+		p.connectsForward(conn)
+		conn.wg.Done()
 	})
 }
-func (p *pool) connectsForward(group interface{}) {
-	conns := group.(Connection)
+func (p *pool) connectsForward(c Connection) {
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
 	var in, out int64
-	_ = p.copyPool.Invoke(newConnGroup(conns.conn1, conns.conn2, wg, &in))
+	_ = p.copyPool.Invoke(newConnGroup(c.conn1, c.conn2, wg, &in))
 	// outside to mux : incoming
-	_ = p.copyPool.Invoke(newConnGroup(conns.conn2, conns.conn1, wg, &out))
+	_ = p.copyPool.Invoke(newConnGroup(c.conn2, c.conn1, wg, &out))
 	// mux to outside : outgoing
 	fmt.Println("in", in, "out", out)
 	wg.Wait()
-	conns.wg.Done()
+
 }
 
 // AddConnections ...
 func AddConnections(conn Connection) {
-
+	defaultPool.AddConnections(conn)
 }
