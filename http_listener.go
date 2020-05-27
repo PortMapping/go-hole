@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/portmapping/go-reuse"
+	"github.com/portmapping/lurker/common"
 	"github.com/portmapping/lurker/nat"
 	"net"
 	"net/http"
@@ -34,7 +35,7 @@ func (l *httpListener) MappingPort() int {
 
 // Listen ...
 func (l *httpListener) Listen(c chan<- Connector) (err error) {
-	tcpAddr := LocalTCPAddr(l.port)
+	tcpAddr := addr.LocalTCPAddr(l.port)
 	if l.cfg.UseSecret {
 		l.tcpListener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.secret)
 	} else {
@@ -44,7 +45,7 @@ func (l *httpListener) Listen(c chan<- Connector) (err error) {
 		return err
 	}
 	l.srv = &http.Server{Handler: l.handler}
-	fmt.Println("listen http on address:", tcpAddr.String())
+	fmt.Println("listen http on common:", tcpAddr.String())
 	go listenHTTP(l.ctx, l.srv, l.tcpListener, c)
 	l.ready = true
 	return

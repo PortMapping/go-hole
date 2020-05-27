@@ -2,6 +2,7 @@ package lurker
 
 import (
 	"encoding/json"
+	"github.com/portmapping/lurker/common"
 	"net"
 )
 
@@ -79,13 +80,13 @@ func (r *HandshakeResponse) JSON() []byte {
 
 // Service ...
 type Service struct {
-	ID          string `json:"id"`
-	Addr        []Addr `json:"addr"`
-	ISP         net.IP `json:"isp"`
-	Local       net.IP `json:"local"`
-	PortUDP     int    `json:"port_udp"`
-	PortTCP     int    `json:"port_tcp"`
-	KeepConnect bool   `json:"keep_connect"`
+	ID          string      `json:"id"`
+	Addr        []addr.Addr `json:"common"`
+	ISP         net.IP      `json:"isp"`
+	Local       net.IP      `json:"local"`
+	PortUDP     int         `json:"port_udp"`
+	PortTCP     int         `json:"port_tcp"`
+	KeepConnect bool        `json:"keep_connect"`
 }
 
 // ParseHandshake ...

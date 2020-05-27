@@ -3,6 +3,7 @@ package lurker
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/portmapping/lurker/common"
 	"time"
 
 	"github.com/portmapping/lurker/nat"
@@ -13,7 +14,7 @@ const maxByteSize = 65520
 // ListenResponse ...
 type ListenResponse struct {
 	Status int
-	Addr   Addr
+	Addr   addr.Addr
 	Error  error
 }
 

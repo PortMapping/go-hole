@@ -30,19 +30,19 @@ func main() {
 		if err != nil {
 			log.Fatalf("error: %s", err)
 		}
-		log.Printf("device address: %s", daddr)
+		log.Printf("device common: %s", daddr)
 
 		iaddr, err := nat.GetInternalAddress()
 		if err != nil {
 			log.Fatalf("error: %s", err)
 		}
-		log.Printf("internal address: %s", iaddr)
+		log.Printf("internal common: %s", iaddr)
 
 		eaddr, err := nat.GetExternalAddress()
 		if err != nil {
 			log.Fatalf("error: %s", err)
 		}
-		log.Printf("external address: %s", eaddr)
+		log.Printf("external common: %s", eaddr)
 
 		log.Printf("test-page: http://%s:%d/", eaddr, 16005)
 
@@ -63,9 +63,9 @@ func main() {
 			rw.WriteHeader(200)
 			fmt.Fprintf(rw, "Hello there!\n")
 			fmt.Fprintf(rw, "nat type: %s\n", nat.Type())
-			fmt.Fprintf(rw, "device address: %s\n", daddr)
-			fmt.Fprintf(rw, "internal address: %s\n", iaddr)
-			fmt.Fprintf(rw, "external address: %s\n", eaddr)
+			fmt.Fprintf(rw, "device common: %s\n", daddr)
+			fmt.Fprintf(rw, "internal common: %s\n", iaddr)
+			fmt.Fprintf(rw, "external common: %s\n", eaddr)
 			fmt.Fprintf(rw, "test-page: http://%s:%d/\n", eaddr, 16005)
 		}))
 	} else {

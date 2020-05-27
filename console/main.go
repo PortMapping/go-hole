@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	address2 "github.com/portmapping/lurker/common"
 	"github.com/portmapping/lurker/nat"
 	"net"
 	"os"
@@ -97,18 +98,18 @@ func main() {
 		tcpPort = nat.ExtPort()
 	}
 	if len(os.Args) > 2 {
-		addr, i := lurker.ParseAddr(address)
+		addr, i := address2.ParseAddr(address)
 		localAddr := net.IPv4zero
 		ispAddr := net.IPv4zero
 
-		fmt.Println("remote addr:", addr.String(), i)
+		fmt.Println("remote common:", addr.String(), i)
 		s := lurker.NewSource(lurker.Service{
 			ID:      lurker.GlobalID,
 			ISP:     ispAddr,
 			Local:   localAddr,
 			PortUDP: l.Config().UDP,
 			PortTCP: l.Config().TCP,
-		}, lurker.Addr{
+		}, address2.Addr{
 			Protocol: network,
 			IP:       addr,
 			Port:     i,

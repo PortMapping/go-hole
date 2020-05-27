@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/portmapping/go-reuse"
+	"github.com/portmapping/lurker/common"
 	"net"
 
 	"github.com/portmapping/lurker/nat"
@@ -61,7 +62,7 @@ func NewTCPListener(cfg *Config) Listener {
 
 // Listen ...
 func (l *tcpListener) Listen(c chan<- Connector) (err error) {
-	tcpAddr := LocalTCPAddr(l.port)
+	tcpAddr := addr.LocalTCPAddr(l.port)
 	if l.cfg.UseSecret {
 		l.listener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.secret)
 	} else {
@@ -70,7 +71,7 @@ func (l *tcpListener) Listen(c chan<- Connector) (err error) {
 	if err != nil {
 		return err
 	}
-	fmt.Println("listen tcp on address:", tcpAddr.String())
+	fmt.Println("listen tcp on common:", tcpAddr.String())
 	go listenTCP(l.ctx, l.listener, c)
 	l.ready = true
 	return

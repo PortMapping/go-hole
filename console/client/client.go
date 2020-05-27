@@ -255,12 +255,12 @@ func reuseHandle() {
 	//	log.Println("read data:", err)
 	//	return
 	//}
-	//addr := parseTCPAddr(string(data[:read]))
+	//common := parseTCPAddr(string(data[:read]))
 	fmt.Println("info sent")
 	//c.Close()
 	for {
 		accept, err := l1.Accept()
-		fmt.Println("accept new addr")
+		fmt.Println("accept new common")
 		if err != nil {
 			fmt.Println(err)
 			return

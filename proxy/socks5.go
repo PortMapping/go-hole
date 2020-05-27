@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/portmapping/go-reuse"
+	"github.com/portmapping/lurker/common"
 	"io"
 	"net"
 	"strconv"
@@ -43,7 +44,8 @@ type socks5 struct {
 	Authenticate
 }
 
-var errAddressTypeNotSupported = errors.New("address type not supported")
+var errAddressTypeNotSupported = errors.New("common type not supported")
+var errCommandNotSupported = errors.New("command not supported")
 
 // ListenPort ...
 func (s *socks5) ListenPort(port int) (net.Listener, error) {
@@ -131,11 +133,11 @@ Requests
              o  BIND X'02'
              o  UDP ASSOCIATE X'03'
           o  RSV    RESERVED
-          o  ATYP   address type of following address
-             o  IP V4 address: X'01'
+          o  ATYP   common type of following common
+             o  IP V4 common: X'01'
              o  DOMAINNAME: X'03'
-             o  IP V6 address: X'04'
-          o  DST.ADDR       desired destination address
+             o  IP V6 common: X'04'
+          o  DST.ADDR       desired destination common
           o  DST.PORT desired destination port in network octet
              order
 
@@ -158,22 +160,24 @@ func (s *socks5) doRequests(conn net.Conn) (err error) {
 	fmt.Println("receive new data")
 	switch header[1] {
 	case cmdConnect:
-		_, e := getAddrPort(conn)
-		if e != nil {
+		e := connect(cmdConnect, conn)
+		if e == errAddressTypeNotSupported {
 			err = doReplies(conn, repAddressTypeNotSupported, atypIPv4Address)
-			return
 		}
-
 	case cmdBind:
 	case cmdUDPAssociate:
 	}
+	conn.Write([]byte{socks5Version, repCommandNotSupported})
 	conn.Close()
 	return nil
 }
 
 func getAddrPort(conn net.Conn) (addr string, err error) {
 	addrType := make([]byte, 1)
-	conn.Read(addrType)
+	_, err = conn.Read(addrType)
+	if err != nil {
+		return "", err
+	}
 	var host string
 	switch addrType[0] {
 	case atypIPv4Address:
@@ -195,13 +199,21 @@ func getAddrPort(conn net.Conn) (addr string, err error) {
 	}
 
 	var port uint16
-	binary.Read(conn, binary.BigEndian, &port)
+	err = binary.Read(conn, binary.BigEndian, &port)
+	if err != nil {
+		return "", err
+	}
 	// connect to host
 	return net.JoinHostPort(host, strconv.Itoa(int(port))), nil
 }
 
-func connect(cmd int, conn net.Conn) {
-
+func connect(cmd int, conn net.Conn) error {
+	addr, e := getAddrPort(conn)
+	if e != nil {
+		return e
+	}
+	fmt.Println("address", addr)
+	return nil
 }
 
 func doReplies(conn net.Conn, rep byte, atyp byte) (err error) {
@@ -211,14 +223,10 @@ func doReplies(conn net.Conn, rep byte, atyp byte) (err error) {
 		rsvRESERVED,
 		atyp,
 	}
-
-	localAddr := conn.LocalAddr().String()
-	localHost, localPort, _ := net.SplitHostPort(localAddr)
-	ipBytes := net.ParseIP(localHost).To4()
-	nPort, _ := strconv.Atoi(localPort)
-	reply = append(reply, ipBytes...)
+	addr := common.ParseNetAddr(conn.LocalAddr())
+	reply = append(reply, addr.IP.To4()...)
 	portBytes := make([]byte, 2)
-	binary.BigEndian.PutUint16(portBytes, uint16(nPort))
+	binary.BigEndian.PutUint16(portBytes, uint16(addr.Port))
 	reply = append(reply, portBytes...)
 
 	_, err = conn.Write(reply)
