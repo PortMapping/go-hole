@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"github.com/portmapping/go-reuse"
 	"github.com/portmapping/lurker/common"
+	"github.com/portmapping/lurker/pool"
 	"io"
 	"net"
 	"strconv"
+	"sync"
 )
 
 const (
@@ -212,7 +214,13 @@ func connect(cmd int, conn net.Conn) error {
 	if e != nil {
 		return e
 	}
-	fmt.Println("address", addr)
+
+	dial, err := net.Dial("tcp", addr)
+	if err != nil {
+		return err
+	}
+	wg := sync.WaitGroup{}
+	pool.AddConnections(pool.NewConnection(dial, conn, &wg))
 	return nil
 }
 

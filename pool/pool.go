@@ -1,4 +1,4 @@
-package goroutine
+package pool
 
 import (
 	"fmt"
@@ -87,7 +87,7 @@ func NewPool() Pool {
 }
 
 // AddConnections ...
-func (p *pool) AddConnections(conn *Connection) {
+func (p *pool) AddConnections(conn Connection) {
 	p.pool.Submit(func() {
 
 	})
@@ -104,4 +104,9 @@ func (p *pool) connectsForward(group interface{}) {
 	fmt.Println("in", in, "out", out)
 	wg.Wait()
 	conns.wg.Done()
+}
+
+// AddConnections ...
+func AddConnections(conn Connection) {
+
 }
