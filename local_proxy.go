@@ -3,6 +3,7 @@ package lurker
 import (
 	"context"
 	"fmt"
+	"github.com/portmapping/lurker/nat"
 	"net"
 
 	"github.com/portmapping/lurker/proxy"
@@ -27,8 +28,15 @@ func RegisterLocalProxy(l Lurker, cfg *Config) (err error) {
 				Pass: p.Pass,
 			}
 		}
+		var n nat.NAT
+		if p.Nat {
+			n, err = mapping(p.Type, p.Port)
+			if err != nil {
+				return err
+			}
+		}
 
-		lp, err := proxy.New(p.Type, a)
+		lp, err := proxy.New(p.Type, n, a)
 		if err != nil {
 			return err
 		}

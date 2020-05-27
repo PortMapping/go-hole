@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/portmapping/go-reuse"
 	"github.com/portmapping/lurker/common"
+	"github.com/portmapping/lurker/nat"
 	"github.com/portmapping/lurker/pool"
 	"io"
 	"net"
@@ -44,6 +45,7 @@ const (
 
 type socks5 struct {
 	Authenticate
+	nat nat.NAT
 }
 
 var errAddressTypeNotSupported = errors.New("common type not supported")
@@ -72,8 +74,9 @@ func (s *socks5) Monitor(conn net.Conn) {
 	}
 }
 
-func newSocks5Proxy(auth Authenticate) (Proxy, error) {
+func newSocks5Proxy(n nat.NAT, auth Authenticate) (Proxy, error) {
 	return &socks5{
+		nat:          n,
 		Authenticate: auth,
 	}, nil
 }

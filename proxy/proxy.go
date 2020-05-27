@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"errors"
+	"github.com/portmapping/lurker/nat"
 	"net"
 )
 
@@ -21,10 +22,10 @@ type Proxy interface {
 }
 
 // New ...
-func New(protocol string, auth Authenticate) (Proxy, error) {
+func New(protocol string, n nat.NAT, auth Authenticate) (Proxy, error) {
 	switch protocol {
 	case Socks5:
-		return newSocks5Proxy(auth)
+		return newSocks5Proxy(n, auth)
 	}
 	return nil, errors.New("protocol was not supported")
 }
