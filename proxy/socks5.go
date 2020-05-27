@@ -229,6 +229,7 @@ func connect(cmd int, conn net.Conn) error {
 	wg.Add(1)
 	pool.AddConnections(pool.NewConnection(dial, conn, &wg))
 	wg.Wait()
+	fmt.Println("connect done")
 	return nil
 }
 
