@@ -159,12 +159,14 @@ func (s *socks5) doRequests(conn net.Conn) (err error) {
 	if err != nil {
 		return
 	}
-	fmt.Println("receive new data")
 	switch header[1] {
 	case cmdConnect:
 		e := connect(cmdConnect, conn)
 		if e == errAddressTypeNotSupported {
 			err = doReplies(conn, repAddressTypeNotSupported, atypIPv4Address)
+			if err != nil {
+				return err
+			}
 		}
 	case cmdBind:
 	case cmdUDPAssociate:
@@ -227,7 +229,7 @@ func connect(cmd int, conn net.Conn) error {
 	}
 	wg := sync.WaitGroup{}
 	wg.Add(1)
-	pool.AddConnections(pool.NewConnection(dial, conn, &wg))
+	pool.AddConnections(pool.NewConnection(conn, dial, &wg))
 	wg.Wait()
 	fmt.Println("connect done")
 	return nil

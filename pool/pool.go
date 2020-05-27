@@ -102,8 +102,8 @@ func (p *pool) connectsForward(c Connection) {
 	// outside to mux : incoming
 	_ = p.copyPool.Invoke(newConnGroup(c.conn2, c.conn1, wg, &out))
 	// mux to outside : outgoing
-	fmt.Println("in", in, "out", out)
 	wg.Wait()
+	fmt.Println("in", in, "out", out)
 
 }
 
