@@ -1,19 +1,49 @@
 package proxy
 
 import (
+	"encoding/binary"
+	"errors"
 	"fmt"
 	"github.com/portmapping/go-reuse"
 	"io"
 	"net"
+	"strconv"
 )
 
 const (
 	socks5Version = uint8(5)
+	rsvRESERVED   = 0x00
+)
+const (
+	cmdConnect      = 0x01
+	cmdBind         = 0x02
+	cmdUDPAssociate = 0x03
+)
+const (
+	repSucceeded = iota
+	repGeneralSOCKSServerFailure
+	repConnectionNotAlloweByRuleset
+	repNetworkUnreachable
+	repHostUnreachable
+	repConnectionRefused
+	repTTLExpired
+	repCommandNotSupported
+	repAddressTypeNotSupported
+	repUnassigned
+	repEnd = 0xFF
+)
+
+const (
+	atypIPv4Address = 0x01
+	atypDomainName  = 0x03
+	atypIPv6Address = 0x04
 )
 
 type socks5 struct {
 	Authenticate
 }
+
+var errAddressTypeNotSupported = errors.New("address type not supported")
 
 // ListenPort ...
 func (s *socks5) ListenPort(port int) (net.Listener, error) {
@@ -33,7 +63,7 @@ func (s *socks5) Monitor(conn net.Conn) {
 	if err := s.listenRequest(conn); err != nil {
 		return
 	}
-	if err := s.requests(conn); err != nil {
+	if err := s.doRequests(conn); err != nil {
 		return
 	}
 }
@@ -82,7 +112,7 @@ Requests
    Once the method-dependent subnegotiation has completed, the client
    sends the request details.  If the negotiated method includes
    encapsulation for purposes of integrity checking and/or
-   confidentiality, these requests MUST be encapsulated in the method-
+   confidentiality, these doRequests MUST be encapsulated in the method-
    dependent encapsulation.
 
    The SOCKS request is formed as follows:
@@ -113,7 +143,7 @@ Requests
    and destination addresses, and return one or more reply messages, as
    appropriate for the request type.
 */
-func (s *socks5) requests(conn net.Conn) (err error) {
+func (s *socks5) doRequests(conn net.Conn) (err error) {
 	defer func() {
 		if err != nil {
 			conn.Close()
@@ -126,5 +156,71 @@ func (s *socks5) requests(conn net.Conn) (err error) {
 		return
 	}
 	fmt.Println("receive new data")
+	switch header[1] {
+	case cmdConnect:
+		_, e := getAddrPort(conn)
+		if e != nil {
+			err = doReplies(conn, repAddressTypeNotSupported, atypIPv4Address)
+			return
+		}
+
+	case cmdBind:
+	case cmdUDPAssociate:
+	}
+	conn.Close()
 	return nil
+}
+
+func getAddrPort(conn net.Conn) (addr string, err error) {
+	addrType := make([]byte, 1)
+	conn.Read(addrType)
+	var host string
+	switch addrType[0] {
+	case atypIPv4Address:
+		ipv4 := make(net.IP, net.IPv4len)
+		conn.Read(ipv4)
+		host = ipv4.String()
+	case atypIPv6Address:
+		ipv6 := make(net.IP, net.IPv6len)
+		conn.Read(ipv6)
+		host = ipv6.String()
+	case atypDomainName:
+		var domainLen uint8
+		binary.Read(conn, binary.BigEndian, &domainLen)
+		domain := make([]byte, domainLen)
+		conn.Read(domain)
+		host = string(domain)
+	default:
+		return "", errAddressTypeNotSupported
+	}
+
+	var port uint16
+	binary.Read(conn, binary.BigEndian, &port)
+	// connect to host
+	return net.JoinHostPort(host, strconv.Itoa(int(port))), nil
+}
+
+func connect(cmd int, conn net.Conn) {
+
+}
+
+func doReplies(conn net.Conn, rep byte, atyp byte) (err error) {
+	reply := []byte{
+		socks5Version,
+		rep,
+		rsvRESERVED,
+		atyp,
+	}
+
+	localAddr := conn.LocalAddr().String()
+	localHost, localPort, _ := net.SplitHostPort(localAddr)
+	ipBytes := net.ParseIP(localHost).To4()
+	nPort, _ := strconv.Atoi(localPort)
+	reply = append(reply, ipBytes...)
+	portBytes := make([]byte, 2)
+	binary.BigEndian.PutUint16(portBytes, uint16(nPort))
+	reply = append(reply, portBytes...)
+
+	_, err = conn.Write(reply)
+	return
 }
