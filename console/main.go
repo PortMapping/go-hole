@@ -2,8 +2,7 @@ package main
 
 import (
 	"fmt"
-	address2 "github.com/portmapping/lurker/common"
-	"github.com/portmapping/lurker/nat"
+
 	"net"
 	"os"
 	"strconv"
@@ -11,9 +10,12 @@ import (
 	"time"
 
 	"github.com/portmapping/lurker"
+	common "github.com/portmapping/lurker/common"
+	"github.com/portmapping/lurker/nat"
 )
 
 func main() {
+
 	network := "tcp"
 	address := ""
 	list := sync.Map{}
@@ -72,7 +74,7 @@ func main() {
 		tcpPort = nat.ExtPort()
 	}
 	if len(os.Args) > 2 {
-		addr, i := address2.ParseAddr(address)
+		addr, i := common.ParseAddr(address)
 		localAddr := net.IPv4zero
 		ispAddr := net.IPv4zero
 
@@ -83,7 +85,7 @@ func main() {
 			Local:   localAddr,
 			PortUDP: l.Config().UDP,
 			PortTCP: l.Config().TCP,
-		}, address2.Addr{
+		}, common.Addr{
 			Protocol: network,
 			IP:       addr,
 			Port:     i,
