@@ -3,17 +3,17 @@ package main
 import "github.com/spf13/cobra"
 
 func cmdClient() *cobra.Command {
-	tcp := 0
-	udp := 0
-	local := 0
+	var addr string
+	var local int
+	var network string
 	cmd := &cobra.Command{
 		Use: "client",
 		Run: func(cmd *cobra.Command, args []string) {
 			// Do Stuff Here
 		},
 	}
-	cmd.Flags().IntVarP(&tcp, "tcp", "t", 16004, "handle tcp port")
-	cmd.Flags().IntVarP(&udp, "udp", "u", 16005, "handle udp port")
+	cmd.Flags().StringVarP(&addr, "addr", "a", "127.0.0.1:16004", "default 127.0.0.1:16004")
+	cmd.Flags().StringVarP(&network, "network", "n", "tcp", "")
 	cmd.Flags().IntVarP(&local, "local", "l", 16004, "handle local mapping port")
 	return cmd
 }
