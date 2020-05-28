@@ -71,7 +71,7 @@ func (l *tcpListener) Listen(c chan<- Connector) (err error) {
 	if err != nil {
 		return err
 	}
-	fmt.Println("listen tcp on common:", tcpAddr.String())
+	fmt.Println("listen tcp on address:", tcpAddr.String())
 	go listenTCP(l.ctx, l.listener, c)
 	l.ready = true
 	return
