@@ -10,6 +10,7 @@ require (
 	github.com/panjf2000/ants/v2 v2.4.0
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/portmapping/go-reuse v0.0.3
+	github.com/spf13/cobra v1.0.0
 	github.com/tjfoc/gmsm v1.3.0 // indirect
 	github.com/xtaci/kcp-go/v5 v5.5.12
 	go.uber.org/atomic v1.6.0

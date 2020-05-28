@@ -10,9 +10,19 @@ import (
 	"time"
 
 	"github.com/portmapping/lurker"
-	common "github.com/portmapping/lurker/common"
+	"github.com/portmapping/lurker/common"
 	"github.com/portmapping/lurker/nat"
+	"github.com/spf13/cobra"
 )
+
+var rootCmd = &cobra.Command{
+	Use:   "Lurker",
+	Short: "Lurker is a intranet direct connection tool",
+	Long:  `Intranet direct connection allows you to directly access the intranet to achieve the fastest access speed.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		// Do Stuff Here
+	},
+}
 
 func main() {
 
