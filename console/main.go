@@ -37,10 +37,6 @@ func main() {
 	//cfg.UDP = 16005
 
 	l := lurker.New(cfg)
-	//if l.NAT() != nil {
-	//	localAddr, _ = l.NAT().GetInternalAddress()
-	//	ispAddr, _ = l.NAT().GetExternalAddress()
-	//}
 	err := lurker.RegisterLocalProxy(l, cfg)
 	if err != nil {
 		return
@@ -61,28 +57,6 @@ func main() {
 		fmt.Println("your connect id:", lurker.GlobalID)
 		go func() {
 			for connector := range connectors {
-				//fmt.Println("connect from:", source.Addr().String(), string(source.Service().JSON()))
-				//_, ok := list.Load(source.Service().ID)
-				//if ok {
-				//	fmt.Println("exist:", source.Service().ID)
-				//	continue
-				//}
-				//s := lurker.NewSource(lurker.Service{
-				//	ID:          lurker.GlobalID,
-				//	ISP:         ispAddr,
-				//	Local:       localAddr,
-				//	PortUDP:     l.Config().UDP,
-				//	PortTCP:     l.Config().TCP,
-				//	KeepConnect: false,
-				//}, source.Addr())
-				//go func(id string, s lurker.Source) {
-				//	err := s.Try()
-				//	fmt.Println("reverse connected:", err)
-				//	if err != nil {
-				//		return
-				//	}
-				//	list.Store(id, s)
-				//}(source.Service().ID, s)
 				fmt.Println(connector.ID())
 			}
 		}()

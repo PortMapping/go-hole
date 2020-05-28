@@ -77,6 +77,7 @@ func (p *localProxy) accept(lis net.Listener) {
 				log.Debugw("debug|getClientFromTCP|Accept", "error", err)
 				continue
 			}
+			fmt.Println("new connect received")
 			p.local.Monitor(conn)
 		}
 	}
