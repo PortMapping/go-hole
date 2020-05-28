@@ -78,7 +78,7 @@ func (p *localProxy) accept(lis net.Listener) {
 				continue
 			}
 			fmt.Println("new connect received")
-			p.local.Monitor(conn)
+			go p.local.Monitor(conn)
 		}
 	}
 }
