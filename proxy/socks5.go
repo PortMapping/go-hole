@@ -168,7 +168,7 @@ func (s *socks5) doRequests(conn net.Conn) (err error) {
 		if e == errAddressTypeNotSupported {
 			err = doReplies(conn, repAddressTypeNotSupported, atypIPv4Address)
 			if err != nil {
-				return err
+				fmt.Println("error", err)
 			}
 		}
 	case cmdBind:
@@ -215,11 +215,15 @@ func getAddrPort(conn net.Conn) (addr string, err error) {
 }
 
 func connect(cmd int, conn net.Conn) error {
+	fmt.Println("connect")
 	addr, e := getAddrPort(conn)
 	if e != nil {
 		return e
 	}
 	tcpAddr, e := net.ResolveTCPAddr("tcp", addr)
+	if e != nil {
+		return e
+	}
 	localTCPAddr := common.LocalTCPAddr(0)
 	dial, err := net.DialTCP("tcp", localTCPAddr, tcpAddr)
 	if err != nil {

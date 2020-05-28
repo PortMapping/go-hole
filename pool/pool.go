@@ -47,13 +47,30 @@ func newConnGroup(dst, src io.ReadWriteCloser, wg *sync.WaitGroup, n *int64) con
 	}
 }
 
+func doCopy(src, dst io.ReadWriteCloser) (n int64, err error) {
+	buf := make([]byte, 0xff)
+	n1 := 0
+	for {
+		n1, err = src.Read(buf[0:])
+		n = int64(n1)
+		if err != nil {
+			return
+		}
+		b := buf[0:n]
+		_, err = dst.Write(b)
+		if err != nil {
+			return
+		}
+	}
+}
+
 func copyConnGroup(group interface{}) {
 	cg, ok := group.(connGroup)
 	if !ok {
 		return
 	}
 	var err error
-	*cg.n, err = io.Copy(cg.dst, cg.src)
+	*cg.n, err = doCopy(cg.dst, cg.src)
 	if err != nil {
 		cg.src.Close()
 		cg.dst.Close()
