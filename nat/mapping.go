@@ -12,7 +12,7 @@ import (
 const description = "mapping_port"
 
 // DefaultTimeOut ...
-var DefaultTimeOut time.Duration = 60
+var DefaultTimeOut = 60 * time.Second
 
 type natClient struct {
 	stop     *atomic.Bool
