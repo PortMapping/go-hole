@@ -215,7 +215,6 @@ func getAddrPort(conn net.Conn) (addr string, err error) {
 }
 
 func connect(cmd int, conn net.Conn) error {
-	fmt.Println("connect")
 	addr, e := getAddrPort(conn)
 	if e != nil {
 		return e
@@ -231,7 +230,6 @@ func connect(cmd int, conn net.Conn) error {
 	}
 
 	e = doReplies(conn, repSucceeded, atypIPv4Address)
-	fmt.Println("reply", "error", e)
 	if e != nil {
 		return e
 	}
@@ -240,7 +238,6 @@ func connect(cmd int, conn net.Conn) error {
 	wg.Add(1)
 	pool.AddConnections(pool.NewConnection(conn, dial, &wg))
 	wg.Wait()
-	fmt.Println("connect done")
 	return nil
 }
 

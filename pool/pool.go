@@ -1,7 +1,6 @@
 package pool
 
 import (
-	"fmt"
 	"io"
 	"sync"
 
@@ -70,7 +69,6 @@ func copyConnGroup(group interface{}) {
 		return
 	}
 	var err error
-	fmt.Println("copy data")
 	*cg.n, err = io.Copy(cg.dst, cg.src)
 	if err != nil {
 		cg.src.Close()
@@ -109,20 +107,18 @@ func NewPool() Pool {
 func (p *pool) AddConnections(conn Connection) {
 	p.pool.Submit(func() {
 		p.connectsForward(conn)
+		conn.wg.Done()
 	})
 }
 func (p *pool) connectsForward(c Connection) {
 	wg := new(sync.WaitGroup)
 	wg.Add(2)
-	fmt.Println("data forwarding")
 	var in, out int64
 	_ = p.copyPool.Invoke(newConnGroup(c.conn1, c.conn2, wg, &in))
 	// outside to mux : incoming
 	_ = p.copyPool.Invoke(newConnGroup(c.conn2, c.conn1, wg, &out))
 	// mux to outside : outgoing
 	wg.Wait()
-	fmt.Println("in", in, "out", out)
-	c.wg.Done()
 }
 
 // AddConnections ...
