@@ -62,7 +62,7 @@ func (p *localProxy) Listen(c chan<- Connector) (err error) {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("listen %v proxy on port: %v", p.proxyCfg.Type, p.port)
+	fmt.Printf("listen %v proxy on port: %v\n", p.proxyCfg.Type, p.port)
 	go p.accept(lis)
 	p.ready = true
 	return

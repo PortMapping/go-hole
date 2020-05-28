@@ -75,6 +75,6 @@ func mapping(network string, port int) (n nat.NAT, err error) {
 		return nil, err
 	}
 	addr := address2.ParseSourceAddr("tcp", address, n.ExtPort())
-	fmt.Printf("%s mapping on common: %v\n", network, addr)
+	fmt.Printf("%s mapping on address: %v\n", network, addr)
 	return n, nil
 }
