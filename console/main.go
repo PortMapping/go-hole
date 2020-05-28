@@ -31,7 +31,7 @@ func main() {
 	if err := rootCmd.Execute(); err != nil {
 		return
 	}
-
+	return
 	network := "tcp"
 	address := ""
 	list := sync.Map{}
