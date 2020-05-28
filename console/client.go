@@ -1,6 +1,13 @@
 package main
 
-import "github.com/spf13/cobra"
+import (
+	"fmt"
+	"net"
+
+	"github.com/portmapping/lurker"
+	"github.com/portmapping/lurker/common"
+	"github.com/spf13/cobra"
+)
 
 func cmdClient() *cobra.Command {
 	var addr string
@@ -9,7 +16,24 @@ func cmdClient() *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "client",
 		Run: func(cmd *cobra.Command, args []string) {
-			// Do Stuff Here
+			addrs, i := common.ParseAddr(addr)
+			localAddr := net.IPv4zero
+			ispAddr := net.IPv4zero
+
+			fmt.Println("remote addr:", addrs.String(), i)
+			s := lurker.NewSource(lurker.Service{
+				ID:    lurker.GlobalID,
+				ISP:   ispAddr,
+				Local: localAddr,
+			}, common.Addr{
+				Protocol: network,
+				IP:       addrs,
+				Port:     i,
+			})
+
+			err := s.Connect()
+			fmt.Println("target connected:", err)
+
 		},
 	}
 	cmd.Flags().StringVarP(&addr, "addr", "a", "127.0.0.1:16004", "default 127.0.0.1:16004")
