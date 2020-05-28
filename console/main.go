@@ -26,6 +26,12 @@ var rootCmd = &cobra.Command{
 
 func main() {
 
+	rootCmd.AddCommand(cmdServer(), cmdClient())
+
+	if err := rootCmd.Execute(); err != nil {
+		return
+	}
+
 	network := "tcp"
 	address := ""
 	list := sync.Map{}
