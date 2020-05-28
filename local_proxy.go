@@ -12,7 +12,7 @@ import (
 type localProxy struct {
 	ctx      context.Context
 	cancel   context.CancelFunc
-	pCfg     Proxy
+	proxyCfg Proxy
 	port     int
 	local    proxy.Proxy
 	ready    bool
@@ -45,11 +45,11 @@ func RegisterLocalProxy(l Lurker, cfg *Config) (err error) {
 		ctx, cFunc := context.WithCancel(context.TODO())
 
 		l.RegisterListener("", &localProxy{
-			ctx:    ctx,
-			cancel: cFunc,
-			pCfg:   p,
-			port:   p.Port,
-			local:  lp,
+			ctx:      ctx,
+			cancel:   cFunc,
+			proxyCfg: p,
+			port:     p.Port,
+			local:    lp,
 		})
 	}
 
@@ -62,7 +62,7 @@ func (p *localProxy) Listen(c chan<- Connector) (err error) {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("listen %v proxy on port: %v", p.pCfg.Type, p.port)
+	fmt.Printf("listen %v proxy on port: %v", p.proxyCfg.Type, p.port)
 	go p.accept(lis)
 	p.ready = true
 	return
