@@ -36,9 +36,8 @@ func RegisterLocalProxy(l Lurker, cfg *Config) (port int, err error) {
 			if err != nil {
 				return 0, err
 			}
+			port = n.ExtPort()
 		}
-
-		port = n.ExtPort()
 
 		lp, err := proxy.New(p.Type, n, a)
 		if err != nil {
