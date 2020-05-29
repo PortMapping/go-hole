@@ -10,6 +10,7 @@ import (
 func cmdServer() *cobra.Command {
 	tcp := 0
 	udp := 0
+	nat := false
 	cmd := &cobra.Command{
 		Use: "server",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -36,5 +37,6 @@ func cmdServer() *cobra.Command {
 	}
 	cmd.Flags().IntVarP(&tcp, "tcp", "t", 16004, "handle tcp port")
 	cmd.Flags().IntVarP(&udp, "udp", "u", 16005, "handle udp port")
+	cmd.Flags().BoolVarP(&nat, "nat", "n", false, "enable nat")
 	return cmd
 }

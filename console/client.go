@@ -61,8 +61,8 @@ func cmdClient() *cobra.Command {
 	cmd.Flags().StringVarP(&network, "network", "n", "tcp", "")
 	cmd.Flags().IntVarP(&local, "local", "l", 16004, "handle local mapping port")
 	cmd.Flags().StringVarP(&proxy, "proxy", "p", "socks5", "locak proxy")
-	cmd.Flags().StringVarP(&proxyName, "pname", "pn", "", "local proxy port")
-	cmd.Flags().StringVarP(&proxyPass, "ppass", "pw", "", "local proxy port")
-	cmd.Flags().IntVarP(&proxyPort, "proxy_port", "pp", 10080, "local proxy port")
+	cmd.Flags().StringVarP(&proxyName, "pname", "", "", "local proxy port")
+	cmd.Flags().StringVarP(&proxyPass, "ppass", "", "", "local proxy port")
+	cmd.Flags().IntVarP(&proxyPort, "pport", "", 10080, "local proxy port")
 	return cmd
 }
