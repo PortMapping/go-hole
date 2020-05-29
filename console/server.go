@@ -33,6 +33,7 @@ func cmdServer() *cobra.Command {
 					fmt.Println(connector.ID())
 				}
 			}()
+			waitForSignal()
 		},
 	}
 	cmd.Flags().IntVarP(&tcp, "tcp", "t", 16004, "handle tcp port")

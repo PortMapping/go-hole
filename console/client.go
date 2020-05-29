@@ -56,6 +56,7 @@ func cmdClient() *cobra.Command {
 				panic(err)
 			}
 			fmt.Println("target connected")
+			waitForSignal()
 		},
 	}
 	cmd.Flags().StringVarP(&addr, "addr", "a", "127.0.0.1:16004", "default 127.0.0.1:16004")

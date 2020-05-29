@@ -31,6 +31,6 @@ func main() {
 		return
 	}
 	fmt.Println("ready for waiting")
-	waitForSignal()
+
 	return
 }
