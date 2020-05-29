@@ -20,7 +20,7 @@ type localProxy struct {
 }
 
 // RegisterLocalProxy ...
-func RegisterLocalProxy(l Lurker, cfg *Config) (err error) {
+func RegisterLocalProxy(l Lurker, cfg *Config) (port int, err error) {
 	for _, p := range cfg.Proxy {
 		a := proxy.NoAuth()
 		if p.Name != "" && p.Pass != "" {
@@ -34,13 +34,15 @@ func RegisterLocalProxy(l Lurker, cfg *Config) (err error) {
 			//todo(network can change)
 			n, err = mapping("tcp", p.Port)
 			if err != nil {
-				return err
+				return 0, err
 			}
 		}
 
+		port = n.ExtPort()
+
 		lp, err := proxy.New(p.Type, n, a)
 		if err != nil {
-			return err
+			return 0, err
 		}
 		ctx, cFunc := context.WithCancel(context.TODO())
 
@@ -53,7 +55,7 @@ func RegisterLocalProxy(l Lurker, cfg *Config) (err error) {
 		})
 	}
 
-	return nil
+	return port, nil
 }
 
 // Listen ...
