@@ -139,10 +139,12 @@ func (l *lurker) Listen() (c <-chan Connector, err error) {
 		lis = append(lis, name)
 		go listener.Listen(l.connectors)
 
-		if v, b := listener.(MappingListener); b {
-			err := v.NAT().Mapping()
-			if err != nil {
-				return nil, err
+		if l.cfg.NAT {
+			if v, b := listener.(MappingListener); b {
+				err := v.NAT().Mapping()
+				if err != nil {
+					return nil, err
+				}
 			}
 		}
 

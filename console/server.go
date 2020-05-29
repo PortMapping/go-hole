@@ -17,7 +17,7 @@ func cmdServer() *cobra.Command {
 			cfg := lurker.DefaultConfig()
 			cfg.TCP = tcp
 			cfg.UDP = udp
-
+			cfg.NAT = nat
 			l := lurker.New(cfg)
 			t := lurker.NewTCPListener(cfg)
 			l.RegisterListener("tcp", t)
