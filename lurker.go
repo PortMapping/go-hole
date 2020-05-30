@@ -72,11 +72,7 @@ func (l *lurker) Config() Config {
 
 // Stop ...
 func (l *lurker) Stop() error {
-	//if l.nat != nil {
-	//	if err := l.nat.StopMapping(); err != nil {
-	//		return err
-	//	}
-	//}
+
 	for _, listener := range l.listeners {
 		err := listener.Stop()
 		if err != nil {
