@@ -31,7 +31,6 @@ type Lurker interface {
 type lurker struct {
 	listeners  map[string]Listener
 	cfg        *Config
-	sources    chan Source
 	timeout    time.Duration
 	connectors chan Connector
 }
@@ -93,9 +92,8 @@ func (l *lurker) Stop() error {
 func New(cfg *Config) Lurker {
 	o := &lurker{
 		cfg:        cfg,
-		sources:    make(chan Source, 5),
 		listeners:  make(map[string]Listener),
-		connectors: make(chan Connector),
+		connectors: make(chan Connector, 10),
 		timeout:    DefaultTimeout,
 	}
 	return o
