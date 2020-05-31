@@ -97,6 +97,7 @@ func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Connector)
 				log.Debugw("debug|getClientFromTCP|Accept", "error", err)
 				continue
 			}
+			fmt.Println("new connector")
 			t := newTCPConnector(conn)
 			go t.Process()
 			cli <- t
