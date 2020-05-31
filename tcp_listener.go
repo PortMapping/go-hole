@@ -98,10 +98,14 @@ func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Connector)
 				continue
 			}
 			fmt.Println("new connector")
-			t := newTCPConnector(conn)
-			go t.Process()
-			cli <- t
+			go tcpProcess(conn, cli)
 			return nil
 		}
 	}
+}
+
+func tcpProcess(conn net.Conn, cli chan<- Connector) {
+	t := newTCPConnector(conn)
+	t.Process()
+	cli <- t
 }
