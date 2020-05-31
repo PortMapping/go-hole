@@ -34,7 +34,7 @@ func cmdClient() *cobra.Command {
 			})
 			l := lurker.New(cfg)
 
-			proxyPort, err := lurker.RegisterLocalProxy(l, cfg)
+			_, err := lurker.RegisterLocalProxy(l, cfg)
 			if err != nil {
 				panic(err)
 			}
@@ -50,7 +50,7 @@ func cmdClient() *cobra.Command {
 				IP:       addrs,
 				Port:     i,
 			})
-			s.SetMappingPort("tcp", proxyPort)
+			s.SetMappingPort("tcp", 10080)
 			err = s.Connect()
 			if err != nil {
 				panic(err)

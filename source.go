@@ -128,7 +128,7 @@ func tryConnect(s *source, addr *common.Addr) error {
 	switch s.addr.Network() {
 	case "tcp", "tcp4", "tcp6":
 		//tcpAddr := ParseSourceAddr(common.Protocol, common.IP, common.Port)
-		tcpAddr, err := reuse.DialTimeOut("tcp", common.LocalTCPAddr(0).String(), addr.String(), s.timeout)
+		tcpAddr, err := reuse.DialTimeOut("tcp", common.LocalTCPAddr(s.mappingPortTCP).String(), addr.String(), s.timeout)
 		//tcpAddr, _, err := multiPortDialTCP(addr.TCP(), s.timeout, s.mappingPortTCP)
 		if err != nil {
 			log.Debugw("debug|tryConnect|multiPortDialTCP", "error", err)
