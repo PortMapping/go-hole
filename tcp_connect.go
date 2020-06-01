@@ -70,7 +70,9 @@ func (c *tcpConnector) Interaction() (err error) {
 		close = true
 	}
 
-	c.id = service.ID
+	if c.id != nil {
+		c.id(service.ID)
+	}
 	netAddr := common.ParseNetAddr(c.conn.RemoteAddr())
 	log.Debugw("debug|Reply|ParseNetAddr", "common", netAddr)
 	var resp HandshakeResponse
