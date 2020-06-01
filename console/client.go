@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/goextension/log"
 	"github.com/portmapping/lurker"
 	"github.com/portmapping/lurker/common"
 	"github.com/spf13/cobra"
@@ -40,7 +41,7 @@ func cmdClient() *cobra.Command {
 			}
 
 			go l.ListenMonitor()
-			fmt.Println("remote addr:", addrs.String(), i)
+			log.Info("remote addr:", addrs.String(), i)
 			s := lurker.NewSource(lurker.Service{
 				ID:    lurker.GlobalID,
 				ISP:   ispAddr,

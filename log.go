@@ -24,8 +24,3 @@ func init() {
 	log = logger.Sugar()
 	log.Debugw("log init")
 }
-
-// RegisterSugarLog ...
-func RegisterSugarLog() {
-	logger.Register(log)
-}

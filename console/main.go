@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/goextension/log/zap"
 	"os"
 	"os/signal"
 
-	"github.com/portmapping/lurker"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +25,7 @@ func waitForSignal() {
 }
 
 func main() {
-	lurker.RegisterSugarLog()
+	zap.InitZapSugar()
 	rootCmd.AddCommand(cmdServer(), cmdClient())
 
 	if err := rootCmd.Execute(); err != nil {
