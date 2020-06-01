@@ -29,8 +29,8 @@ var _ HandshakeResponder = &tcpConnector{}
 func newTCPConnector(conn net.Conn) Connector {
 	c := &tcpConnector{
 		timeout: 5 * time.Second,
+		conn:    conn,
 	}
-	c.conn = conn
 	return c
 }
 
