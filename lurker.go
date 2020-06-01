@@ -44,7 +44,9 @@ func (l *lurker) ListenMonitor() error {
 		return err
 	}
 	for connector := range connectors {
-		fmt.Println("connect from", connector.ID())
+		connector.ID(func(s string) {
+			fmt.Println("id is", s)
+		})
 	}
 	return nil
 }
