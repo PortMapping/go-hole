@@ -21,7 +21,7 @@ func cmdServer() *cobra.Command {
 			l := lurker.New(cfg)
 			t := lurker.NewTCPListener(cfg)
 			l.RegisterListener("tcp", t)
-			connectors, err := l.Listen()
+			err := l.ListenMonitor()
 			if err != nil {
 				panic(err)
 				return
@@ -29,9 +29,9 @@ func cmdServer() *cobra.Command {
 
 			fmt.Println("your connect id:", lurker.GlobalID)
 			go func() {
-				for connector := range connectors {
-					fmt.Println(connector.ID())
-				}
+				//for connector := range connectors {
+				//	fmt.Println(connector.ID())
+				//}
 			}()
 			waitForSignal()
 		},
