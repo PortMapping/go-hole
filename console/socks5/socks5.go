@@ -10,7 +10,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	px, err := proxy.New("tcp", p, proxy.NoAuth())
+	px, err := proxy.New("socks5", p, proxy.NoAuth())
 	if err != nil {
 		panic(err)
 	}
