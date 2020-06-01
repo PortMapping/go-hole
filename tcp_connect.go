@@ -139,6 +139,12 @@ func (c *tcpConnector) Pong() error {
 // Run ...
 func (c *tcpConnector) Process() {
 	var err error
+	defer func() {
+		if err != nil {
+			log.Errorw("debug|error", "error", err)
+			c.conn.Close()
+		}
+	}()
 	data := make([]byte, maxByteSize)
 	log.Debugw("process")
 	n, err := c.conn.Read(data)
