@@ -29,7 +29,7 @@ type wsListener struct {
 func (ws *wsListener) Listen(c chan<- Connector) (err error) {
 	tcpAddr := common.LocalTCPAddr(ws.port)
 	if ws.cfg.UseSecret {
-		ws.listener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), l.cfg.secret)
+		ws.listener, err = reuse.ListenTLS("tcp", DefaultLocalTCPAddr.String(), ws.cfg.secret)
 		http.Serve(ws.listener, ws.handler)
 	} else {
 		ws.listener, err = reuse.ListenTCP("tcp", tcpAddr)
