@@ -1,6 +1,7 @@
 package lurker
 
 import (
+	logger "github.com/goextension/log"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -22,4 +23,9 @@ func init() {
 	}
 	log = logger.Sugar()
 	log.Debugw("log init")
+}
+
+// RegisterSugarLog ...
+func RegisterSugarLog() {
+	logger.Register(log)
 }

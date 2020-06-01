@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/ccding/go-stun v0.1.2
+	github.com/goextension/log v0.0.2
 	github.com/google/uuid v1.1.1
 	github.com/klauspost/reedsolomon v1.9.6 // indirect
 	github.com/libp2p/go-nat v0.0.5

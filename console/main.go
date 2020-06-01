@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"os/signal"
 
+	"github.com/portmapping/lurker"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 var rootCmd = &cobra.Command{
@@ -24,7 +25,7 @@ func waitForSignal() {
 }
 
 func main() {
-
+	lurker.RegisterSugarLog()
 	rootCmd.AddCommand(cmdServer(), cmdClient())
 
 	if err := rootCmd.Execute(); err != nil {
