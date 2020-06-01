@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/panjf2000/ants/v2"
 	"github.com/portmapping/go-reuse"
 	"github.com/portmapping/lurker/common"
 	"github.com/portmapping/lurker/nat"
@@ -13,6 +14,7 @@ import (
 type tcpListener struct {
 	ctx         context.Context
 	cancel      context.CancelFunc
+	funcPool    *ants.PoolWithFunc
 	port        int
 	mappingPort int
 	nat         nat.NAT
@@ -57,6 +59,9 @@ func NewTCPListener(cfg *Config) Listener {
 			panic(err)
 		}
 	}
+	tcp.funcPool, err = ants.NewPoolWithFunc(ants.DefaultAntsPoolSize, tcpHandler, func(opts *ants.Options) {
+		opts.Nonblocking = false
+	})
 	return tcp
 }
 
@@ -72,7 +77,7 @@ func (l *tcpListener) Listen(c chan<- Connector) (err error) {
 		return err
 	}
 	fmt.Println("listen tcp on address:", tcpAddr.String())
-	go listenTCP(l.ctx, l.listener, c)
+	go l.listenTCP(c)
 	l.ready = true
 	return
 }
@@ -86,25 +91,33 @@ func (l *tcpListener) Stop() error {
 	return nil
 }
 
-func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Connector) (err error) {
+func (l *tcpListener) listenTCP(cli chan<- Connector) (err error) {
 	for {
 		select {
-		case <-ctx.Done():
+		case <-l.ctx.Done():
 			return
 		default:
-			conn, err := listener.Accept()
+			conn, err := l.listener.Accept()
 			if err != nil {
 				log.Debugw("debug|getClientFromTCP|Accept", "error", err)
 				continue
 			}
 			fmt.Println("new connector")
-			go tcpHandler(conn, cli)
+			t := newTCPConnector(conn, cli)
+			err = l.funcPool.Invoke(t)
+			if err != nil {
+				log.Debugw("debug|funcPool|Invoke", "error", err)
+				continue
+			}
 			return nil
 		}
 	}
 }
 
-func tcpHandler(conn net.Conn, cli chan<- Connector) {
-	t := newTCPConnector(conn)
-	t.Process()
+func tcpHandler(i interface{}) {
+	connector, b := i.(Connector)
+	if !b {
+		return
+	}
+	connector.Process()
 }

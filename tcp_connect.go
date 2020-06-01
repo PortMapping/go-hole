@@ -8,10 +8,11 @@ import (
 )
 
 type tcpConnector struct {
-	id      string
-	timeout time.Duration
-	conn    net.Conn
-	ticker  *time.Ticker
+	id        string
+	timeout   time.Duration
+	conn      net.Conn
+	ticker    *time.Ticker
+	connector chan<- Connector
 }
 
 // RegisterCallback ...
@@ -26,10 +27,11 @@ func (c *tcpConnector) ID() string {
 
 var _ HandshakeResponder = &tcpConnector{}
 
-func newTCPConnector(conn net.Conn) Connector {
+func newTCPConnector(conn net.Conn, connector chan<- Connector) Connector {
 	c := &tcpConnector{
-		timeout: 5 * time.Second,
-		conn:    conn,
+		timeout:   5 * time.Second,
+		conn:      conn,
+		connector: connector,
 	}
 	return c
 }
