@@ -138,8 +138,8 @@ func (c *tcpConnector) Pong() error {
 	return nil
 }
 
-// Run ...
-func (c *tcpConnector) Process() {
+// Processing ...
+func (c *tcpConnector) Processing() {
 	var err error
 	defer func() {
 		if err != nil {

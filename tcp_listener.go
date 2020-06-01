@@ -119,5 +119,5 @@ func tcpHandler(i interface{}) {
 	if !b {
 		return
 	}
-	connector.Process()
+	connector.Processing()
 }

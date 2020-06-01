@@ -2,7 +2,7 @@ package lurker
 
 // Connector ...
 type Connector interface {
-	Process()
+	Processing()
 	RegisterCallback(cb ConnectorCallback)
 	ID(f func(string))
 }
