@@ -27,11 +27,11 @@ func (c *tcpConnector) ID() string {
 var _ HandshakeResponder = &tcpConnector{}
 
 func newTCPConnector(conn net.Conn) Connector {
-	c := tcpConnector{
+	c := &tcpConnector{
 		timeout: 5 * time.Second,
 	}
 	c.conn = conn
-	return &c
+	return c
 }
 
 // Interaction ...
@@ -50,6 +50,7 @@ func (c *tcpConnector) Interaction() (err error) {
 			return err
 		}
 	}
+	log.Info("read data")
 	n, err := c.conn.Read(data)
 	if err != nil {
 		log.Debugw("debug|Reply|Read", "error", err)
@@ -79,6 +80,7 @@ func (c *tcpConnector) Interaction() (err error) {
 			return err
 		}
 	}
+	log.Info("write data")
 	_, err = c.conn.Write(resp.JSON())
 	if err != nil {
 		log.Debugw("debug|Reply|Write", "error", err)
