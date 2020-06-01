@@ -1,6 +1,7 @@
 package lurker
 
 import (
+	"encoding/binary"
 	"encoding/json"
 	"net"
 
@@ -26,22 +27,22 @@ const HandshakeTypeAdapter HandshakeType = 0x03
 const HandshakeRequestTypeProxy RequestType = 0x01
 
 // Version ...
-type Version string
+type Version [4]byte
 
 // HandshakeStatus ...
 type HandshakeStatus int
 
 // HandshakeType ...
-type HandshakeType int
+type HandshakeType uint8
 
 // RequestType ...
 type RequestType int
 
 // HandshakeHead ...
 type HandshakeHead struct {
-	Type HandshakeType `json:"type"`
-
-	ProtocolVersion Version `json:"protocol_version"`
+	Type    uint8 `json:"type"`
+	Tunnel  uint8 `json:"tunnel"`
+	Version uint8 `json:"version"`
 }
 
 // HandshakeResponder ...
@@ -172,4 +173,12 @@ func (h *HandshakeHead) Run(able HandshakeResponder) error {
 		return able.Intermediary()
 	}
 	return able.Other()
+}
+
+// Head ...
+func (h *HandshakeHead) Head() []byte {
+	var b []byte
+	binary.BigEndian.PutUint32(b, uint32(h.Type))
+	b = append(b, h.ProtocolVersion[:]...)
+	return b
 }
