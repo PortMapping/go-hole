@@ -107,5 +107,4 @@ func listenTCP(ctx context.Context, listener net.Listener, cli chan<- Connector)
 func tcpProcess(conn net.Conn, cli chan<- Connector) {
 	t := newTCPConnector(conn)
 	t.Process()
-	cli <- t
 }

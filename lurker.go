@@ -37,12 +37,12 @@ type lurker struct {
 
 // ListenNoMonitor ...
 func (l *lurker) ListenMonitor() error {
-	listen, err := l.Listen()
+	connectors, err := l.Listen()
 	if err != nil {
 		return err
 	}
-	for l := range listen {
-		fmt.Println("connect from", l.ID())
+	for connector := range connectors {
+		fmt.Println("connect from", connector.ID())
 	}
 	return nil
 }
