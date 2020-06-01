@@ -237,6 +237,12 @@ func tcpConnect(s *source, conn net.Conn, data []byte) (n int, err error) {
 		log.Debugw("debug|tcpConnect|Write", "error", err)
 		return 0, err
 	}
+	b := make([]byte, 8)
+	_, err = conn.Read(b)
+	if err != nil {
+		return 0, err
+	}
+
 	if s.timeout != 0 {
 		err = conn.SetWriteDeadline(time.Now().Add(s.timeout))
 		if err != nil {

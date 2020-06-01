@@ -160,6 +160,8 @@ func (c *tcpConnector) Processing() {
 		log.Debugw("debug|getClientFromTCP|decode", "error", err)
 		return
 	}
+	c.conn.Write([]byte(""))
+
 	handshake.Run(c)
 	return
 }

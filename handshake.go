@@ -39,9 +39,9 @@ type RequestType int
 
 // HandshakeHead ...
 type HandshakeHead struct {
-	Type    uint8 `json:"type"`
-	Tunnel  uint8 `json:"tunnel"`
-	Version uint8 `json:"version"`
+	Type    HandshakeType `json:"type"`
+	Tunnel  uint8         `json:"tunnel"`
+	Version Version       `json:"version"`
 }
 
 // HandshakeResponder ...
@@ -172,17 +172,4 @@ func (h *HandshakeHead) Run(able HandshakeResponder) error {
 		return able.Intermediary()
 	}
 	return able.Other()
-}
-
-// Head ...
-func (h *HandshakeHead) Head() []byte {
-	b := make([]byte, 4)
-	b = []byte{
-		h.Type,
-		h.Tunnel,
-		h.Version,
-		h.Secret,
-	}
-
-	return b
 }
