@@ -91,7 +91,6 @@ func New(cfg *Config) Lurker {
 	if err != nil {
 		panic(err)
 	}
-	ants.Submit()
 	o := &lurker{
 		cfg:        cfg,
 		listeners:  make(map[string]Listener),
