@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/goextension/log"
 	"github.com/portmapping/go-reuse"
 	"github.com/portmapping/lurker/common"
 	"github.com/portmapping/lurker/nat"
@@ -164,6 +165,7 @@ func (s *socks5) doRequests(conn net.Conn) (err error) {
 	}
 	switch header[1] {
 	case cmdConnect:
+		log.Debugw("proxy connect")
 		e := connect(cmdConnect, conn)
 		if e == errAddressTypeNotSupported {
 			err = doReplies(conn, repAddressTypeNotSupported, atypIPv4Address)
@@ -204,7 +206,7 @@ func getAddrPort(conn net.Conn) (addr string, err error) {
 	default:
 		return "", errAddressTypeNotSupported
 	}
-
+	log.Debugw("proxy get addr")
 	var port uint16
 	err = binary.Read(conn, binary.BigEndian, &port)
 	if err != nil {

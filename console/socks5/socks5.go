@@ -1,11 +1,15 @@
 package main
 
 import (
+	"fmt"
+
+	"github.com/goextension/log/zap"
 	"github.com/portmapping/lurker/nat"
 	"github.com/portmapping/lurker/proxy"
 )
 
 func main() {
+	zap.InitZapSugar()
 	p, err := nat.FromLocal("tcp", 10080)
 	if err != nil {
 		panic(err)
@@ -18,6 +22,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("listen on port", 10080)
 	for {
 		accept, err := l.Accept()
 		if err != nil {
