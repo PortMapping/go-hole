@@ -1,7 +1,6 @@
 package lurker
 
 import (
-	"encoding/binary"
 	"encoding/json"
 	"net"
 
@@ -177,8 +176,13 @@ func (h *HandshakeHead) Run(able HandshakeResponder) error {
 
 // Head ...
 func (h *HandshakeHead) Head() []byte {
-	var b []byte
-	binary.BigEndian.PutUint32(b, uint32(h.Type))
-	b = append(b, h.ProtocolVersion[:]...)
+	b := make([]byte, 4)
+	b = []byte{
+		h.Type,
+		h.Tunnel,
+		h.Version,
+		h.Secret,
+	}
+
 	return b
 }

@@ -3,6 +3,7 @@ package lurker
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/panjf2000/ants/v2"
 	"time"
 
 	"github.com/portmapping/lurker/common"
@@ -33,6 +34,7 @@ type lurker struct {
 	cfg        *Config
 	timeout    time.Duration
 	connectors chan Connector
+	pool       *ants.Pool
 }
 
 // ListenNoMonitor ...
@@ -85,11 +87,17 @@ func (l *lurker) Stop() error {
 
 // New ...
 func New(cfg *Config) Lurker {
+	pool, err := ants.NewPool(5000)
+	if err != nil {
+		panic(err)
+	}
+	ants.Submit()
 	o := &lurker{
 		cfg:        cfg,
 		listeners:  make(map[string]Listener),
 		connectors: nil,
 		timeout:    DefaultTimeout,
+		pool:       pool,
 	}
 	return o
 }
