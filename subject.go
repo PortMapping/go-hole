@@ -15,7 +15,10 @@ type subject struct {
 
 // Add ...
 func (s *subject) Add(connector Connector) error {
-	s.connectors.Store(connector.ID(), connector)
+	connector.ID(func(id string) {
+		s.connectors.Store(id, connector)
+	})
+
 	return nil
 }
 
