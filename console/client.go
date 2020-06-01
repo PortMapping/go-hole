@@ -26,13 +26,15 @@ func cmdClient() *cobra.Command {
 			ispAddr := net.IPv4zero
 
 			cfg := lurker.DefaultConfig()
-			cfg.Proxy = append(cfg.Proxy, lurker.Proxy{
-				Type: proxy,
-				Nat:  true,
-				Port: proxyPort,
-				Name: proxyName,
-				Pass: proxyPass,
-			})
+			cfg.Proxy = []lurker.Proxy{
+				{
+					Type: proxy,
+					Nat:  true,
+					Port: proxyPort,
+					Name: proxyName,
+					Pass: proxyPass,
+				},
+			}
 			l := lurker.New(cfg)
 
 			mport, err := lurker.RegisterLocalProxy(l, cfg)
