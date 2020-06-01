@@ -88,7 +88,7 @@ func New(cfg *Config) Lurker {
 	o := &lurker{
 		cfg:        cfg,
 		listeners:  make(map[string]Listener),
-		connectors: make(chan Connector, 10),
+		connectors: nil,
 		timeout:    DefaultTimeout,
 	}
 	return o
