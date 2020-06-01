@@ -36,6 +36,7 @@ func newTCPConnector(conn net.Conn) Connector {
 
 // Interaction ...
 func (c *tcpConnector) Interaction() (err error) {
+	log.Debugw("interaction call")
 	close := true
 	defer func() {
 		if close {
@@ -139,14 +140,16 @@ func (c *tcpConnector) Pong() error {
 func (c *tcpConnector) Process() {
 	var err error
 	data := make([]byte, maxByteSize)
-	log.Infow("do process")
+	log.Debugw("process")
 	n, err := c.conn.Read(data)
 	if err != nil {
 		log.Debugw("debug|getClientFromTCP|Read", "error", err)
 		return
 	}
+	log.Debugw("read", "data", string(data[:n]))
 	handshake, err := ParseHandshake(data[:n])
 	if err != nil {
+		log.Debugw("debug|getClientFromTCP|decode", "error", err)
 		return
 	}
 	handshake.Run(c)

@@ -40,6 +40,8 @@ type RequestType int
 // HandshakeHead ...
 type HandshakeHead struct {
 	Type HandshakeType `json:"type"`
+
+	ProtocolVersion Version `json:"protocol_version"`
 }
 
 // HandshakeResponder ...
@@ -59,15 +61,15 @@ type HandshakeRequester interface {
 
 // HandshakeRequest ...
 type HandshakeRequest struct {
-	RequestType     RequestType `json:"request_type"`
-	ProtocolVersion Version     `json:"protocol_version"`
-	Data            []byte      `json:"data"`
+	Head HandshakeHead `json:"head"`
+	Data []byte        `json:"data"`
 }
 
 // HandshakeResponse ...
 type HandshakeResponse struct {
-	Status HandshakeStatus `json:"status"`
-	Data   []byte          `json:"data"`
+	Status      HandshakeStatus `json:"status"`
+	RequestType RequestType     `json:"request_type"`
+	Data        []byte          `json:"data"`
 }
 
 // JSON ...
@@ -121,8 +123,7 @@ func decodeHandshakeRequestV1(request *HandshakeRequest) (Service, error) {
 // EncodeHandshakeRequest ...
 func EncodeHandshakeRequest(service Service) ([]byte, error) {
 	return encodeHandshakeRequestV1(&HandshakeRequest{
-		ProtocolVersion: "v0.0.1",
-		Data:            service.JSON(),
+		Data: service.JSON(),
 	})
 }
 func encodeHandshakeRequestV1(request *HandshakeRequest) ([]byte, error) {
