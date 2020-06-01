@@ -91,7 +91,7 @@ func (l *tcpListener) Stop() error {
 	return nil
 }
 
-func (l *tcpListener) listenTCP(cli chan<- Connector) (err error) {
+func (l *tcpListener) listenTCP() (err error) {
 	for {
 		select {
 		case <-l.ctx.Done():
@@ -103,7 +103,7 @@ func (l *tcpListener) listenTCP(cli chan<- Connector) (err error) {
 				continue
 			}
 			fmt.Println("new connector")
-			t := newTCPConnector(conn, cli)
+			t := newTCPConnector(conn)
 			err = l.funcPool.Invoke(t)
 			if err != nil {
 				log.Debugw("debug|funcPool|Invoke", "error", err)

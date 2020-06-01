@@ -3,6 +3,7 @@ package lurker
 import (
 	"context"
 	"fmt"
+	"github.com/panjf2000/ants/v2"
 	"github.com/portmapping/lurker/nat"
 	"net"
 
@@ -17,6 +18,7 @@ type localProxy struct {
 	local    proxy.Proxy
 	ready    bool
 	protocol string
+	funcPool *ants.PoolWithFunc
 }
 
 // RegisterLocalProxy ...
@@ -59,7 +61,7 @@ func RegisterLocalProxy(l Lurker, cfg *Config) (port int, err error) {
 
 // Listen ...
 func (p *localProxy) Listen(c chan<- Connector) (err error) {
-	lis, err := p.local.ListenPort(p.port)
+	lis, err := p.local.ListenOnPort(p.port)
 	if err != nil {
 		return err
 	}
@@ -81,7 +83,11 @@ func (p *localProxy) accept(lis net.Listener) {
 				continue
 			}
 			fmt.Println("new connect received")
-			go p.local.Monitor(conn)
+			err = p.local.Connect(conn)
+			if err != nil {
+				log.Debugw("debug|Connect|error", "error", err)
+				continue
+			}
 		}
 	}
 }

@@ -1,13 +1,11 @@
 package lurker
 
-import "io"
-
 // Connector ...
 type Connector interface {
-	ID() string
 	Process()
 	RegisterCallback(cb ConnectorCallback)
+	ID(f func(string))
 }
 
 // ConnectorCallback ...
-type ConnectorCallback func(rt RequestType, closer io.ReadWriteCloser)
+type ConnectorCallback func(rt RequestType, data []byte)

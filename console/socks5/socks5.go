@@ -18,7 +18,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	l, err := px.ListenPort(10080)
+	l, err := px.ListenOnPort(10080)
 	if err != nil {
 		panic(err)
 	}
@@ -28,7 +28,7 @@ func main() {
 		if err != nil {
 			continue
 		}
-		go px.Monitor(accept)
+		go px.HandleConnect(accept)
 	}
 
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/goextension/log"
+	"github.com/panjf2000/ants/v2"
 	"github.com/portmapping/go-reuse"
 	"github.com/portmapping/lurker/common"
 	"github.com/portmapping/lurker/nat"
@@ -46,14 +47,15 @@ const (
 
 type socks5 struct {
 	Authenticate
-	nat nat.NAT
+	nat      nat.NAT
+	funcPool *ants.PoolWithFunc
 }
 
 var errAddressTypeNotSupported = errors.New("common type not supported")
 var errCommandNotSupported = errors.New("command not supported")
 
-// ListenPort ...
-func (s *socks5) ListenPort(port int) (net.Listener, error) {
+// ListenOnPort ...
+func (s *socks5) ListenOnPort(port int) (net.Listener, error) {
 	tcpAddr := net.TCPAddr{
 		IP:   net.IPv4zero,
 		Port: port,
@@ -65,25 +67,26 @@ func (s *socks5) ListenPort(port int) (net.Listener, error) {
 	return tcpLis, nil
 }
 
-// ListenTCP ...
-func (s *socks5) Monitor(conn net.Conn) {
-	if err := s.listenRequest(conn); err != nil {
-		return
-	}
-	if err := s.doRequests(conn); err != nil {
-		return
-	}
+// Connect ...
+func (s *socks5) Connect(conn net.Conn) error {
+	return s.funcPool.Invoke(conn)
 }
 
 func newSocks5Proxy(n nat.NAT, auth Authenticate) (Proxy, error) {
-	return &socks5{
+
+	s := &socks5{
 		nat:          n,
 		Authenticate: auth,
-	}, nil
+	}
+	funcPool, err := ants.NewPoolWithFunc(ants.DefaultAntsPoolSize, s.handleConnect, ants.WithNonblocking(false))
+	if err != nil {
+		return nil, err
+	}
+	s.funcPool = funcPool
+	return s, nil
 }
 
-// ListenRequest ...
-func (s *socks5) listenRequest(conn net.Conn) (err error) {
+func (s *socks5) procedureProc(conn net.Conn) (err error) {
 	defer func() {
 		if err != nil {
 			conn.Close()
@@ -151,7 +154,7 @@ Requests
    and destination addresses, and return one or more reply messages, as
    appropriate for the request type.
 */
-func (s *socks5) doRequests(conn net.Conn) (err error) {
+func doRequests(conn net.Conn) (err error) {
 	defer func() {
 		if err != nil {
 			conn.Close()
@@ -179,6 +182,19 @@ func (s *socks5) doRequests(conn net.Conn) (err error) {
 	conn.Write([]byte{socks5Version, repCommandNotSupported})
 	conn.Close()
 	return nil
+}
+
+func (s *socks5) handleConnect(i interface{}) {
+	conn, b := i.(net.Conn)
+	if !b {
+		return
+	}
+	if err := s.procedureProc(conn); err != nil {
+		return
+	}
+	if err := doRequests(conn); err != nil {
+		return
+	}
 }
 
 func getAddrPort(conn net.Conn) (addr string, err error) {
