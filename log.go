@@ -1,7 +1,6 @@
 package lurker
 
 import (
-	logger "github.com/goextension/log"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
