@@ -7,6 +7,8 @@ import (
 	"github.com/portmapping/lurker/common"
 )
 
+var _ HandshakeResponder = &tcpConnector{}
+
 type tcpConnector struct {
 	id        func(id string)
 	timeout   time.Duration
@@ -26,8 +28,24 @@ func (c *tcpConnector) Header() (HandshakeHead, error) {
 }
 
 // Reply ...
-func (c *tcpConnector) Response(header HandshakeHead) error {
-	panic("implement me")
+func (c *tcpConnector) Reply(status HandshakeStatus, data []byte) error {
+	r := HandshakeResponse{
+		Status: status,
+		Data:   data,
+	}
+
+	if c.timeout != 0 {
+		err := c.conn.SetReadDeadline(time.Now().Add(c.timeout))
+		if err != nil {
+			log.Debugw("debug|Reply|SetReadDeadline", "error", err)
+			return err
+		}
+	}
+	_, err := c.conn.Write(r.JSON())
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // RegisterCallback ...
@@ -39,8 +57,6 @@ func (c *tcpConnector) RegisterCallback(cb ConnectorCallback) {
 func (c *tcpConnector) ID(f func(string)) {
 	c.id = f
 }
-
-var _ HandshakeResponder = &tcpConnector{}
 
 func newTCPConnector(conn net.Conn) Connector {
 	c := &tcpConnector{
@@ -132,7 +148,7 @@ func (c *tcpConnector) KeepConnect() {
 }
 
 // Pong ...
-func (c *tcpConnector) Pong() error {
+func (c *tcpConnector) pong() error {
 	defer c.conn.Close()
 	response := HandshakeResponse{
 		Status: HandshakeStatusSuccess,
@@ -145,6 +161,9 @@ func (c *tcpConnector) Pong() error {
 			return err
 		}
 	}
+
+	c.Reply()
+
 	write, err := c.conn.Write(response.JSON())
 	if err != nil {
 		return err
@@ -153,6 +172,19 @@ func (c *tcpConnector) Pong() error {
 		log.Warnw("write pong", "written", 0)
 	}
 	return nil
+}
+
+// Do ...
+func (c *tcpConnector) Do(ht HandshakeType) error {
+	switch ht {
+	case HandshakeTypePing:
+		return c.pong()
+	case HandshakeTypeConnect:
+		return connector.Interaction()
+	case HandshakeTypeAdapter:
+		return connector.Intermediary()
+	}
+	return connector.Other()
 }
 
 // Close ...

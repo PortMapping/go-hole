@@ -6,8 +6,8 @@ type Connector interface {
 	ID(f func(string))
 	Header() (HandshakeHead, error)
 	Close() error
-	Reply(header HandshakeHead, status HandshakeStatus, data []byte) error
-	Pong() error
+	Reply(status HandshakeStatus, data []byte) error
+	Do(handshakeType HandshakeType) error
 }
 
 // ConnectorCallback ...
@@ -16,7 +16,6 @@ type ConnectorCallback func(rt RequestType, data []byte)
 func receive(connector Connector) (err error) {
 	defer func() {
 		if err != nil {
-
 			connector.Close()
 		}
 	}()
@@ -28,13 +27,7 @@ func receive(connector Connector) (err error) {
 		}
 		return err
 	}
-	switch header.Type {
-	case HandshakeTypePing:
-		return connector.Pong()
-	case HandshakeTypeConnect:
-		return connector.Interaction()
-	case HandshakeTypeAdapter:
-		return connector.Intermediary()
-	}
-	return connector.Other()
+
+	return connector.Do(header.Type)
+
 }
