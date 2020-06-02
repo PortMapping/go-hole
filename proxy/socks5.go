@@ -185,6 +185,7 @@ func doRequests(conn net.Conn) (err error) {
 }
 
 func (s *socks5) handleConnect(i interface{}) {
+	fmt.Println("handle Connect")
 	conn, b := i.(net.Conn)
 	if !b {
 		return
