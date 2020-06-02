@@ -171,7 +171,7 @@ func (h *udpHandshake) Do() (err error) {
 		return err
 	}
 	log.Debugw("received", "data", string(data[:n]))
-	handshake, err := ParseHandshake(data[:n])
+	handshake, err := ParseHandshakeByte(data[:n])
 	if err != nil {
 		return err
 	}

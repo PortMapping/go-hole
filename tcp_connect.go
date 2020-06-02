@@ -23,7 +23,7 @@ func (c *tcpConnector) Header() (HandshakeHead, error) {
 	if err != nil {
 		return HandshakeHead{}, err
 	}
-	return ParseHandshake(b)
+	return ParseHandshakeByte(b)
 }
 
 // Reply ...

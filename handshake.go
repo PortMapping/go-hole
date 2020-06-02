@@ -97,7 +97,7 @@ type Service struct {
 }
 
 // ParseHandshake ...
-func ParseHandshake(data []byte) (HandshakeHead, error) {
+func ParseHandshakeJSON(data []byte) (HandshakeHead, error) {
 	var h HandshakeHead
 	err := json.Unmarshal(data, &h)
 	if err != nil {
@@ -165,8 +165,8 @@ func (h HandshakeHead) JSON() []byte {
 	return marshal
 }
 
-// ParseHandshakeHead ...
-func ParseHandshakeHead(b []byte) (HandshakeHead, error) {
+// ParseHandshakeByte ...
+func ParseHandshakeByte(b []byte) (HandshakeHead, error) {
 	var h HandshakeHead
 	if len(b) < 8 {
 		return h, fmt.Errorf("wrong byte size")
