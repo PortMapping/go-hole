@@ -18,7 +18,7 @@ type ConnectorListener interface {
 }
 
 // ConnectorCallback ...
-type ConnectorCallback func(rt RequestType, data []byte)
+type ConnectorCallback func(rt HandshakeType, data []byte)
 
 func receive(connector Connector) (err error) {
 	defer func() {
@@ -37,5 +37,4 @@ func receive(connector Connector) (err error) {
 	}
 
 	return connector.Do(header.Type)
-
 }
