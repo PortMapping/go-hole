@@ -173,3 +173,19 @@ func (h *HandshakeHead) Run(able HandshakeResponder) error {
 	}
 	return able.Other()
 }
+
+// Receive ...
+func Receive(connector Connector) (err error) {
+	defer func() {
+		if err != nil {
+			connector.Close()
+		}
+	}()
+	header, err := connector.Header()
+	if err != nil {
+		return err
+	}
+	err = connector.Response(header)
+
+	return
+}

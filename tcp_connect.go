@@ -167,3 +167,8 @@ func (c *tcpConnector) Processing() {
 	handshake.Run(c)
 	return
 }
+
+// Close ...
+func (c *tcpConnector) Close() error {
+	return c.conn.Close()
+}

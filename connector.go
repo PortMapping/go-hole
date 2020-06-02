@@ -2,9 +2,11 @@ package lurker
 
 // Connector ...
 type Connector interface {
-	Processing()
 	RegisterCallback(cb ConnectorCallback)
 	ID(f func(string))
+	Header() (HandshakeHead, error)
+	Close() error
+	Response(header HandshakeHead) error
 }
 
 // ConnectorCallback ...
