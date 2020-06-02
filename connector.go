@@ -1,18 +1,20 @@
 package lurker
 
-import (
-	"github.com/portmapping/lurker/common"
-)
+import "github.com/portmapping/lurker/common"
 
 // Connector ...
 type Connector interface {
-	RegisterCallback(cb ConnectorCallback)
-	ID(f func(string))
-	Addr(f func(addr common.Addr))
 	Header() (HandshakeHead, error)
 	Close() error
 	Reply(status HandshakeStatus, data []byte) error
 	Do(handshakeType HandshakeType) error
+}
+
+// ConnectorListener ...
+type ConnectorListener interface {
+	RegisterCallback(cb ConnectorCallback)
+	ID(f func(string))
+	Addr(f func(addr common.Addr))
 }
 
 // ConnectorCallback ...
