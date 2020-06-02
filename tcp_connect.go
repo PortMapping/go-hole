@@ -7,14 +7,13 @@ import (
 	"github.com/portmapping/lurker/common"
 )
 
-var _ HandshakeResponder = &tcpConnector{}
+var _ Connector = &tcpConnector{}
 
 type tcpConnector struct {
-	id        func(id string)
-	timeout   time.Duration
-	conn      net.Conn
-	ticker    *time.Ticker
-	connector chan<- Connector
+	id      func(id string)
+	timeout time.Duration
+	conn    net.Conn
+	ticker  *time.Ticker
 }
 
 // Header ...
@@ -68,14 +67,8 @@ func newTCPConnector(conn net.Conn) Connector {
 }
 
 // Interaction ...
-func (c *tcpConnector) Interaction() (err error) {
+func (c *tcpConnector) interaction() (err error) {
 	log.Debugw("interaction call")
-	close := true
-	defer func() {
-		if close {
-			c.conn.Close()
-		}
-	}()
 	data := make([]byte, maxByteSize)
 	if c.timeout != 0 {
 		err := c.conn.SetReadDeadline(time.Now().Add(c.timeout))
@@ -96,9 +89,6 @@ func (c *tcpConnector) Interaction() (err error) {
 	if err != nil {
 		log.Debugw("debug|Reply|DecodeHandshakeRequest", "error", err)
 		return err
-	}
-	if !service.KeepConnect {
-		close = true
 	}
 
 	if c.id != nil {
@@ -126,12 +116,12 @@ func (c *tcpConnector) Interaction() (err error) {
 }
 
 // Intermediary ...
-func (c *tcpConnector) Intermediary() error {
+func (c *tcpConnector) intermediary() error {
 	return nil
 }
 
 // Other ...
-func (c *tcpConnector) Other() error {
+func (c *tcpConnector) other() error {
 	return nil
 }
 
@@ -149,29 +139,7 @@ func (c *tcpConnector) KeepConnect() {
 
 // Pong ...
 func (c *tcpConnector) pong() error {
-	defer c.conn.Close()
-	response := HandshakeResponse{
-		Status: HandshakeStatusSuccess,
-		Data:   []byte("PONG"),
-	}
-	if c.timeout != 0 {
-		err := c.conn.SetWriteDeadline(time.Now().Add(c.timeout))
-		if err != nil {
-			log.Debugw("debug|Reply|SetWriteDeadline", "error", err)
-			return err
-		}
-	}
-
-	c.Reply()
-
-	write, err := c.conn.Write(response.JSON())
-	if err != nil {
-		return err
-	}
-	if write == 0 {
-		log.Warnw("write pong", "written", 0)
-	}
-	return nil
+	return c.Reply(HandshakeStatusSuccess, []byte("PONG"))
 }
 
 // Do ...
@@ -180,11 +148,11 @@ func (c *tcpConnector) Do(ht HandshakeType) error {
 	case HandshakeTypePing:
 		return c.pong()
 	case HandshakeTypeConnect:
-		return connector.Interaction()
+		return c.interaction()
 	case HandshakeTypeAdapter:
-		return connector.Intermediary()
+		return c.intermediary()
 	}
-	return connector.Other()
+	return c.other()
 }
 
 // Close ...
