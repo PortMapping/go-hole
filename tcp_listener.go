@@ -120,5 +120,8 @@ func tcpHandler(i interface{}) {
 	if !b {
 		return
 	}
-	connector.Processing()
+	err := receive(connector)
+	if err != nil {
+		log.Debugw("tcp handler error", "error", err)
+	}
 }
