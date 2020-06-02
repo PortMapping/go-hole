@@ -15,6 +15,21 @@ type tcpConnector struct {
 	connector chan<- Connector
 }
 
+// Header ...
+func (c *tcpConnector) Header() (HandshakeHead, error) {
+	b := make([]byte, 8)
+	_, err := c.conn.Read(b)
+	if err != nil {
+		return HandshakeHead{}, err
+	}
+	return ParseHandshake(b)
+}
+
+// Reply ...
+func (c *tcpConnector) Response(header HandshakeHead) error {
+	panic("implement me")
+}
+
 // RegisterCallback ...
 func (c *tcpConnector) RegisterCallback(cb ConnectorCallback) {
 
@@ -138,34 +153,6 @@ func (c *tcpConnector) Pong() error {
 		log.Warnw("write pong", "written", 0)
 	}
 	return nil
-}
-
-// Processing ...
-func (c *tcpConnector) Processing() {
-	var err error
-	defer func() {
-		if err != nil {
-			log.Errorw("debug|error", "error", err)
-			c.conn.Close()
-		}
-	}()
-	data := make([]byte, maxByteSize)
-	log.Debugw("process")
-	n, err := c.conn.Read(data)
-	if err != nil {
-		log.Debugw("debug|getClientFromTCP|Read", "error", err)
-		return
-	}
-	log.Debugw("read", "data", string(data[:n]))
-	handshake, err := ParseHandshake(data[:n])
-	if err != nil {
-		log.Debugw("debug|getClientFromTCP|decode", "error", err)
-		return
-	}
-	c.conn.Write([]byte(""))
-
-	handshake.Run(c)
-	return
 }
 
 // Close ...
