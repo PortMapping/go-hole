@@ -21,7 +21,7 @@ func receive(connector Connector) (err error) {
 	}()
 	header, err := connector.Header()
 	if err != nil {
-		e := connector.Reply(header, HandshakeStatusFailed, nil)
+		e := connector.Reply(HandshakeStatusFailed, nil)
 		if e != nil {
 			log.Debugw("connector response", "error", e)
 		}

@@ -232,14 +232,9 @@ func tcpConnect(s *source, conn net.Conn, data []byte) (n int, err error) {
 	handshake := HandshakeHead{
 		Type: HandshakeTypeConnect,
 	}
-	_, err = conn.Write(handshake.JSON())
+	_, err = conn.Write(handshake.Bytes())
 	if err != nil {
 		log.Debugw("debug|tcpConnect|Write", "error", err)
-		return 0, err
-	}
-	b := make([]byte, 8)
-	_, err = conn.Read(b)
-	if err != nil {
 		return 0, err
 	}
 
@@ -284,7 +279,7 @@ func tcpPing(s *source, conn net.Conn, data []byte) (n int, err error) {
 		Type: HandshakeTypePing,
 	}
 
-	_, err = conn.Write(handshake.JSON())
+	_, err = conn.Write(handshake.Bytes())
 	if err != nil {
 		log.Debugw("debug|tcpPing|Write", "error", err)
 		return 0, err
@@ -303,6 +298,7 @@ func tcpPing(s *source, conn net.Conn, data []byte) (n int, err error) {
 	log.Infow("tcp received", "data", string(data[:n]))
 	return n, nil
 }
+
 func udpPing(s *source, conn net.Conn, data []byte) (n int, err error) {
 	if s.timeout != 0 {
 		err = conn.SetWriteDeadline(time.Now().Add(s.timeout))
