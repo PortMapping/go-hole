@@ -11,9 +11,15 @@ var _ Connector = &tcpConnector{}
 
 type tcpConnector struct {
 	id      func(id string)
+	addr    func(addr common.Addr)
 	timeout time.Duration
 	conn    net.Conn
 	ticker  *time.Ticker
+}
+
+// Addr ...
+func (c *tcpConnector) Addr(f func(addr common.Addr)) {
+	c.addr = f
 }
 
 // Header ...
@@ -96,6 +102,9 @@ func (c *tcpConnector) interaction() (err error) {
 	}
 	netAddr := common.ParseNetAddr(c.conn.RemoteAddr())
 	log.Debugw("debug|Reply|ParseNetAddr", "common", netAddr)
+	if c.addr != nil {
+		c.addr(*netAddr)
+	}
 	var resp HandshakeResponse
 	resp.Status = HandshakeStatusSuccess
 	resp.Data = []byte("Connected")
