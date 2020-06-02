@@ -175,6 +175,7 @@ func doRequests(conn net.Conn) (err error) {
 			if err != nil {
 				log.Debugw("reply error", "error", err)
 			}
+			return
 		}
 	case cmdBind:
 	case cmdUDPAssociate:
