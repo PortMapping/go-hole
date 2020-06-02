@@ -11,3 +11,17 @@ type Connector interface {
 
 // ConnectorCallback ...
 type ConnectorCallback func(rt RequestType, data []byte)
+
+func receive(connector Connector) (err error) {
+	defer func() {
+		if err != nil {
+			connector.Close()
+		}
+	}()
+	header, err := connector.Header()
+	if err != nil {
+		return err
+	}
+	err = connector.Response(header)
+	return
+}

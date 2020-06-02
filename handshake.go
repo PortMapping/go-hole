@@ -2,6 +2,7 @@ package lurker
 
 import (
 	"encoding/json"
+	"fmt"
 	"net"
 
 	"github.com/portmapping/lurker/common"
@@ -22,6 +23,9 @@ const HandshakeTypeConnect HandshakeType = 0x02
 // HandshakeTypeAdapter ...
 const HandshakeTypeAdapter HandshakeType = 0x03
 
+// HandshakeAuthorization ...
+const HandshakeAuthorization HandshakeType = 0x04
+
 // HandshakeRequestTypeProxy ...
 const HandshakeRequestTypeProxy RequestType = 0x01
 
@@ -29,7 +33,7 @@ const HandshakeRequestTypeProxy RequestType = 0x01
 type Version [4]byte
 
 // HandshakeStatus ...
-type HandshakeStatus int
+type HandshakeStatus uint8
 
 // HandshakeType ...
 type HandshakeType uint8
@@ -67,9 +71,9 @@ type HandshakeRequest struct {
 
 // HandshakeResponse ...
 type HandshakeResponse struct {
-	Status      HandshakeStatus `json:"status"`
-	RequestType RequestType     `json:"request_type"`
-	Data        []byte          `json:"data"`
+	//RequestType RequestType     `json:"request_type"`
+	Status HandshakeStatus `json:"status"`
+	Data   []byte          `json:"data"`
 }
 
 // JSON ...
@@ -161,6 +165,34 @@ func (h HandshakeHead) JSON() []byte {
 	return marshal
 }
 
+// ParseHandshakeHead ...
+func ParseHandshakeHead(b []byte) (HandshakeHead, error) {
+	var h HandshakeHead
+	if len(b) < 8 {
+		return h, fmt.Errorf("wrong byte size")
+	}
+	h.Type = HandshakeType(b[0])
+	h.Tunnel = b[1]
+	h.Version[0] = b[4]
+	h.Version[1] = b[5]
+	h.Version[2] = b[6]
+	h.Version[3] = b[7]
+	return h, nil
+}
+
+// Bytes ...
+func (h HandshakeHead) Bytes() []byte {
+	var dummy uint8 = 0
+	b := []byte{
+		uint8(h.Type),
+		h.Tunnel,
+		dummy,
+		dummy,
+	}
+	b = append(b, h.Version[:]...)
+	return b
+}
+
 // Run ...
 func (h *HandshakeHead) Run(able HandshakeResponder) error {
 	switch h.Type {
@@ -172,20 +204,4 @@ func (h *HandshakeHead) Run(able HandshakeResponder) error {
 		return able.Intermediary()
 	}
 	return able.Other()
-}
-
-// Receive ...
-func Receive(connector Connector) (err error) {
-	defer func() {
-		if err != nil {
-			connector.Close()
-		}
-	}()
-	header, err := connector.Header()
-	if err != nil {
-		return err
-	}
-	err = connector.Response(header)
-
-	return
 }
