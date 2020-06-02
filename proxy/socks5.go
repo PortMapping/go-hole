@@ -173,7 +173,7 @@ func doRequests(conn net.Conn) (err error) {
 		if e == errAddressTypeNotSupported {
 			err = doReplies(conn, repAddressTypeNotSupported, atypIPv4Address)
 			if err != nil {
-				fmt.Println("error", err)
+				log.Debugw("reply error", "error", err)
 			}
 		}
 	case cmdBind:
