@@ -22,7 +22,7 @@ type ListenResponse struct {
 // Lurker ...
 type Lurker interface {
 	Listen() (c <-chan Connector, err error)
-	ListenMonitor() error
+	ListenOnMonitor() error
 	RegisterListener(name string, listener Listener)
 	Listener(name string) (Listener, bool)
 	NetworkNAT(name string) nat.NAT
@@ -38,7 +38,7 @@ type lurker struct {
 }
 
 // ListenNoMonitor ...
-func (l *lurker) ListenMonitor() error {
+func (l *lurker) ListenOnMonitor() error {
 	connectors, err := l.Listen()
 	if err != nil {
 		return err
@@ -96,7 +96,7 @@ func New(cfg *Config) Lurker {
 	o := &lurker{
 		cfg:        cfg,
 		listeners:  make(map[string]Listener),
-		connectors: nil,
+		connectors: make(chan Connector, 5),
 		timeout:    DefaultTimeout,
 		pool:       pool,
 	}

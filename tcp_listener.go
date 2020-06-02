@@ -77,7 +77,7 @@ func (l *tcpListener) Listen(c chan<- Connector) (err error) {
 		return err
 	}
 	fmt.Println("listen tcp on address:", tcpAddr.String())
-	go l.listenTCP()
+	go l.listenTCP(c)
 	l.ready = true
 	return
 }
@@ -91,7 +91,7 @@ func (l *tcpListener) Stop() error {
 	return nil
 }
 
-func (l *tcpListener) listenTCP() (err error) {
+func (l *tcpListener) listenTCP(c chan<- Connector) (err error) {
 	for {
 		select {
 		case <-l.ctx.Done():
@@ -109,6 +109,7 @@ func (l *tcpListener) listenTCP() (err error) {
 				log.Debugw("debug|funcPool|Invoke", "error", err)
 				continue
 			}
+			c <- t
 			return nil
 		}
 	}

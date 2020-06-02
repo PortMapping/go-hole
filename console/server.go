@@ -21,7 +21,7 @@ func cmdServer() *cobra.Command {
 			l := lurker.New(cfg)
 			t := lurker.NewTCPListener(cfg)
 			l.RegisterListener("tcp", t)
-			err := l.ListenMonitor()
+			err := l.ListenOnMonitor()
 			if err != nil {
 				panic(err)
 				return

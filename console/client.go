@@ -43,7 +43,7 @@ func cmdClient() *cobra.Command {
 			}
 
 			fmt.Println("your connect id:", lurker.GlobalID)
-			go l.ListenMonitor()
+			go l.ListenOnMonitor()
 			log.Infof("remote addr: %v:%v", addrs.String(), i)
 			s := lurker.NewSource(lurker.Service{
 				ID:    lurker.GlobalID,
