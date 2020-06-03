@@ -17,6 +17,7 @@ func cmdClient() *cobra.Command {
 	var proxyPort int
 	var proxyName string
 	var proxyPass string
+	var id string
 	cmd := &cobra.Command{
 		Use: "client",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -44,7 +45,7 @@ func cmdClient() *cobra.Command {
 			fmt.Println("your connect id:", lurker.GlobalID)
 			go l.ListenOnMonitor()
 			s := lurker.NewSource(lurker.Service{
-				ID:    lurker.GlobalID,
+				ID:    id,
 				ISP:   ispAddr,
 				Local: localAddr,
 			}, common.Addr{
@@ -67,5 +68,6 @@ func cmdClient() *cobra.Command {
 	cmd.Flags().StringVarP(&proxyName, "pname", "", "", "local proxy port")
 	cmd.Flags().StringVarP(&proxyPass, "ppass", "", "", "local proxy port")
 	cmd.Flags().IntVarP(&proxyPort, "pport", "", 10080, "local proxy port")
+	cmd.Flags().StringVarP(&id, "id", "", lurker.GlobalID, "set the connect id")
 	return cmd
 }
