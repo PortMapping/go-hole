@@ -17,6 +17,11 @@ type tcpConnector struct {
 	ticker  *time.Ticker
 }
 
+// ConnectorListener ...
+func (c *tcpConnector) ConnectorListener() ConnectorListener {
+	return c
+}
+
 // Addr ...
 func (c *tcpConnector) Addr(f func(addr common.Addr)) {
 	c.addr = f

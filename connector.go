@@ -8,6 +8,7 @@ type Connector interface {
 	Close() error
 	Reply(status HandshakeStatus, data []byte) error
 	Do(handshakeType HandshakeType) error
+	ConnectorListener() ConnectorListener
 }
 
 // ConnectorListener ...
