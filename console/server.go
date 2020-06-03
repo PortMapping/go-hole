@@ -27,11 +27,6 @@ func cmdServer() *cobra.Command {
 				return
 			}
 			fmt.Println("your connect id:", lurker.GlobalID)
-			go func() {
-				//for connector := range connectors {
-				//	fmt.Println(connector.ID())
-				//}
-			}()
 			waitForSignal()
 		},
 	}
