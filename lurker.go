@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/panjf2000/ants/v2"
+	"sync"
 	"time"
 
 	"github.com/portmapping/lurker/common"
@@ -47,13 +48,20 @@ func (l *lurker) ListenOnMonitor() error {
 		var id string
 		var addrs common.Addr
 		l := connector.ConnectorListener()
+		wg := sync.WaitGroup{}
+		wg.Add(2)
 		l.ID(func(s string) {
+			wg.Done()
 			id = s
 		})
 		l.Addr(func(addr common.Addr) {
+			wg.Done()
 			addrs = addr
 		})
-		fmt.Println("id", id, "address is", addrs.String())
+		go func() {
+			wg.Wait()
+			fmt.Println("id", id, "address is", addrs.String())
+		}()
 	}
 	return nil
 }

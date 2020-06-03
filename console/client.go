@@ -59,7 +59,7 @@ func cmdClient() *cobra.Command {
 			if err != nil {
 				panic(err)
 			}
-			fmt.Println("target connected")
+			log.Debugw("target connected")
 			waitForSignal()
 		},
 	}

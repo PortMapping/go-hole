@@ -11,8 +11,8 @@ func init() {
 	cfg := zap.NewProductionConfig()
 	//cfg.Level = logLvToAtomicLv(Level)
 	cfg.Level = zap.NewAtomicLevelAt(zapcore.DebugLevel)
-	cfg.OutputPaths = []string{"stdout"}
-	cfg.ErrorOutputPaths = []string{"stdout"}
+	cfg.OutputPaths = []string{"lk.log"}
+	cfg.ErrorOutputPaths = []string{"lk_err.log"}
 	logger, e := cfg.Build(
 		zap.AddCaller(),
 		//zap.AddCallerSkip(1),
