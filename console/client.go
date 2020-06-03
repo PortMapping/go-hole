@@ -42,7 +42,7 @@ func cmdClient() *cobra.Command {
 				panic(err)
 			}
 
-			fmt.Println("your connect id:", lurker.GlobalID)
+			fmt.Println("your connect id:", id)
 			go l.ListenOnMonitor()
 			s := lurker.NewSource(lurker.Service{
 				ID:    id,
