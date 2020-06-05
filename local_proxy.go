@@ -34,7 +34,7 @@ func RegisterLocalProxy(l Lurker, cfg *Config) (port int, err error) {
 		var n nat.NAT
 		if p.Nat {
 			//todo(network can change)
-			n, err = mapping("tcp", p.Port)
+			n, err = Mapping("tcp", p.Port)
 			if err != nil {
 				return 0, err
 			}
