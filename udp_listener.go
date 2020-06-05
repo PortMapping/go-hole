@@ -69,7 +69,7 @@ func (l *udpListener) Listen(c chan<- Connector) (err error) {
 	if !l.cfg.NAT {
 		return nil
 	}
-	l.nat, err = mapping("udp", l.cfg.UDP)
+	l.nat, err = Mapping("udp", l.cfg.UDP)
 	if err != nil {
 		return err
 	}
