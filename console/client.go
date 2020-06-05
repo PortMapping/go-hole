@@ -29,25 +29,25 @@ func cmdClient() *cobra.Command {
 			cfg := lurker.DefaultConfig()
 			var err error
 			mport := bindPort
-			//if bindPort == 0 {
-			cfg.Proxy = []lurker.Proxy{
-				{
-					Type: proxy,
-					Nat:  true,
-					Port: proxyPort,
-					Name: proxyName,
-					Pass: proxyPass,
-				},
-			}
-			l := lurker.New(cfg)
-			mport, err = lurker.RegisterLocalProxy(l, cfg)
-			if err != nil {
-				panic(err)
-			}
+			if proxy != "" {
+				cfg.Proxy = []lurker.Proxy{
+					{
+						Type: proxy,
+						Nat:  true,
+						Port: proxyPort,
+						Name: proxyName,
+						Pass: proxyPass,
+					},
+				}
+				l := lurker.New(cfg)
+				mport, err = lurker.RegisterLocalProxy(l, cfg)
+				if err != nil {
+					panic(err)
+				}
 
-			fmt.Println("your connect id:", id)
-			go l.ListenOnMonitor()
-			//}
+				fmt.Println("your connect id:", id)
+				go l.ListenOnMonitor()
+			}
 			s := lurker.NewSource(lurker.Service{
 				ID:    id,
 				ISP:   ispAddr,
