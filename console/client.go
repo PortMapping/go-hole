@@ -44,10 +44,9 @@ func cmdClient() *cobra.Command {
 				if err != nil {
 					panic(err)
 				}
-
-				fmt.Println("your connect id:", id)
 				go l.ListenOnMonitor()
 			}
+			fmt.Println("your connect id:", id)
 			s := lurker.NewSource(lurker.Service{
 				ID:    id,
 				ISP:   ispAddr,
