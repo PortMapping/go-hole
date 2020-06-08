@@ -96,7 +96,7 @@ type Service struct {
 	KeepConnect bool          `json:"keep_connect"`
 }
 
-// ParseHandshake ...
+// ParseHandshakeJSON ...
 func ParseHandshakeJSON(data []byte) (HandshakeHead, error) {
 	var h HandshakeHead
 	err := json.Unmarshal(data, &h)
@@ -182,7 +182,7 @@ func ParseHandshakeByte(b []byte) (HandshakeHead, error) {
 
 // Bytes ...
 func (h HandshakeHead) Bytes() []byte {
-	var dummy uint8 = 0
+	dummy := uint8(0)
 	b := []byte{
 		uint8(h.Type),
 		h.Tunnel,
