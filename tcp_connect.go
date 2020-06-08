@@ -145,7 +145,7 @@ func (c *tcpConnector) other(ht HandshakeType) error {
 	return nil
 }
 
-// Heartbeat ...
+// KeepConnect ...
 func (c *tcpConnector) KeepConnect() {
 	c.ticker = time.NewTicker(time.Second * 30)
 	for {
