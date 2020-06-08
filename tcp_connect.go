@@ -77,7 +77,6 @@ func newTCPConnector(conn net.Conn) Connector {
 	return c
 }
 
-// Interaction ...
 func (c *tcpConnector) interaction() (err error) {
 	log.Debugw("interaction call")
 	data := make([]byte, maxByteSize)
@@ -129,12 +128,10 @@ func (c *tcpConnector) interaction() (err error) {
 	return nil
 }
 
-// Intermediary ...
 func (c *tcpConnector) intermediary() error {
 	return nil
 }
 
-// Other ...
 func (c *tcpConnector) other(ht HandshakeType) error {
 	switch ht {
 	case HandshakeReverse:
