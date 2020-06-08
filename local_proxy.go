@@ -3,10 +3,10 @@ package lurker
 import (
 	"context"
 	"fmt"
-	"github.com/panjf2000/ants/v2"
-	"github.com/portmapping/lurker/nat"
 	"net"
 
+	"github.com/panjf2000/ants/v2"
+	"github.com/portmapping/lurker/nat"
 	"github.com/portmapping/lurker/proxy"
 )
 
