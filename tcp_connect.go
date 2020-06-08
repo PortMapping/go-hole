@@ -135,7 +135,16 @@ func (c *tcpConnector) intermediary() error {
 }
 
 // Other ...
-func (c *tcpConnector) other() error {
+func (c *tcpConnector) other(ht HandshakeType) error {
+	switch ht {
+	case HandshakeReverse:
+		addr := c.conn.RemoteAddr()
+		dial, err := net.Dial("tcp", addr.String())
+		if err != nil {
+			return err
+		}
+		defer dial.Close()
+	}
 	return nil
 }
 
@@ -166,7 +175,7 @@ func (c *tcpConnector) Do(ht HandshakeType) error {
 	case HandshakeTypeAdapter:
 		return c.intermediary()
 	}
-	return c.other()
+	return c.other(ht)
 }
 
 // Close ...

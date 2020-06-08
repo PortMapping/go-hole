@@ -9,22 +9,19 @@ import (
 )
 
 // HandshakeStatusSuccess ...
-const HandshakeStatusSuccess HandshakeStatus = 0x01
+const (
+	HandshakeStatusSuccess HandshakeStatus = 0x01
+	HandshakeStatusFailed  HandshakeStatus = 0x00
+)
 
-// HandshakeStatusFailed ...
-const HandshakeStatusFailed HandshakeStatus = 0x00
-
-// HandshakeTypePing ...
-const HandshakeTypePing HandshakeType = 0x01
-
-// HandshakeTypeConnect ...
-const HandshakeTypeConnect HandshakeType = 0x02
-
-// HandshakeTypeAdapter ...
-const HandshakeTypeAdapter HandshakeType = 0x03
-
-// HandshakeAuthorization ...
-const HandshakeAuthorization HandshakeType = 0x04
+// HandshakeType ...
+const (
+	HandshakeTypePing      HandshakeType = 0x01
+	HandshakeTypeConnect   HandshakeType = 0x02
+	HandshakeTypeAdapter   HandshakeType = 0x03
+	HandshakeAuthorization HandshakeType = 0x04
+	HandshakeReverse       HandshakeType = 0x05
+)
 
 // HandshakeRequestTypeProxy ...
 const HandshakeRequestTypeProxy RequestType = 0x01
