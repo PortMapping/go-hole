@@ -7,7 +7,7 @@ import (
 
 func init() {
 	list := []SupportType{
-		SupportTypePubliccTCP,
+		SupportTypePublicTCP,
 		SupportTypePublicUDP,
 		SupportTypeProviderTCP,
 		SupportTypeProviderUDP,
@@ -21,7 +21,7 @@ func init() {
 
 // TestSupportType_Add ...
 func TestSupportType_Add(t *testing.T) {
-	s := SupportTypePubliccTCP
+	s := SupportTypePublicTCP
 	s.Add(SupportTypePrivateUDP)
 	fmt.Println("support", s)
 	//output:33
@@ -29,9 +29,9 @@ func TestSupportType_Add(t *testing.T) {
 
 // TestSupportType_Del ...
 func TestSupportType_Del(t *testing.T) {
-	s := SupportTypePubliccTCP
+	s := SupportTypePublicTCP
 	s.Add(SupportTypePrivateUDP)
-	s.Del(SupportTypePubliccTCP)
+	s.Del(SupportTypePublicTCP)
 	fmt.Println("support", s)
 	//output:32
 }

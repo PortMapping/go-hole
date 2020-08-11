@@ -20,7 +20,7 @@ const (
 
 // PublicNetworkTCP ...
 const (
-	SupportTypePubliccTCP SupportType = 1 << iota
+	SupportTypePublicTCP SupportType = 1 << iota
 	SupportTypePublicUDP
 	SupportTypeProviderTCP
 	SupportTypeProviderUDP
