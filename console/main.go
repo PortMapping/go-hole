@@ -9,6 +9,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Version ...
+const Version = "0.0.1"
+
 var rootCmd = &cobra.Command{
 	Use:   "Lurker",
 	Short: "Lurker is a intranet direct connection tool",
@@ -27,7 +30,7 @@ func waitForSignal() {
 func main() {
 	zap.InitZapSugar()
 	rootCmd.AddCommand(cmdServer(), cmdClient())
-
+	fmt.Println("Current Verstion:", Version)
 	if err := rootCmd.Execute(); err != nil {
 		return
 	}
